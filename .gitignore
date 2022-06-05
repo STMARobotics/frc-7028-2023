@@ -160,3 +160,9 @@ bin/
 
 # Simulation GUI and other tools window save file
 *-window.json
+simgui.json
+simgui-ds.json
+networktables.ini
+
+# Merge conflict diff files
+*.orig

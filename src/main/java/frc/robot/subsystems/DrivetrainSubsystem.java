@@ -28,10 +28,12 @@ import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -92,6 +94,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backLeftModule;
   private final SwerveModule m_backRightModule;
 
+  private final SwerveDriveOdometry swerveDriveOdometry;
+
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
   public DrivetrainSubsystem() {
@@ -149,6 +153,31 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_STEER_ENCODER,
             BACK_RIGHT_MODULE_STEER_OFFSET
     );
+
+    tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
+    tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
+
+    swerveDriveOdometry = new SwerveDriveOdometry(m_kinematics, getGyroscopeRotation());
+  }
+
+  private String getFomattedPose() {
+    var pose = getCurrentPose();
+    return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
+  }
+
+  public Pose2d getCurrentPose() {
+    return swerveDriveOdometry.getPoseMeters();
+  }
+
+  /**
+   * Resets the current pose to the specified pose. This should ONLY be called
+   * when the robot's position on the field is known, like at the beginnig of
+   * a match.
+   * @param newPose new pose
+   */
+  public void setCurrentPose(Pose2d newPose) {
+    zeroGyroscope();
+    swerveDriveOdometry.resetPosition(newPose, getGyroscopeRotation());
   }
 
   /**
@@ -191,6 +220,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     setModuleState(m_backLeftModule, states[2]);
     setModuleState(m_backRightModule, states[3]);
 
+    // Update odometry
+    swerveDriveOdometry.update(getGyroscopeRotation(), states);
   }
 
   private void setModuleState(SwerveModule module, SwerveModuleState state) {

@@ -1,12 +1,22 @@
 package com.swervedrivespecialties.swervelib.ctre;
 
-import com.ctre.phoenix.motorcontrol.*;
+import static com.swervedrivespecialties.swervelib.ctre.CtreUtils.checkCtreError;
+
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.swervedrivespecialties.swervelib.*;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.swervedrivespecialties.swervelib.AbsoluteEncoder;
+import com.swervedrivespecialties.swervelib.AbsoluteEncoderFactory;
+import com.swervedrivespecialties.swervelib.ModuleConfiguration;
+import com.swervedrivespecialties.swervelib.SteerController;
+import com.swervedrivespecialties.swervelib.SteerControllerFactory;
 
-import static com.swervedrivespecialties.swervelib.ctre.CtreUtils.checkCtreError;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
 public final class Falcon500SteerControllerFactoryBuilder {
     private static final int CAN_TIMEOUT_MS = 250;
@@ -115,7 +125,7 @@ public final class Falcon500SteerControllerFactoryBuilder {
                 motorConfiguration.supplyCurrLimit.enable = true;
             }
 
-            TalonFX motor = new TalonFX(steerConfiguration.getMotorPort());
+            WPI_TalonFX motor = new WPI_TalonFX(steerConfiguration.getMotorPort());
             checkCtreError(motor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS), "Failed to configure Falcon 500 settings");
 
             if (hasVoltageCompensation()) {

@@ -224,8 +224,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     swerveDriveOdometry.update(getGyroscopeRotation(), states);
   }
 
-  private void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
-    m_frontLeftModule.set(
+  private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
+    module.set(
       state.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, state.angle.getRadians());
   }
 }

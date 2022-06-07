@@ -225,7 +225,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
-    module.set(
-      state.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, state.angle.getRadians());
+    module.set(state.speedMetersPerSecond, state.angle.getRadians());
   }
 }

@@ -17,7 +17,7 @@ public class Falcon500SwerveModule {
     return steerController.getStateAngle();
   }
 
-  public void set(double driveVoltage, double steerAngle) {
+  public void set(double velocity, double steerAngle) {
     steerAngle %= (2.0 * Math.PI);
     if (steerAngle < 0.0) {
       steerAngle += 2.0 * Math.PI;
@@ -39,7 +39,7 @@ public class Falcon500SwerveModule {
       // Only need to add 180 deg here because the target angle will be put back into
       // the range [0, 2pi)
       steerAngle += Math.PI;
-      driveVoltage *= -1.0;
+      velocity *= -1.0;
     }
 
     // Put the target angle back into the range [0, 2pi)
@@ -48,7 +48,7 @@ public class Falcon500SwerveModule {
       steerAngle += 2.0 * Math.PI;
     }
 
-    driveController.setReferenceVoltage(driveVoltage);
+    driveController.setReferenceVelocity(velocity);
     steerController.setReferenceAngle(steerAngle);
   }
 }

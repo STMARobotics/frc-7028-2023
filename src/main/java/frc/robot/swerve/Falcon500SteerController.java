@@ -48,6 +48,8 @@ public class Falcon500SteerController {
     motorConfiguration.slot0.kI = 0.0;
     motorConfiguration.slot0.kD = 0.1;
     motorConfiguration.voltageCompSaturation = 12;
+    motorConfiguration.supplyCurrLimit.currentLimit = 20;
+    motorConfiguration.supplyCurrLimit.enable = true;
 
     WPI_TalonFX motor = new WPI_TalonFX(steerConfiguration.getMotorPort());
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS),

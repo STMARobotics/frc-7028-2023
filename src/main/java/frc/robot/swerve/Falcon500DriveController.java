@@ -26,6 +26,8 @@ public class Falcon500DriveController {
     TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 
     motorConfiguration.voltageCompSaturation = 12;
+    motorConfiguration.supplyCurrLimit.currentLimit = 80;
+    motorConfiguration.supplyCurrLimit.enable = true;
 
     motor = new WPI_TalonFX(port);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");

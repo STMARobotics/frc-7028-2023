@@ -1,4 +1,4 @@
-package com.swervedrivespecialties.swervelib.ctre;
+package frc.robot.swerve;
 
 public class CanCoderAbsoluteConfiguration {
     private final int id;

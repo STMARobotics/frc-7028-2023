@@ -24,9 +24,6 @@ import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_MOTOR;
 import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_OFFSET;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
-import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
-import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,6 +37,10 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.swerve.Falcon500SwerveModule;
+import frc.robot.swerve.Mk4ModuleConfiguration;
+import frc.robot.swerve.Mk4SwerveModuleHelper;
+import frc.robot.swerve.SdsModuleConfigurations;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   /**
@@ -89,10 +90,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
   // These are our modules. We initialize them in the constructor.
-  private final SwerveModule m_frontLeftModule;
-  private final SwerveModule m_frontRightModule;
-  private final SwerveModule m_backLeftModule;
-  private final SwerveModule m_backRightModule;
+  private final Falcon500SwerveModule m_frontLeftModule;
+  private final Falcon500SwerveModule m_frontRightModule;
+  private final Falcon500SwerveModule m_backLeftModule;
+  private final Falcon500SwerveModule m_backRightModule;
 
   private final SwerveDriveOdometry swerveDriveOdometry;
 
@@ -108,6 +109,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(0, 0),
+            new Mk4ModuleConfiguration(),
             // This can either be L1, L2, L3, L4 depending on your gear configuration
             Mk4SwerveModuleHelper.GearRatio.L1,
             // This is the ID of the drive motor
@@ -125,6 +127,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Front Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(2, 0),
+            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
             FRONT_RIGHT_MODULE_STEER_MOTOR,
@@ -136,6 +139,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(4, 0),
+            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
@@ -147,6 +151,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(6, 0),
+            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
@@ -224,7 +229,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     swerveDriveOdometry.update(getGyroscopeRotation(), states);
   }
 
-  private void setModuleState(SwerveModule module, SwerveModuleState state) {
+  private void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
     m_frontLeftModule.set(
       state.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, state.angle.getRadians());
   }

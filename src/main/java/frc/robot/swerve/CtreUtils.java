@@ -1,6 +1,7 @@
-package com.swervedrivespecialties.swervelib.ctre;
+package frc.robot.swerve;
 
 import com.ctre.phoenix.ErrorCode;
+
 import edu.wpi.first.wpilibj.DriverStation;
 
 public final class CtreUtils {

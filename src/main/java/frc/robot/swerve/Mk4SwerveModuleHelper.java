@@ -12,7 +12,6 @@ public final class Mk4SwerveModuleHelper {
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
-     * @param configuration    Module configuration parameters to use.
      * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive Falcon 500.
      * @param steerMotorPort   The CAN ID of the steer Falcon 500.
@@ -22,7 +21,6 @@ public final class Mk4SwerveModuleHelper {
      */
     public static Falcon500SwerveModule createFalcon500(
             ShuffleboardLayout container,
-            Mk4ModuleConfiguration configuration,
             GearRatio gearRatio,
             int driveMotorPort,
             int steerMotorPort,

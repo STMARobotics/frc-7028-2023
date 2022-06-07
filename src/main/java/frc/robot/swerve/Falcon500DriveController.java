@@ -28,11 +28,9 @@ public class Falcon500DriveController {
     motorConfiguration.voltageCompSaturation = 12;
 
     motor = new WPI_TalonFX(port);
-    motor.enableVoltageCompensation(true);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");
-
+    motor.enableVoltageCompensation(true);
     motor.setNeutralMode(NeutralMode.Brake);
-
     motor.setInverted(
         moduleConfiguration.isDriveInverted() ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
     motor.setSensorPhase(true);
@@ -40,10 +38,7 @@ public class Falcon500DriveController {
 
     // Reduce CAN status frame rates
     CtreUtils.checkCtreError(
-        motor.setStatusFramePeriod(
-            StatusFrameEnhanced.Status_1_General,
-            STATUS_FRAME_GENERAL_PERIOD_MS,
-            CAN_TIMEOUT_MS),
+        motor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, STATUS_FRAME_GENERAL_PERIOD_MS, CAN_TIMEOUT_MS),
         "Failed to configure Falcon status frame period");
   }
 

@@ -38,7 +38,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.swerve.Falcon500SwerveModule;
-import frc.robot.swerve.Mk4ModuleConfiguration;
 import frc.robot.swerve.Mk4SwerveModuleHelper;
 import frc.robot.swerve.SdsModuleConfigurations;
 
@@ -109,7 +108,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(0, 0),
-            new Mk4ModuleConfiguration(),
             // This can either be L1, L2, L3, L4 depending on your gear configuration
             Mk4SwerveModuleHelper.GearRatio.L1,
             // This is the ID of the drive motor
@@ -127,7 +125,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Front Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(2, 0),
-            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
             FRONT_RIGHT_MODULE_STEER_MOTOR,
@@ -139,7 +136,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(4, 0),
-            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
@@ -151,7 +147,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(6, 0),
-            new Mk4ModuleConfiguration(),
             Mk4SwerveModuleHelper.GearRatio.L1,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,

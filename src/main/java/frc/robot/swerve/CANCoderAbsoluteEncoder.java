@@ -17,17 +17,18 @@ public class CANCoderAbsoluteEncoder {
     encoder = new CANCoder(configuration.getId());
     CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");
 
-    CtreUtils.checkCtreError(encoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 250), "Failed to configure CANCoder update rate");
+    CtreUtils.checkCtreError(
+        encoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 250),
+        "Failed to configure CANCoder update rate");
   }
 
   public double getAbsoluteAngle() {
-      double angle = Math.toRadians(encoder.getAbsolutePosition());
-      angle %= 2.0 * Math.PI;
-      if (angle < 0.0) {
-          angle += 2.0 * Math.PI;
-      }
+    double angle = Math.toRadians(encoder.getAbsolutePosition());
+    angle %= 2.0 * Math.PI;
+    if (angle < 0.0) {
+      angle += 2.0 * Math.PI;
+    }
 
-      return angle;
+    return angle;
   }
 }
-

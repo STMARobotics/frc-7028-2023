@@ -207,11 +207,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-    m_chassisSpeeds = chassisSpeeds;
-  }
-
-  @Override
-  public void periodic() {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
@@ -219,9 +214,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
     setModuleState(m_frontRightModule, states[1]);
     setModuleState(m_backLeftModule, states[2]);
     setModuleState(m_backRightModule, states[3]);
+  }
 
+  @Override
+  public void periodic() {
     // Update odometry
-    swerveDriveOdometry.update(getGyroscopeRotation(), states);
+    swerveDriveOdometry.update(
+        getGyroscopeRotation(),
+        m_frontLeftModule.getState(),
+        m_frontRightModule.getState(),
+        m_backLeftModule.getState(),
+        m_backRightModule.getState());
   }
 
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {

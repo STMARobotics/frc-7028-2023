@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.swerve.Falcon500SwerveModule;
 import frc.robot.swerve.Mk4SwerveModuleHelper;
@@ -95,6 +96,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final Falcon500SwerveModule m_backRightModule;
 
   private final SwerveDriveOdometry swerveDriveOdometry;
+  private final Field2d field2d = new Field2d();
+
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -154,6 +157,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
     tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
+    tab.add(field2d);
 
     swerveDriveOdometry = new SwerveDriveOdometry(m_kinematics, getGyroscopeRotation());
   }
@@ -223,6 +227,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_frontRightModule.getState(),
         m_backLeftModule.getState(),
         m_backRightModule.getState());
+
+    field2d.setRobotPose(getCurrentPose());
   }
 
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {

@@ -23,6 +23,9 @@ public class Falcon500SteerController {
   private final double motorEncoderVelocityCoefficient;
   private final CANCoderAbsoluteEncoder absoluteEncoder;
 
+  private final double motionMagicVelocityConstant = 2; // FIXME - not sure if this is radians/sec/sec
+  private final double motionMagicAccelerationConstant = 1; // FIXME
+
   private double referenceAngleRadians = 0.0;
 
   private double resetIteration = 0;
@@ -47,11 +50,16 @@ public class Falcon500SteerController {
     motorConfiguration.slot0.kP = 0.2;
     motorConfiguration.slot0.kI = 0.0;
     motorConfiguration.slot0.kD = 0.1;
+
+    motorConfiguration.slot0.kF = (1023.0 * motorEncoderVelocityCoefficient / 12) * motionMagicVelocityConstant;
+    motorConfiguration.motionCruiseVelocity = 2.0 / motionMagicVelocityConstant / motorEncoderVelocityCoefficient;
+    motorConfiguration.motionAcceleration = (8.0 - 2.0) / motionMagicAccelerationConstant / motorEncoderVelocityCoefficient;
+
     motorConfiguration.voltageCompSaturation = 12;
     motorConfiguration.supplyCurrLimit.currentLimit = 20;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    WPI_TalonFX motor = new WPI_TalonFX(steerConfiguration.getMotorPort());
+    motor = new WPI_TalonFX(steerConfiguration.getMotorPort());
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS),
         "Failed to configure Falcon 500 settings");
 
@@ -72,8 +80,6 @@ public class Falcon500SteerController {
     CtreUtils.checkCtreError(
         motor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, STATUS_FRAME_GENERAL_PERIOD_MS, CAN_TIMEOUT_MS),
         "Failed to configure Falcon status frame period");
-    
-    this.motor = motor;
     
     addDashboardEntries(container, this);
 
@@ -113,8 +119,7 @@ public class Falcon500SteerController {
     } else if (referenceAngleRadians - currentAngleRadiansMod < -Math.PI) {
       adjustedReferenceAngleRadians += 2.0 * Math.PI;
     }
-
-    motor.set(TalonFXControlMode.Position, adjustedReferenceAngleRadians / motorEncoderPositionCoefficient);
+    motor.set(TalonFXControlMode.MotionMagic, adjustedReferenceAngleRadians / motorEncoderPositionCoefficient);
 
     this.referenceAngleRadians = referenceAngleRadians;
   }

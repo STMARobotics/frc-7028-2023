@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DrivetrainSubsystem extends SubsystemBase {
@@ -95,8 +96,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backRightModule;
 
   private final SwerveDriveOdometry swerveDriveOdometry;
+  private final Field2d field2d = new Field2d();
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -156,6 +159,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
     tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
+    tab.add(field2d);
 
     swerveDriveOdometry = new SwerveDriveOdometry(m_kinematics, getGyroscopeRotation());
   }
@@ -222,6 +226,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     // Update odometry
     swerveDriveOdometry.update(getGyroscopeRotation(), states);
+    field2d.setRobotPose(getCurrentPose());
   }
 
   private static void setModuleState(SwerveModule module, SwerveModuleState state) {

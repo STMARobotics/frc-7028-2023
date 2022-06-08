@@ -25,6 +25,8 @@ import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_OFFSET;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -32,11 +34,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.swerve.Falcon500SwerveModule;
 import frc.robot.swerve.Mk4SwerveModuleHelper;
 import frc.robot.swerve.SdsModuleConfigurations;
@@ -207,11 +213,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void drive(ChassisSpeeds chassisSpeeds) {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+    setModuleStates(states);
+  }
 
-    setModuleState(m_frontLeftModule, states[0]);
-    setModuleState(m_frontRightModule, states[1]);
-    setModuleState(m_backLeftModule, states[2]);
-    setModuleState(m_backRightModule, states[3]);
+  public void stop() {
+    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
+    setModuleStates(states);
   }
 
   @Override
@@ -225,7 +232,47 @@ public class DrivetrainSubsystem extends SubsystemBase {
         m_backRightModule.getState());
   }
 
+  private void setModuleStates(SwerveModuleState[] states) {
+    setModuleState(m_frontLeftModule, states[0]);
+    setModuleState(m_frontRightModule, states[1]);
+    setModuleState(m_backLeftModule, states[2]);
+    setModuleState(m_backRightModule, states[3]);
+  }
+
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
     module.set(state.speedMetersPerSecond, state.angle.getRadians());
+  }
+
+  public SwerveDriveKinematics getKinematics() {
+    return m_kinematics;
+  }
+
+  /**
+   * Creates a command to follow a Trajectory on the drivetrain.
+   * @param trajectory trajectory to follow
+   * @return command that will run the trajectory
+   */
+  public Command createCommandForTrajectory(Trajectory trajectory) {
+
+    // FIXME set theta constraints
+    TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(Math.PI, Math.PI);
+
+    // FIXME set theta PID values
+    var thetaController = new ProfiledPIDController(1, 0, 0, kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    // FIXME set X and Y controller PID values
+    SwerveControllerCommand swerveControllerCommand =
+        new SwerveControllerCommand(
+          trajectory,
+          this::getCurrentPose,
+          m_kinematics,
+          new PIDController(1, 0, 0),
+          new PIDController(1, 0, 0),
+          thetaController,
+          this::setModuleStates,
+          this);
+            
+      return swerveControllerCommand;
   }
 }

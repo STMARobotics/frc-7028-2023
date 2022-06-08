@@ -1,5 +1,8 @@
 package frc.robot.swerve;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+
 public class Falcon500SwerveModule {
   private final Falcon500DriveController driveController;
   private final Falcon500SteerController steerController;
@@ -51,4 +54,9 @@ public class Falcon500SwerveModule {
     driveController.setReferenceVelocity(velocity);
     steerController.setReferenceAngle(steerAngle);
   }
+
+  public SwerveModuleState getState() {
+    return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getSteerAngle()));
+  }
+
 }

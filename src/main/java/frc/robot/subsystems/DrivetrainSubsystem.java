@@ -260,6 +260,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   public Command createCommandForTrajectory(Trajectory trajectory) {
 
+    // TODO - make a more robust way to display multiple trajectories, and clear them at some point
+    field2d.getObject("traj").setTrajectory(trajectory);
+
     // FIXME set theta constraints
     TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(Math.PI, Math.PI);
 

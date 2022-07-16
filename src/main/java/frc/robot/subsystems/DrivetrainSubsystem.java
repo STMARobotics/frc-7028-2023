@@ -32,6 +32,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -165,7 +166,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
+    return String.format("(%.2f, %.2f)", 
+        Units.metersToInches(pose.getX()), 
+        Units.metersToInches(pose.getY()));
   }
 
   public Pose2d getCurrentPose() {
@@ -221,18 +224,24 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update odometry
-    swerveDriveOdometry.update(
-        getGyroscopeRotation(),
-        m_frontLeftModule.getState(),
-        m_frontRightModule.getState(),
-        m_backLeftModule.getState(),
-        m_backRightModule.getState());
+  
+    SwerveModuleState[] currentStates = {
+      getSwerveModuleState(m_frontLeftModule),
+      getSwerveModuleState(m_frontRightModule),
+      getSwerveModuleState(m_backLeftModule),
+      getSwerveModuleState(m_backRightModule)
+    };
 
+    // Update odometry
+    swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
     field2d.setRobotPose(getCurrentPose());
   }
 
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
     module.set(state.speedMetersPerSecond, state.angle.getRadians());
+  }
+
+  private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
+    return new SwerveModuleState(module.getDriveVelocity(), new Rotation2d(module.getSteerAngle()));
   }
 }

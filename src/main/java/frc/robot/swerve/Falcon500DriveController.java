@@ -18,8 +18,8 @@ public class Falcon500DriveController {
 
   private final WPI_TalonFX motor;
 
-  private double sensorPositionCoefficient;
-  private double sensorVelocityCoefficient = sensorPositionCoefficient * 10.0;
+  private final double sensorPositionCoefficient;
+  private final double sensorVelocityCoefficient;
   private final double nominalVoltage = 12.0;
 
   /** Voltage needed to overcome the motor’s static friction. kS */
@@ -33,6 +33,7 @@ public class Falcon500DriveController {
   public Falcon500DriveController(int port, ModuleConfiguration moduleConfiguration) {
     sensorPositionCoefficient = Math.PI * moduleConfiguration.getWheelDiameter()
         * moduleConfiguration.getDriveReduction() / TICKS_PER_ROTATION;
+    sensorVelocityCoefficient = sensorPositionCoefficient * 10.0;
 
     TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
 

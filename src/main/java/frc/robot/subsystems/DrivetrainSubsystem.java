@@ -35,6 +35,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -167,7 +168,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
+    return String.format("(%.2f, %.2f)", 
+        Units.metersToInches(pose.getX()), 
+        Units.metersToInches(pose.getY()));
   }
 
   public Pose2d getCurrentPose() {
@@ -217,6 +220,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    SwerveModuleState[] currentStates = {
+      getSwerveModuleState(m_frontLeftModule),
+      getSwerveModuleState(m_frontRightModule),
+      getSwerveModuleState(m_backLeftModule),
+      getSwerveModuleState(m_backRightModule)
+    };
+
+    // Update odometry
+    swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
+    field2d.setRobotPose(getCurrentPose());
+
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
@@ -225,13 +240,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
     setModuleState(m_backLeftModule, states[2]);
     setModuleState(m_backRightModule, states[3]);
 
-    // Update odometry
-    swerveDriveOdometry.update(getGyroscopeRotation(), states);
-    field2d.setRobotPose(getCurrentPose());
   }
 
   private static void setModuleState(SwerveModule module, SwerveModuleState state) {
     module.set(
       state.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, state.angle.getRadians());
+  }
+
+  private static SwerveModuleState getSwerveModuleState(SwerveModule module) {
+    return new SwerveModuleState(module.getDriveVelocity(), Rotation2d.fromDegrees(module.getSteerAngle()));
   }
 }

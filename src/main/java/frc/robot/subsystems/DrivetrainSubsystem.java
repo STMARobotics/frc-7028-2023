@@ -36,6 +36,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -73,8 +74,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This is a measure of how fast the robot can rotate in place.
    */
   // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
-  public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
-          Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
+  public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
+          (MAX_VELOCITY_METERS_PER_SECOND /
+          Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
           // Front left
@@ -171,7 +173,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", pose.getX(), pose.getY());
+    return String.format("(%.2f, %.2f)", 
+        Units.metersToInches(pose.getX()), 
+        Units.metersToInches(pose.getY()));
   }
 
   public Pose2d getCurrentPose() {
@@ -228,14 +232,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update odometry
-    swerveDriveOdometry.update(
-        getGyroscopeRotation(),
-        m_frontLeftModule.getState(),
-        m_frontRightModule.getState(),
-        m_backLeftModule.getState(),
-        m_backRightModule.getState());
+  
+    SwerveModuleState[] currentStates = {
+      getSwerveModuleState(m_frontLeftModule),
+      getSwerveModuleState(m_frontRightModule),
+      getSwerveModuleState(m_backLeftModule),
+      getSwerveModuleState(m_backRightModule)
+    };
 
+    // Update odometry
+    swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
     field2d.setRobotPose(getCurrentPose());
   }
 
@@ -252,6 +258,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public SwerveDriveKinematics getKinematics() {
     return m_kinematics;
+  }
+
+  private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
+    return new SwerveModuleState(module.getDriveVelocity(), new Rotation2d(module.getSteerAngle()));
   }
 
   /**

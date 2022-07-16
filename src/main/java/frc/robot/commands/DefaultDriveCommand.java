@@ -15,9 +15,9 @@ public class DefaultDriveCommand extends CommandBase {
   private final DoubleSupplier m_rotationSupplier;
 
   // FIXME these limits are a guess
-  private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(4);
-  private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(4);
-  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(Math.PI);
+  private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(6);
+  private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(6);
+  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(5 * Math.PI);
 
   /**
    * Constructor

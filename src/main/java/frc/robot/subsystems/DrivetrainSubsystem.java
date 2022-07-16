@@ -189,7 +189,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    zeroGyroscope();
     swerveDriveOdometry.resetPosition(newPose, getGyroscopeRotation());
   }
 
@@ -274,11 +273,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // TODO - make a more robust way to display multiple trajectories, and clear them at some point
     field2d.getObject("traj").setTrajectory(trajectory);
 
-    // FIXME set theta constraints
-    TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(Math.PI, Math.PI);
+    TrapezoidProfile.Constraints kThetaControllerConstraints = 
+        new TrapezoidProfile.Constraints(Math.PI, 2 / Math.PI);
 
-    // FIXME set theta PID values
-    var thetaController = new ProfiledPIDController(1, 0, 0, kThetaControllerConstraints);
+    var thetaController = new ProfiledPIDController(5, 0, 0, kThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     // FIXME set X and Y controller PID values
@@ -287,8 +285,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
           trajectory,
           this::getCurrentPose,
           m_kinematics,
-          new PIDController(1, 0, 0),
-          new PIDController(1, 0, 0),
+          new PIDController(16, 0, 0),
+          new PIDController(16, 0, 0),
           thetaController,
           this::setModuleStates,
           this);

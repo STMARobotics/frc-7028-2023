@@ -14,6 +14,8 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
@@ -83,14 +85,18 @@ public class RobotContainer {
         TrajectoryGenerator.generateTrajectory(
             // Start at the origin facing the +X direction
             new Pose2d(0, 0, new Rotation2d(0)),
-            // Pass through these two interior waypoints, making an 's' curve path
+            // Pass through these no interior waypoints
             List.of(),
             // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(3, 0, new Rotation2d(0)),
+            new Pose2d(3, 0, Rotation2d.fromDegrees(90)),
             config);
     
-    return m_drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory)
-        .andThen(new RunCommand(m_drivetrainSubsystem::stop, m_drivetrainSubsystem));
+    return new PrintCommand("Starting auto")
+        .andThen(new InstantCommand(
+            () -> m_drivetrainSubsystem.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), m_drivetrainSubsystem))
+        .andThen(m_drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory))
+        .andThen(new RunCommand(m_drivetrainSubsystem::stop, m_drivetrainSubsystem))
+        .andThen(new PrintCommand("Done with auto"));
   }
 
   private static double deadband(double value, double deadband) {

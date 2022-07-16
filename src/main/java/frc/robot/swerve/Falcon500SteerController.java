@@ -25,7 +25,7 @@ public class Falcon500SteerController {
 
   // Not sure what these represent, but smaller is faster
   private final double motionMagicVelocityConstant = .125;
-  private final double motionMagicAccelerationConstant = .125;
+  private final double motionMagicAccelerationConstant = .0625;
 
   private double referenceAngleRadians = 0.0;
 

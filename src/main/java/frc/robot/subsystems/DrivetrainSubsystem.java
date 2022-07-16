@@ -243,6 +243,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
-    return new SwerveModuleState(module.getDriveVelocity(), Rotation2d.fromDegrees(module.getSteerAngle()));
+    return new SwerveModuleState(module.getDriveVelocity(), new Rotation2d(module.getSteerAngle()));
   }
 }

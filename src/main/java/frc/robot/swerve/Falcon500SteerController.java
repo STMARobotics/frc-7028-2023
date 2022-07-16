@@ -23,8 +23,9 @@ public class Falcon500SteerController {
   private final double motorEncoderVelocityCoefficient;
   private final CANCoderAbsoluteEncoder absoluteEncoder;
 
-  private final double motionMagicVelocityConstant = 2; // FIXME - not sure if this is radians/sec/sec
-  private final double motionMagicAccelerationConstant = 1; // FIXME
+  // Not sure what these represent, but smaller is faster
+  private final double motionMagicVelocityConstant = .125;
+  private final double motionMagicAccelerationConstant = .125;
 
   private double referenceAngleRadians = 0.0;
 

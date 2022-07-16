@@ -23,11 +23,11 @@ public class Falcon500DriveController {
   private final double nominalVoltage = 12.0;
 
   /** Voltage needed to overcome the motor’s static friction. kS */
-  public static final double kS = 0.70888;
+  public static final double kS = 0.6716;
   /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-  public static final double kV = 2.4834;
+  public static final double kV = 2.5913;
   /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-  public static final double kA = 0.29679;
+  public static final double kA = 0.19321;
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kS, kV, kA);
 
   public Falcon500DriveController(int port, ModuleConfiguration moduleConfiguration) {
@@ -41,7 +41,7 @@ public class Falcon500DriveController {
     motorConfiguration.supplyCurrLimit.currentLimit = 80;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    motorConfiguration.slot0.kP = 0.05;
+    motorConfiguration.slot0.kP = 0.00565;
     motorConfiguration.slot0.kI = 0.0;
     motorConfiguration.slot0.kD = 0.0;
 
@@ -67,6 +67,7 @@ public class Falcon500DriveController {
   public void setReferenceVelocity(double velocity) {
     var arbFeedForward = feedforward.calculate(velocity) / nominalVoltage;
     motor.set(TalonFXControlMode.Velocity, velocity, DemandType.ArbitraryFeedForward, arbFeedForward);
+    motor.feed();
   }
 
   public double getStateVelocity() {

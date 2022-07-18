@@ -106,6 +106,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveDriveOdometry swerveDriveOdometry;
   private final Field2d field2d = new Field2d();
 
+  private ChassisSpeeds m_chassisSpeeds;
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -184,7 +185,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   /**
    * Resets the current pose to the specified pose. This should ONLY be called
-   * when the robot's position on the field is known, like at the beginnig of
+   * when the robot's position on the field is known, like at the beginning of
    * a match.
    * @param newPose new pose
    */
@@ -193,55 +194,56 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   /**
-   * Sets the gyroscope angle to zero. This can be used to set the direction the robot is currently facing to the
-   * 'forwards' direction.
+   * Resets the position on the field to 0,0 0-degrees, with forward being downfield. This resets
+   * what "forward" is for field oriented driving.
    */
-  public void zeroGyroscope() {
+  public void resetFieldPosition() {
     // FIXME Remove if you are using a Pigeon
     // m_pigeon.setFusedHeading(0.0);
 
     // FIXME Uncomment if you are using a NavX
     m_navx.zeroYaw();
+    swerveDriveOdometry.resetPosition(
+      new Pose2d(getCurrentPose().getTranslation(), new Rotation2d()), getGyroscopeRotation());
   }
 
   public Rotation2d getGyroscopeRotation() {
     // FIXME Remove if you are not using a Pigeon
     // return Rotation2d.fromDegrees(m_pigeon.getFusedHeading());
 
-    // FIXME Uncomment if you are using a NavX
-   if (m_navx.isMagnetometerCalibrated()) {
-     // We will only get valid fused headings if the magnetometer is calibrated
-     return Rotation2d.fromDegrees(-m_navx.getFusedHeading());
-   }
-
    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
    return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-    setModuleStates(states);
+    m_chassisSpeeds = chassisSpeeds;
   }
 
   public void stop() {
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
-    setModuleStates(states);
+    m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   }
 
   @Override
   public void periodic() {
-  
+    // Update odometry
     SwerveModuleState[] currentStates = {
       getSwerveModuleState(m_frontLeftModule),
       getSwerveModuleState(m_frontRightModule),
       getSwerveModuleState(m_backLeftModule),
       getSwerveModuleState(m_backRightModule)
     };
-
-    // Update odometry
     swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
     field2d.setRobotPose(getCurrentPose());
+
+    // Set the swerve module states
+    if (m_chassisSpeeds == null) {
+      // For safety, stop the robot if the states have not been set this iteration
+      m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+    }
+    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+    setModuleStates(states);
+    m_chassisSpeeds = null;
   }
 
   private void setModuleStates(SwerveModuleState[] states) {
@@ -279,7 +281,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     var thetaController = new ProfiledPIDController(5, 0, 0, kThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    // FIXME set X and Y controller PID values
     SwerveControllerCommand swerveControllerCommand =
         new SwerveControllerCommand(
           trajectory,

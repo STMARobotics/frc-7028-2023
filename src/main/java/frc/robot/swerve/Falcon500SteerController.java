@@ -1,5 +1,6 @@
 package frc.robot.swerve;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
@@ -7,7 +8,13 @@ import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
+import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix.sensors.CANCoderStatusFrame;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
 public class Falcon500SteerController {
@@ -21,8 +28,8 @@ public class Falcon500SteerController {
   private final WPI_TalonFX motor;
   private final double motorEncoderPositionCoefficient;
   private final double motorEncoderVelocityCoefficient;
-  private final CANCoderAbsoluteEncoder absoluteEncoder;
-
+  private final CANCoder encoder;
+  
   // Not sure what these represent, but smaller is faster
   private final double motionMagicVelocityConstant = .125;
   private final double motionMagicAccelerationConstant = .0625;
@@ -31,19 +38,36 @@ public class Falcon500SteerController {
 
   private double resetIteration = 0;
 
+  private boolean motorOffsetConfigured = false;
+
   private void addDashboardEntries(ShuffleboardContainer container, Falcon500SteerController controller) {
     container.addNumber("Current Angle", () -> Math.toDegrees(controller.getStateAngle()));
     container.addNumber("Target Angle", () -> Math.toDegrees(controller.getReferenceAngle()));
-    container.addNumber("Absolute Encoder Angle", () -> Math.toDegrees(absoluteEncoder.getAbsoluteAngle()));
+    container.addNumber("Absolute Encoder Angle", () -> Math.toDegrees(getAbsoluteAngle()));
   }
 
   public Falcon500SteerController(
       ShuffleboardContainer container, 
       Falcon500SteerConfiguration steerConfiguration,
       ModuleConfiguration moduleConfiguration) {
-    
-    absoluteEncoder = new CANCoderAbsoluteEncoder(steerConfiguration.getEncoderConfiguration());
 
+    // Configure CANCoder
+    CanCoderAbsoluteConfiguration configuration = steerConfiguration.getEncoderConfiguration();
+
+    CANCoderConfiguration config = new CANCoderConfiguration();
+    config.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
+    config.magnetOffsetDegrees = Math.toDegrees(configuration.getOffset());
+    config.sensorDirection = false;
+    config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+
+    encoder = new CANCoder(configuration.getId());
+    CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");
+
+    CtreUtils.checkCtreError(
+        encoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 250),
+        "Failed to configure CANCoder update rate");
+
+    // Configure Motor
     motorEncoderPositionCoefficient = 2.0 * Math.PI / TICKS_PER_ROTATION * moduleConfiguration.getSteerReduction();
     motorEncoderVelocityCoefficient = motorEncoderPositionCoefficient * 10.0;
 
@@ -73,9 +97,7 @@ public class Falcon500SteerController {
         moduleConfiguration.isSteerInverted() ? TalonFXInvertType.CounterClockwise : TalonFXInvertType.Clockwise);
     motor.setNeutralMode(NeutralMode.Brake);
 
-    CtreUtils.checkCtreError(
-      motor.setSelectedSensorPosition(absoluteEncoder.getAbsoluteAngle() / motorEncoderPositionCoefficient, 0, CAN_TIMEOUT_MS), 
-      "Failed to set Falcon 500 encoder position");
+    configMotorOffset(true);
 
     // Reduce CAN status frame rates
     CtreUtils.checkCtreError(
@@ -84,6 +106,43 @@ public class Falcon500SteerController {
     
     addDashboardEntries(container, this);
 
+  }
+
+  /**
+   * Configures the motor offset from the CANCoder's abosolute position. In an ideal state, this only needs to happen
+   * once. However, sometime it fails and we end up with a wheel that isn't in the right position.
+   * See https://www.chiefdelphi.com/t/official-sds-mk3-mk4-code/397109/99
+   * @return the absolute angle
+   */
+  private double configMotorOffset(boolean logErrors) {
+    double angle = getAbsoluteAngle();
+    var angleErrorCode = encoder.getLastError();
+
+    if ((angleErrorCode != ErrorCode.OK) && logErrors) {
+      // If this happens, we will have a misaligned wheel
+      DriverStation.reportError(
+        "Failed to configure swerve module position. CANCoder ID: " + encoder.getDeviceID(), false);
+    }
+
+    var positionErrorCode = motor.setSelectedSensorPosition(angle / motorEncoderPositionCoefficient, 0, CAN_TIMEOUT_MS);
+    if (logErrors) {
+      CtreUtils.checkCtreError(positionErrorCode, "Failed to set Falcon 500 encoder position. ID: " + motor.getDeviceID());
+    }
+
+    motorOffsetConfigured = (angleErrorCode == ErrorCode.OK) && (positionErrorCode == ErrorCode.OK);
+    return angle;
+  }
+
+  private double getAbsoluteAngle() {
+    double angle = encoder.getPosition();
+
+    angle = Math.toRadians(angle);
+    angle %= 2.0 * Math.PI;
+    if (angle < 0.0) {
+      angle += 2.0 * Math.PI;
+    }
+
+    return angle;
   }
 
   public double getReferenceAngle() {
@@ -97,11 +156,9 @@ public class Falcon500SteerController {
     // Sometimes (~5% of the time) when we initialize, the absolute encoder isn't fully set up, and we don't
     // end up getting a good reading. If we reset periodically this won't matter anymore.
     if (motor.getSelectedSensorVelocity() * motorEncoderVelocityCoefficient < ENCODER_RESET_MAX_ANGULAR_VELOCITY) {
-      if (++resetIteration >= ENCODER_RESET_ITERATIONS) {
+      if (++resetIteration >= ENCODER_RESET_ITERATIONS || !motorOffsetConfigured) {
         resetIteration = 0;
-        double absoluteAngle = absoluteEncoder.getAbsoluteAngle();
-        motor.setSelectedSensorPosition(absoluteAngle / motorEncoderPositionCoefficient);
-        currentAngleRadians = absoluteAngle;
+        currentAngleRadians = configMotorOffset(false);
       }
     } else {
       resetIteration = 0;

@@ -4,8 +4,8 @@ package frc.robot.swerve;
  * A swerve module configuration.
  * <p>
  * A configuration represents a unique mechanical configuration of a module. For example, the Swerve Drive Specialties
- * Mk3 swerve module has two configurations, standard and fast, and therefore should have two configurations
- * ({@link SdsModuleConfigurations#MK3_STANDARD} and {@link SdsModuleConfigurations#MK3_FAST} respectively).
+ * Mk4 swerve module has four gear configurations, and therefore should have multiple configurations
+ * ({@link ModuleConfiguration#MK4_L1} and {@link ModuleConfiguration#MK4_L2}, for example).
  */
 public enum ModuleConfiguration {
 

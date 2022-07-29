@@ -12,15 +12,20 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.HolonomicTargetCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.LimelightConfig;
+import frc.robot.subsystems.LimelightSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -31,6 +36,18 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+  private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem(
+    LimelightConfig.Builder.create()
+      .withMountDepth(0)
+      .withMountDistanceFromCenter(0)
+      .withMountingAngle(0)
+      .withMountingHeight(Units.inchesToMeters(0))
+      .withNetworkTableName("limelight")
+      .build()
+  );
+
+  private final HolonomicTargetCommand holonomicTargetCommand = 
+      new HolonomicTargetCommand(drivetrainSubsystem, limelightSubsystem);
 
   private final XboxController controller = new XboxController(0);
 
@@ -52,6 +69,11 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    configureDashboard();
+  }
+
+  private void configureDashboard() {
+    limelightSubsystem.addDashboardWidgets(Shuffleboard.getTab("Limelight"));
   }
 
   /**
@@ -64,6 +86,7 @@ public class RobotContainer {
     // Back button zeros the gyroscope
     new Button(controller::getBackButton)
             .whenPressed(drivetrainSubsystem::resetFieldPosition, drivetrainSubsystem);
+    new Button(controller::getAButton).whileHeld(holonomicTargetCommand);
   }
 
   /**

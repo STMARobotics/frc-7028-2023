@@ -47,20 +47,19 @@ public class Falcon500SteerController {
   }
 
   public Falcon500SteerController(
+      int motorPort,
+      int canCoderPort,
+      double canCoderOffset,
       ShuffleboardContainer container, 
-      Falcon500SteerConfiguration steerConfiguration,
       ModuleConfiguration moduleConfiguration) {
-
-    // Configure CANCoder
-    CanCoderAbsoluteConfiguration configuration = steerConfiguration.getEncoderConfiguration();
 
     CANCoderConfiguration config = new CANCoderConfiguration();
     config.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
-    config.magnetOffsetDegrees = Math.toDegrees(configuration.getOffset());
+    config.magnetOffsetDegrees = Math.toDegrees(canCoderOffset);
     config.sensorDirection = false;
     config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
 
-    encoder = new CANCoder(configuration.getId());
+    encoder = new CANCoder(canCoderPort);
     CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");
 
     CtreUtils.checkCtreError(
@@ -84,7 +83,7 @@ public class Falcon500SteerController {
     motorConfiguration.supplyCurrLimit.currentLimit = 20;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    motor = new WPI_TalonFX(steerConfiguration.getMotorPort());
+    motor = new WPI_TalonFX(motorPort);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS),
         "Failed to configure Falcon 500 settings");
 

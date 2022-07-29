@@ -2,8 +2,8 @@ package frc.robot.swerve;
 
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 
-public final class Mk4SwerveModuleHelper {
-    private Mk4SwerveModuleHelper() {
+public final class Mk4SwerveModuleFactory {
+    private Mk4SwerveModuleFactory() {
     }
 
 
@@ -29,10 +29,8 @@ public final class Mk4SwerveModuleHelper {
       
       var moduleConfig = gearRatio.getConfiguration();
       var driveController = new Falcon500DriveController(driveMotorPort, moduleConfig);
-      var steerConfig = new Falcon500SteerConfiguration(
-        steerMotorPort,
-        new CanCoderAbsoluteConfiguration(steerEncoderPort, steerOffset));
-      var steerController = new Falcon500SteerController(container, steerConfig, moduleConfig);
+      var steerController = 
+          new Falcon500SteerController(steerMotorPort, steerEncoderPort, steerOffset, container, moduleConfig);
 
       return new Falcon500SwerveModule(driveController, steerController);
     }

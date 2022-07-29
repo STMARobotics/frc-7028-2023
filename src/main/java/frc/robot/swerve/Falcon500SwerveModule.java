@@ -1,5 +1,7 @@
 package frc.robot.swerve;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -57,6 +59,15 @@ public class Falcon500SwerveModule {
 
   public SwerveModuleState getState() {
     return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getSteerAngle()));
+  }
+
+  /**
+   * Sets the neutral mode for the drive and steer motors
+   * @param neutralMode neutral mode
+   */
+  public void setNeutralMode(NeutralMode neutralMode) {
+    steerController.setNeutralMode(neutralMode);
+    driveController.setNeutralMode(neutralMode);
   }
 
 }

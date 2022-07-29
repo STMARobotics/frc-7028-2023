@@ -48,7 +48,7 @@ public class Falcon500DriveController {
     motor = new WPI_TalonFX(port);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");
     motor.enableVoltageCompensation(true);
-    motor.setNeutralMode(NeutralMode.Brake);
+    motor.setNeutralMode(NeutralMode.Coast);
     motor.setInverted(
         moduleConfiguration.isDriveInverted() ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
     motor.setSensorPhase(true);
@@ -72,6 +72,14 @@ public class Falcon500DriveController {
 
   public double getStateVelocity() {
     return motor.getSelectedSensorVelocity() * sensorVelocityCoefficient;
+  }
+
+  /**
+   * Sets the neutral mode for the drive motor
+   * @param neutralMode neutral mode
+   */
+  public void setNeutralMode(NeutralMode neutralMode) {
+    motor.setNeutralMode(neutralMode);
   }
 
 }

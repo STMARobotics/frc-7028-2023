@@ -94,7 +94,7 @@ public class Falcon500SteerController {
     motor.setSensorPhase(true);
     motor.setInverted(
         moduleConfiguration.isSteerInverted() ? TalonFXInvertType.CounterClockwise : TalonFXInvertType.Clockwise);
-    motor.setNeutralMode(NeutralMode.Brake);
+    motor.setNeutralMode(NeutralMode.Coast);
 
     configMotorOffset(true);
 
@@ -189,6 +189,14 @@ public class Falcon500SteerController {
     }
 
     return motorAngleRadians;
+  }
+
+  /**
+   * Sets the neutral mode for the steer motor
+   * @param neutralMode neutral mode
+   */
+  public void setNeutralMode(NeutralMode neutralMode) {
+    motor.setNeutralMode(neutralMode);
   }
 
 }

@@ -71,7 +71,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-        // Create config for trajectory
+    // Create config for trajectory
     TrajectoryConfig config =
         new TrajectoryConfig(
                 1,

@@ -23,6 +23,7 @@ import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_ENCODER;
 import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_MOTOR;
 import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_OFFSET;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -37,14 +38,17 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.swerve.Falcon500SwerveModule;
 import frc.robot.swerve.Mk4SwerveModuleFactory;
 import frc.robot.swerve.ModuleConfiguration;
@@ -166,6 +170,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
     tab.add(field2d);
 
     swerveDriveOdometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation());
+
+    new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
+      frontLeftModule.setNeutralMode(NeutralMode.Brake);
+      frontRightModule.setNeutralMode(NeutralMode.Brake);
+      backLeftModule.setNeutralMode(NeutralMode.Brake);
+      backRightModule.setNeutralMode(NeutralMode.Brake);
+    }, () -> {
+      frontLeftModule.setNeutralMode(NeutralMode.Coast);
+      frontRightModule.setNeutralMode(NeutralMode.Coast);
+      backLeftModule.setNeutralMode(NeutralMode.Coast);
+      backRightModule.setNeutralMode(NeutralMode.Coast);
+    }));
   }
 
   private String getFomattedPose() {

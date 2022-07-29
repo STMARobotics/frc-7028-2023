@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.List;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -98,21 +99,9 @@ public class RobotContainer {
         .andThen(new PrintCommand("Done with auto"));
   }
 
-  private static double deadband(double value, double deadband) {
-    if (Math.abs(value) > deadband) {
-      if (value > 0.0) {
-        return (value - deadband) / (1.0 - deadband);
-      } else {
-        return (value + deadband) / (1.0 - deadband);
-      }
-    } else {
-      return 0.0;
-    }
-  }
-
   private static double modifyAxis(double value) {
     // Deadband
-    value = deadband(value, 0.1);
+    value = MathUtil.applyDeadband(value, 0.1);
 
     // Square the axis
     value = Math.copySign(value * value, value);

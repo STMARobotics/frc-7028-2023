@@ -47,7 +47,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.swerve.Falcon500SwerveModule;
 import frc.robot.swerve.Mk4SwerveModuleFactory;
-import frc.robot.swerve.SdsModuleConfigurations;
+import frc.robot.swerve.ModuleConfiguration;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   /**
@@ -65,8 +65,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This is a measure of how fast the robot should be able to drive in a straight line.
    */
   public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-          SdsModuleConfigurations.MK4_L1.getDriveReduction() *
-          SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI;
+      ModuleConfiguration.MK4_L1.getDriveReduction() *
+      ModuleConfiguration.MK4_L1.getWheelDiameter() * Math.PI;
   
   /**
    * The maximum angular velocity of the robot in radians per second.
@@ -116,7 +116,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                     .withSize(2, 4)
                     .withPosition(0, 0),
             // This can either be L1, L2, L3, L4 depending on your gear configuration
-            Mk4SwerveModuleFactory.GearRatio.L1,
+            ModuleConfiguration.MK4_L1,
             // This is the ID of the drive motor
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             // This is the ID of the steer motor
@@ -132,7 +132,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Front Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(2, 0),
-            Mk4SwerveModuleFactory.GearRatio.L1,
+            ModuleConfiguration.MK4_L1,
             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
             FRONT_RIGHT_MODULE_STEER_MOTOR,
             FRONT_RIGHT_MODULE_STEER_ENCODER,
@@ -143,7 +143,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(4, 0),
-            Mk4SwerveModuleFactory.GearRatio.L1,
+            ModuleConfiguration.MK4_L1,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER,
@@ -154,7 +154,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             tab.getLayout("Back Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(6, 0),
-            Mk4SwerveModuleFactory.GearRatio.L1,
+            ModuleConfiguration.MK4_L1,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER,

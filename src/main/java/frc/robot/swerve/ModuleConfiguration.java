@@ -1,7 +1,5 @@
 package frc.robot.swerve;
 
-import java.util.Objects;
-
 /**
  * A swerve module configuration.
  * <p>
@@ -9,7 +7,36 @@ import java.util.Objects;
  * Mk3 swerve module has two configurations, standard and fast, and therefore should have two configurations
  * ({@link SdsModuleConfigurations#MK3_STANDARD} and {@link SdsModuleConfigurations#MK3_FAST} respectively).
  */
-public class ModuleConfiguration {
+public enum ModuleConfiguration {
+
+  MK4_L1(
+    0.10033,
+    (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
+    true,
+    (15.0 / 32.0) * (10.0 / 60.0),
+    true),
+
+MK4_L2(
+    0.10033,
+    (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
+    true,
+    (15.0 / 32.0) * (10.0 / 60.0),
+    true),
+
+MK4_L3(
+    0.10033,
+    (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0),
+    true,
+    (15.0 / 32.0) * (10.0 / 60.0),
+    true),
+    
+MK4_L4(
+    0.10033,
+    (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 45.0),
+    true,
+    (15.0 / 32.0) * (10.0 / 60.0),
+    true);
+
   private final double wheelDiameter;
   private final double driveReduction;
   private final boolean driveInverted;
@@ -34,7 +61,7 @@ public class ModuleConfiguration {
    *                       an odd number of gear reductions
    *                       this is typically true.
    */
-  public ModuleConfiguration(double wheelDiameter, double driveReduction, boolean driveInverted,
+  private ModuleConfiguration(double wheelDiameter, double driveReduction, boolean driveInverted,
       double steerReduction, boolean steerInverted) {
     this.wheelDiameter = wheelDiameter;
     this.driveReduction = driveReduction;
@@ -82,30 +109,6 @@ public class ModuleConfiguration {
    */
   public boolean isSteerInverted() {
     return steerInverted;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    ModuleConfiguration that = (ModuleConfiguration) o;
-    return Double.compare(that.getWheelDiameter(), getWheelDiameter()) == 0 &&
-        Double.compare(that.getDriveReduction(), getDriveReduction()) == 0 &&
-        isDriveInverted() == that.isDriveInverted() &&
-        Double.compare(that.getSteerReduction(), getSteerReduction()) == 0 &&
-        isSteerInverted() == that.isSteerInverted();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(
-        getWheelDiameter(),
-        getDriveReduction(),
-        isDriveInverted(),
-        getSteerReduction(),
-        isSteerInverted());
   }
 
   @Override

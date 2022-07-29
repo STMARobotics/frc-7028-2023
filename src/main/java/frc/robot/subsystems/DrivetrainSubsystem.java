@@ -78,7 +78,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
           (MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
-  private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
+  private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
           // Front left
           new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
           // Front right
@@ -93,20 +93,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
   // The important thing about how you configure your gyroscope is that rotating the robot counter-clockwise should
   // cause the angle reading to increase until it wraps back over to zero.
   // FIXME Remove if you are using a Pigeon
-  // private final PigeonIMU m_pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
+  // private final PigeonIMU pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
   // FIXME Uncomment if you are using a NavX
-  private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
+  private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
   // These are our modules. We initialize them in the constructor.
-  private final Falcon500SwerveModule m_frontLeftModule;
-  private final Falcon500SwerveModule m_frontRightModule;
-  private final Falcon500SwerveModule m_backLeftModule;
-  private final Falcon500SwerveModule m_backRightModule;
+  private final Falcon500SwerveModule frontLeftModule;
+  private final Falcon500SwerveModule frontRightModule;
+  private final Falcon500SwerveModule backLeftModule;
+  private final Falcon500SwerveModule backRightModule;
 
   private final SwerveDriveOdometry swerveDriveOdometry;
   private final Field2d field2d = new Field2d();
 
-  private ChassisSpeeds m_chassisSpeeds;
+  private ChassisSpeeds chassisSpeeds;
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -114,7 +114,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     tab.addNumber("Rotation degrees", () -> this.getGyroscopeRotation().getDegrees());
 
     // We use Falcon 500s in L1 configuration.
-    m_frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
+    frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
@@ -132,7 +132,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     );
 
     // We will do the same for the other modules
-    m_frontRightModule = Mk4SwerveModuleHelper.createFalcon500(
+    frontRightModule = Mk4SwerveModuleHelper.createFalcon500(
             tab.getLayout("Front Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(2, 0),
@@ -143,7 +143,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             FRONT_RIGHT_MODULE_STEER_OFFSET
     );
 
-    m_backLeftModule = Mk4SwerveModuleHelper.createFalcon500(
+    backLeftModule = Mk4SwerveModuleHelper.createFalcon500(
             tab.getLayout("Back Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(4, 0),
@@ -154,7 +154,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_LEFT_MODULE_STEER_OFFSET
     );
 
-    m_backRightModule = Mk4SwerveModuleHelper.createFalcon500(
+    backRightModule = Mk4SwerveModuleHelper.createFalcon500(
             tab.getLayout("Back Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(6, 0),
@@ -169,7 +169,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
     tab.add(field2d);
 
-    swerveDriveOdometry = new SwerveDriveOdometry(m_kinematics, getGyroscopeRotation());
+    swerveDriveOdometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation());
   }
 
   private String getFomattedPose() {
@@ -199,58 +199,58 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   public void resetFieldPosition() {
     // FIXME Remove if you are using a Pigeon
-    // m_pigeon.setFusedHeading(0.0);
+    // pigeon.setFusedHeading(0.0);
 
     // FIXME Uncomment if you are using a NavX
-    m_navx.zeroYaw();
+    navx.zeroYaw();
     swerveDriveOdometry.resetPosition(
       new Pose2d(getCurrentPose().getTranslation(), new Rotation2d()), getGyroscopeRotation());
   }
 
   public Rotation2d getGyroscopeRotation() {
     // FIXME Remove if you are not using a Pigeon
-    // return Rotation2d.fromDegrees(m_pigeon.getFusedHeading());
+    // return Rotation2d.fromDegrees(pigeon.getFusedHeading());
 
    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
-   return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
+   return Rotation2d.fromDegrees(360.0 - navx.getYaw());
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-    m_chassisSpeeds = chassisSpeeds;
+    this.chassisSpeeds = chassisSpeeds;
   }
 
   public void stop() {
-    m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+    chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
   }
 
   @Override
   public void periodic() {
     // Update odometry
     SwerveModuleState[] currentStates = {
-      getSwerveModuleState(m_frontLeftModule),
-      getSwerveModuleState(m_frontRightModule),
-      getSwerveModuleState(m_backLeftModule),
-      getSwerveModuleState(m_backRightModule)
+      getSwerveModuleState(frontLeftModule),
+      getSwerveModuleState(frontRightModule),
+      getSwerveModuleState(backLeftModule),
+      getSwerveModuleState(backRightModule)
     };
     swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
     field2d.setRobotPose(getCurrentPose());
 
     // Set the swerve module states
-    if (m_chassisSpeeds == null) {
+    if (chassisSpeeds == null) {
       // For safety, stop the robot if the states have not been set this iteration
-      m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+      chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     }
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
     setModuleStates(states);
-    m_chassisSpeeds = null;
+    chassisSpeeds = null;
   }
 
   private void setModuleStates(SwerveModuleState[] states) {
-    setModuleState(m_frontLeftModule, states[0]);
-    setModuleState(m_frontRightModule, states[1]);
-    setModuleState(m_backLeftModule, states[2]);
-    setModuleState(m_backRightModule, states[3]);
+    setModuleState(frontLeftModule, states[0]);
+    setModuleState(frontRightModule, states[1]);
+    setModuleState(backLeftModule, states[2]);
+    setModuleState(backRightModule, states[3]);
   }
 
   private static void setModuleState(Falcon500SwerveModule module, SwerveModuleState state) {
@@ -258,7 +258,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public SwerveDriveKinematics getKinematics() {
-    return m_kinematics;
+    return kinematics;
   }
 
   private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
@@ -285,7 +285,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         new SwerveControllerCommand(
           trajectory,
           this::getCurrentPose,
-          m_kinematics,
+          kinematics,
           new PIDController(16, 0, 0),
           new PIDController(16, 0, 0),
           thetaController,

@@ -29,9 +29,9 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
 
-  private final XboxController m_controller = new XboxController(0);
+  private final XboxController controller = new XboxController(0);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -42,11 +42,11 @@ public class RobotContainer {
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-            m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
+    drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+            drivetrainSubsystem,
+            () -> -modifyAxis(controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
     ));
 
     // Configure the button bindings
@@ -61,8 +61,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button zeros the gyroscope
-    new Button(m_controller::getBackButton)
-            .whenPressed(m_drivetrainSubsystem::resetFieldPosition, m_drivetrainSubsystem);
+    new Button(controller::getBackButton)
+            .whenPressed(drivetrainSubsystem::resetFieldPosition, drivetrainSubsystem);
   }
 
   /**
@@ -77,7 +77,7 @@ public class RobotContainer {
                 1,
                 1)
             // Add kinematics to ensure max speed is actually obeyed
-            .setKinematics(m_drivetrainSubsystem.getKinematics());
+            .setKinematics(drivetrainSubsystem.getKinematics());
 
     // An example trajectory to follow.  All units in meters.
     Trajectory exampleTrajectory =
@@ -92,9 +92,9 @@ public class RobotContainer {
     
     return new PrintCommand("Starting auto")
         .andThen(new InstantCommand(
-            () -> m_drivetrainSubsystem.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), m_drivetrainSubsystem))
-        .andThen(m_drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory))
-        .andThen(new RunCommand(m_drivetrainSubsystem::stop, m_drivetrainSubsystem))
+            () -> drivetrainSubsystem.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
+        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory))
+        .andThen(new RunCommand(drivetrainSubsystem::stop, drivetrainSubsystem))
         .andThen(new PrintCommand("Done with auto"));
   }
 

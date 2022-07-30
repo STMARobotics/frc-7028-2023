@@ -43,7 +43,7 @@ public class Falcon500SteerController {
   private void addDashboardEntries(ShuffleboardContainer container, Falcon500SteerController controller) {
     container.addNumber("Current Angle", () -> Math.toDegrees(controller.getStateAngle()));
     container.addNumber("Target Angle", () -> Math.toDegrees(controller.getReferenceAngle()));
-    container.addNumber("Absolute Encoder Angle", () -> Math.toDegrees(getAbsoluteAngle()));
+    container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition());
   }
 
   public Falcon500SteerController(

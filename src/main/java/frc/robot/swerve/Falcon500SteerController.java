@@ -61,6 +61,7 @@ public class Falcon500SteerController {
 
     encoder = new CANCoder(canCoderPort);
     CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");
+    CtreUtils.checkCtreError(encoder.setPositionToAbsolute(250), "Failed to set CANCoder to absolute");
 
     CtreUtils.checkCtreError(
         encoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 100, 250),

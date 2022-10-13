@@ -28,22 +28,18 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -82,7 +78,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
           (MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
-  private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+  public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
           // Front left
           new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
           // Front right
@@ -102,9 +98,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final Falcon500SwerveModule frontRightModule;
   private final Falcon500SwerveModule backLeftModule;
   private final Falcon500SwerveModule backRightModule;
-
-  private final SwerveDriveOdometry swerveDriveOdometry;
-  private final Field2d field2d = new Field2d();
 
   private ChassisSpeeds chassisSpeeds;
 
@@ -165,12 +158,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_STEER_OFFSET
     );
 
-    tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
-    tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
-    tab.add(field2d);
-
-    swerveDriveOdometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation());
-
     new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
       frontLeftModule.setNeutralMode(NeutralMode.Brake);
       frontRightModule.setNeutralMode(NeutralMode.Brake);
@@ -184,35 +171,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }));
   }
 
-  private String getFomattedPose() {
-    var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", 
-        Units.metersToInches(pose.getX()), 
-        Units.metersToInches(pose.getY()));
-  }
-
-  public Pose2d getCurrentPose() {
-    return swerveDriveOdometry.getPoseMeters();
-  }
-
-  /**
-   * Resets the current pose to the specified pose. This should ONLY be called
-   * when the robot's position on the field is known, like at the beginning of
-   * a match.
-   * @param newPose new pose
-   */
-  public void setCurrentPose(Pose2d newPose) {
-    swerveDriveOdometry.resetPosition(newPose, getGyroscopeRotation());
-  }
-
-  /**
-   * Resets the position on the field to 0,0 0-degrees, with forward being downfield. This resets
-   * what "forward" is for field oriented driving.
-   */
-  public void resetFieldPosition() {
+  public void resetGyroAngle() {
     navx.zeroYaw();
-    swerveDriveOdometry.resetPosition(
-      new Pose2d(getCurrentPose().getTranslation(), new Rotation2d()), getGyroscopeRotation());
   }
 
   public Rotation2d getGyroscopeRotation() {
@@ -230,25 +190,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update odometry
-    SwerveModuleState[] currentStates = {
-      getSwerveModuleState(frontLeftModule),
-      getSwerveModuleState(frontRightModule),
-      getSwerveModuleState(backLeftModule),
-      getSwerveModuleState(backRightModule)
-    };
-    swerveDriveOdometry.update(getGyroscopeRotation(), currentStates);
-    field2d.setRobotPose(getCurrentPose());
 
     // Set the swerve module states
     if (chassisSpeeds == null) {
       // For safety, stop the robot if the states have not been set this iteration
       chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     }
-    SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
+    SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
     setModuleStates(states);
     chassisSpeeds = null;
+  }
+
+  public SwerveModuleState[] getModuleStates() {
+    return new SwerveModuleState[] {
+      getSwerveModuleState(frontLeftModule),
+      getSwerveModuleState(frontRightModule),
+      getSwerveModuleState(backLeftModule),
+      getSwerveModuleState(backRightModule)
+    };
   }
 
   private void setModuleStates(SwerveModuleState[] states) {
@@ -263,7 +223,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public SwerveDriveKinematics getKinematics() {
-    return kinematics;
+    return KINEMATICS;
   }
 
   private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
@@ -275,10 +235,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param trajectory trajectory to follow
    * @return command that will run the trajectory
    */
-  public Command createCommandForTrajectory(Trajectory trajectory) {
-
-    // TODO - make a more robust way to display multiple trajectories, and clear them at some point
-    field2d.getObject("traj").setTrajectory(trajectory);
+  public Command createCommandForTrajectory(Trajectory trajectory, PoseEstimatorSubsystem poseEstimator) {
 
     TrapezoidProfile.Constraints kThetaControllerConstraints = 
         new TrapezoidProfile.Constraints(Math.PI, 2 / Math.PI);
@@ -289,8 +246,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SwerveControllerCommand swerveControllerCommand =
         new SwerveControllerCommand(
           trajectory,
-          this::getCurrentPose,
-          kinematics,
+          poseEstimator::getCurrentPose,
+          KINEMATICS,
           new PIDController(16, 0, 0),
           new PIDController(16, 0, 0),
           thetaController,

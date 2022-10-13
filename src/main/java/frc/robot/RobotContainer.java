@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.List;
 
+import org.photonvision.PhotonCamera;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +22,9 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.HolonomicTargetCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -30,7 +34,12 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final PhotonCamera photonCamera = new PhotonCamera("gloworm");
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
+  
+  private final HolonomicTargetCommand holonomicTargetCommand = 
+      new HolonomicTargetCommand(drivetrainSubsystem, photonCamera);
 
   private final XboxController controller = new XboxController(0);
 
@@ -52,6 +61,11 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    configureDashboard();
+  }
+
+  private void configureDashboard() {
+
   }
 
   /**
@@ -63,7 +77,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Back button zeros the gyroscope
     new Button(controller::getBackButton)
-            .whenPressed(drivetrainSubsystem::resetFieldPosition, drivetrainSubsystem);
+            .whenPressed(poseEstimator::resetFieldPosition, drivetrainSubsystem);
+    new Button(controller::getAButton).whileHeld(holonomicTargetCommand);
   }
 
   /**
@@ -93,8 +108,8 @@ public class RobotContainer {
     
     return new PrintCommand("Starting auto")
         .andThen(new InstantCommand(
-            () -> drivetrainSubsystem.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
-        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory))
+            () -> poseEstimator.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
+        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator))
         .andThen(new RunCommand(drivetrainSubsystem::stop, drivetrainSubsystem))
         .andThen(new PrintCommand("Done with auto"));
   }

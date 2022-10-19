@@ -4,7 +4,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.math.util.Units.inchesToMeters;
+import static java.lang.Math.toRadians;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -24,31 +29,40 @@ public final class Constants {
    *
    * Should be measured from center to center.
    */
-  public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(20.5);
+  public static final double DRIVETRAIN_TRACKWIDTH_METERS = inchesToMeters(20.5);
   /**
    * The front-to-back distance between the drivetrain wheels.
    *
    * Should be measured from center to center.
    */
-  public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(20.5);
+  public static final double DRIVETRAIN_WHEELBASE_METERS = inchesToMeters(20.5);
 
   public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 0;
   public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 10;
   public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 20;
-  public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(74.8828125);
+  public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(74.8828125);
 
   public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 1;
   public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 11;
   public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 21;
-  public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(104.765625);
+  public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(104.765625);
 
   public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 2;
   public static final int BACK_LEFT_MODULE_STEER_MOTOR = 12;
   public static final int BACK_LEFT_MODULE_STEER_ENCODER = 22;
-  public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(162.158203125);
+  public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(162.158203125);
 
   public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 3;
   public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 13;
   public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 23;
-  public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(74.70703125);
+  public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(74.70703125);
+
+  public static class VisionConstants {
+
+    /**
+     * Physical location of the camera on the robot, relative to the center of the robot.
+     */
+    public static final Transform2d CAMERA_TO_ROBOT = 
+        new Transform2d(new Translation2d(inchesToMeters(12.75), 0.0), new Rotation2d(0.0));
+  }
 }

@@ -197,6 +197,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
       chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
     }
     SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+    if(chassisSpeeds.vxMetersPerSecond == 0.0 && chassisSpeeds.vyMetersPerSecond == 0.0
+        && chassisSpeeds.omegaRadiansPerSecond == 0.0) {
+      // Keep the wheels at their current angle when stopped, don't snap back to straight
+      var currentStates = getModuleStates();
+      for(int i = 0; i < currentStates.length; i++) {
+        states[i].angle = currentStates[i].angle;
+      }
+    }
+
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
     setModuleStates(states);
     chassisSpeeds = null;

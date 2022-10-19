@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
+import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.HolonomicTargetCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -40,6 +41,8 @@ public class RobotContainer {
   
   private final HolonomicTargetCommand holonomicTargetCommand = 
       new HolonomicTargetCommand(drivetrainSubsystem, photonCamera);
+  private final ChaseTagCommand chaseTagCommand = 
+      new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
 
   private final XboxController controller = new XboxController(0);
 
@@ -79,6 +82,7 @@ public class RobotContainer {
     new Button(controller::getBackButton)
             .whenPressed(poseEstimator::resetFieldPosition, drivetrainSubsystem);
     new Button(controller::getAButton).whileHeld(holonomicTargetCommand);
+    new Button(controller::getBButton).whileHeld(chaseTagCommand);
   }
 
   /**

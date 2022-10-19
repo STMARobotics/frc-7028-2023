@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.Matrix;
@@ -13,7 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -27,11 +29,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
-
-  // Physical location of the camera on the robot, relative to the center of the
-  // robot.
-  private static final Transform2d CAMERA_TO_ROBOT = 
-      new Transform2d(new Translation2d(Units.inchesToMeters(12.75), 0.0), new Rotation2d(0.0));
 
   // Ordered list of target poses by ID (WPILib is adding some functionality for
   // this)
@@ -50,6 +47,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
+
+  private PhotonPipelineResult previousPipelineResult = null;
 
   public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
     this.photonCamera = photonCamera;
@@ -72,11 +71,12 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Update pose estimator with visible targets
-    var res = photonCamera.getLatestResult();
-    if (res.hasTargets()) {
-      double imageCaptureTime = Timer.getFPGATimestamp() - (res.getLatencyMillis() / 1000d);
+    var pipelineResult = photonCamera.getLatestResult();
+    if (!pipelineResult.equals(previousPipelineResult) && pipelineResult.hasTargets()) {
+      previousPipelineResult = pipelineResult;
+      double imageCaptureTime = Timer.getFPGATimestamp() - (pipelineResult.getLatencyMillis() / 1000d);
 
-      for (PhotonTrackedTarget target : res.getTargets()) {
+      for (PhotonTrackedTarget target : pipelineResult.getTargets()) {
 
         var fiducialId = target.getFiducialId();
         if (fiducialId >= 0 && fiducialId < targetPoses.size()) {
@@ -90,7 +90,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
           Pose2d camPose = targetPose.transformBy(transform.inverse());
 
           var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
-          field2d.getObject("MyRobot" + fiducialId).setPose(visionMeasurement);
+          // field2d.getObject("MyRobot" + fiducialId).setPose(visionMeasurement);
           // SmartDashboard.putString("Vision pose", String.format("(%.2f, %.2f) %.2f",
           //   visionMeasurement.getTranslation().getX(),
           //   visionMeasurement.getTranslation().getY(),
@@ -98,9 +98,12 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
           poseEstimator.addVisionMeasurement(visionMeasurement, imageCaptureTime);
         }
       }
-          // Update pose estimator with drivetrain sensors
     }
-    poseEstimator.updateWithTime(Timer.getFPGATimestamp(), drivetrainSubsystem.getGyroscopeRotation(), drivetrainSubsystem.getModuleStates());
+    // Update pose estimator with drivetrain sensors
+    poseEstimator.updateWithTime(
+      Timer.getFPGATimestamp(),
+      drivetrainSubsystem.getGyroscopeRotation(),
+      drivetrainSubsystem.getModuleStates());
 
     field2d.setRobotPose(getCurrentPose());
   }

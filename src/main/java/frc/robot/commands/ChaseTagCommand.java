@@ -22,7 +22,7 @@ public class ChaseTagCommand extends CommandBase {
   
   private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(2, 2);
   private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(2, 2);
-  private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = 
+  private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = 
       new TrapezoidProfile.Constraints(8, 8);
   
   private static final int TAG_TO_CHASE = 2;
@@ -34,7 +34,7 @@ public class ChaseTagCommand extends CommandBase {
 
   private final ProfiledPIDController xController = new ProfiledPIDController(4, 0, 0, X_CONSTRAINTS);
   private final ProfiledPIDController yController = new ProfiledPIDController(4, 0, 0, Y_CONSTRAINTS);
-  private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRATINTS);
+  private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRAINTS);
 
   private Pose2d goalPose;
   private PhotonTrackedTarget lastTarget;

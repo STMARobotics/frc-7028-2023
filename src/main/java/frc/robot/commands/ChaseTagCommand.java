@@ -20,20 +20,20 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class ChaseTagCommand extends CommandBase {
   
-  private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(2, 2);
-  private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(2, 2);
-  private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = 
-      new TrapezoidProfile.Constraints(8, 8);
+  private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
+  private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
+  private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS =   new TrapezoidProfile.Constraints(8, 8);
   
   private static final int TAG_TO_CHASE = 2;
-  private static final Transform2d TAG_TO_GOAL = new Transform2d(new Translation2d(1, 0), Rotation2d.fromDegrees(180.0));
+  private static final Transform2d TAG_TO_GOAL = 
+      new Transform2d(new Translation2d(1.5, 0), Rotation2d.fromDegrees(180.0));
 
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final Supplier<Pose2d> poseProvider;
 
-  private final ProfiledPIDController xController = new ProfiledPIDController(4, 0, 0, X_CONSTRAINTS);
-  private final ProfiledPIDController yController = new ProfiledPIDController(4, 0, 0, Y_CONSTRAINTS);
+  private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
+  private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
   private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRATINTS);
 
   private Pose2d goalPose;
@@ -47,10 +47,10 @@ public class ChaseTagCommand extends CommandBase {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
 
-    xController.setTolerance(0.1);
-    yController.setTolerance(0.1);
+    xController.setTolerance(0.2);
+    yController.setTolerance(0.2);
     omegaController.setTolerance(Units.degreesToRadians(3));
-    omegaController.enableContinuousInput(-1, 1);
+    omegaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(drivetrainSubsystem);
   }
@@ -76,7 +76,7 @@ public class ChaseTagCommand extends CommandBase {
           .findFirst();
       if (targetOpt.isPresent()) {
         var target = targetOpt.get();
-        if (!target.equals(lastTarget)) {
+        if (!target.equals(lastTarget) && target.getPoseAmbiguity() <= .2 && target.getPoseAmbiguity() != -1) {
           // This is new target data, so recalculate the goal
           lastTarget = target;
 
@@ -85,13 +85,13 @@ public class ChaseTagCommand extends CommandBase {
           var transform = new Transform2d(
             camToTarget.getTranslation().toTranslation2d(),
             camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
-            
-            // Transform the robot's pose to find the tag's pose
-            var cameraPose = robotPose.transformBy(CAMERA_TO_ROBOT.inverse());
-            Pose2d targetPose = cameraPose.transformBy(transform);
-            
-            // Transform the tag's pose to set our goal
-            goalPose = targetPose.transformBy(TAG_TO_GOAL);
+          
+          // Transform the robot's pose to find the tag's pose
+          var cameraPose = robotPose.transformBy(CAMERA_TO_ROBOT.inverse());
+          Pose2d targetPose = cameraPose.transformBy(transform);
+          
+          // Transform the tag's pose to set our goal
+          goalPose = targetPose.transformBy(TAG_TO_GOAL);
         }
 
         if (null != goalPose) {

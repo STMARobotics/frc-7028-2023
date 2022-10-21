@@ -26,7 +26,7 @@ public class ChaseTagCommand extends CommandBase {
   
   private static final int TAG_TO_CHASE = 2;
   private static final Transform2d TAG_TO_GOAL = 
-      new Transform2d(new Translation2d(1.5, 0), Rotation2d.fromDegrees(180.0));
+      new Transform2d(new Translation2d(1.5, 0), new Rotation2d(Math.PI));
 
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
@@ -107,7 +107,7 @@ public class ChaseTagCommand extends CommandBase {
     if (xController.atGoal()) {
       xSpeed = 0;
     }
-    
+
     var ySpeed = yController.calculate(robotPose.getY());
     if (yController.atGoal()) {
       ySpeed = 0;

@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT;
+import static edu.wpi.first.math.util.Units.degreesToRadians;
+import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT_3D;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +14,10 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -32,18 +34,18 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   // Ordered list of target poses by ID (WPILib is adding some functionality for
   // this)
-  private static final List<Pose2d> targetPoses = Collections.unmodifiableList(List.of(
-      new Pose2d(Units.inchesToMeters(84), Units.inchesToMeters(39.4375), Rotation2d.fromDegrees(180)),
-      new Pose2d(Units.inchesToMeters(84), 0.0, Rotation2d.fromDegrees(180))));
+  private static final List<Pose3d> targetPoses = Collections.unmodifiableList(List.of(
+      new Pose3d(3.0, 1.166, 0.287 + 0.165, new Rotation3d(0, 0, degreesToRadians(180.0))),
+      new Pose3d(3.0, 0.0, 0.287 + .165, new Rotation3d(0, 0, degreesToRadians(180.0)))));
   
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
   // "trust" the estimate from that particular component more than the others. 
   // This in turn means the particualr component will have a stronger influence
   // on the final pose estimate.
-  private static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
-  private static final Matrix<N1, N1> localMeasurementStdDevs = VecBuilder.fill(Units.degreesToRadians(0.01));
-  private static final Matrix<N3, N1> visionMeasurementStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
+  private static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, degreesToRadians(5));
+  private static final Matrix<N1, N1> localMeasurementStdDevs = VecBuilder.fill(degreesToRadians(0.01));
+  private static final Matrix<N3, N1> visionMeasurementStdDevs = VecBuilder.fill(0.1, 0.1, degreesToRadians(5));
   private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
@@ -83,19 +85,12 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
           var targetPose = targetPoses.get(fiducialId);
 
           Transform3d camToTarget = target.getCameraToTarget();
-          var transform = new Transform2d(
-              camToTarget.getTranslation().toTranslation2d(),
-              camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
+          // Workaround until PhotonVision changes Rotation
+          camToTarget = camToTarget.plus(new Transform3d(new Translation3d(), new Rotation3d(0, 0, -Math.PI / 2)));
+          Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-          Pose2d camPose = targetPose.transformBy(transform.inverse());
-
-          var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
-          // field2d.getObject("MyRobot" + fiducialId).setPose(visionMeasurement);
-          // SmartDashboard.putString("Vision pose", String.format("(%.2f, %.2f) %.2f",
-          //   visionMeasurement.getTranslation().getX(),
-          //   visionMeasurement.getTranslation().getY(),
-          //   visionMeasurement.getRotation().getDegrees()));
-          poseEstimator.addVisionMeasurement(visionMeasurement, imageCaptureTime);
+          var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT_3D);
+          poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), imageCaptureTime);
         }
       }
     }

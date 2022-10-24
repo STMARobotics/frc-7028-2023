@@ -7,11 +7,8 @@ package frc.robot;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static java.lang.Math.toRadians;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 
 /**
@@ -65,9 +62,7 @@ public final class Constants {
     /**
      * Physical location of the camera on the robot, relative to the center of the robot.
      */
-    public static final Transform2d CAMERA_TO_ROBOT = 
-        new Transform2d(new Translation2d(-0.3425, 0.0), new Rotation2d(0.0));
-    public static final Transform3d CAMERA_TO_ROBOT_3D =
+    public static final Transform3d CAMERA_TO_ROBOT =
         new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
   }
 }

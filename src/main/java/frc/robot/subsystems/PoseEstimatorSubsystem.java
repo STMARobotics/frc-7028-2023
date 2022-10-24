@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.math.util.Units.degreesToRadians;
-import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT_3D;
+import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT;
 
 import java.util.Collections;
 import java.util.List;
@@ -85,7 +85,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
           Transform3d camToTarget = target.getBestCameraToTarget();
           Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-          var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT_3D);
+          var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
           poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), imageCaptureTime);
         }
       }

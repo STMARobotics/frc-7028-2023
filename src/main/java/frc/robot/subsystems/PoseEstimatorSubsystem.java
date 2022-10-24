@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -71,23 +70,20 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update pose estimator with visible targets
+    // Update pose estimator with the best visible target
     var pipelineResult = photonCamera.getLatestResult();
     if (!pipelineResult.equals(previousPipelineResult) && pipelineResult.hasTargets()) {
       previousPipelineResult = pipelineResult;
       double imageCaptureTime = Timer.getFPGATimestamp() - (pipelineResult.getLatencyMillis() / 1000d);
+      var target = pipelineResult.getBestTarget();
+      var fiducialId = target.getFiducialId();
+      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && fiducialId < targetPoses.size()) {
+        var targetPose = targetPoses.get(fiducialId);
+        Transform3d camToTarget = target.getBestCameraToTarget();
+        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-      for (PhotonTrackedTarget target : pipelineResult.getTargets()) {
-
-        var fiducialId = target.getFiducialId();
-        if (fiducialId >= 0 && fiducialId < targetPoses.size()) {
-          var targetPose = targetPoses.get(fiducialId);
-          Transform3d camToTarget = target.getBestCameraToTarget();
-          Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
-
-          var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
-          poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), imageCaptureTime);
-        }
+        var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
+        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), imageCaptureTime);
       }
     }
     // Update pose estimator with drivetrain sensors

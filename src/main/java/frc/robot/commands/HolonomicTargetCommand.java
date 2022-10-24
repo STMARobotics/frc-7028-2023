@@ -36,10 +36,11 @@ public class HolonomicTargetCommand extends CommandBase {
     pidControllerX.setTolerance(Units.inchesToMeters(2.5));
 
     pidControllerY.setSetpoint(0); // Move side to side to keep target centered
-    pidControllerX.setTolerance(Units.inchesToMeters(2.5));
+    pidControllerY.setTolerance(Units.inchesToMeters(2.5));
 
-    pidControllerOmega.setSetpoint(Units.degreesToRadians(-90)); // Rotate the keep perpendicular with the target
+    pidControllerOmega.setSetpoint(Units.degreesToRadians(180)); // Rotate the keep perpendicular with the target
     pidControllerOmega.setTolerance(Units.degreesToRadians(1));
+    pidControllerOmega.enableContinuousInput(-Math.PI, Math.PI);
 
   }
 
@@ -47,25 +48,25 @@ public class HolonomicTargetCommand extends CommandBase {
   public void execute() {
     var result = photoncamera.getLatestResult();
     if (result.hasTargets()) {
-      var cameraToTarget = result.getBestTarget().getCameraToTarget();
+      var cameraToTarget = result.getBestTarget().getBestCameraToTarget();
 
-      // X - distance from camera in meters
-      // Y - right and left of camera center (in meters?)
-      // Z - above and below camera center (in meters?)
-      // rotation X - pitch - 0-degrees is flat on floor - rotation is positive as tilted toward camera
-      //                    - visible targets in range [0, 180]
-      // rotation Y - roll - 0-degrees is straight upward (or straight down) - clockwise rotation is positive
+      // X - distance from camera in meters (in meters)
+      // Y - right and left of camera center (in meters)
+      // Z - above and below camera center (in meters)
+      // rotation Y - pitch - -90-degrees is flat on floor - rotation is positive as tilted toward camera
+      //                    - visible targets in range [-90, 90]
+      // rotation X - roll - 0-degrees is straight upward (or straight down) - clockwise rotation is positive
       //                  - seems to give same results if the target is upside down (maybe need to research this one)
-      //                  - visible targets are in range [-90, 90]
-      // rotation Z - yaw - 0-degrees is perpendicular to the camera, rotated with the right side away from camera (not visible)
-      //                  - -90-degrees is straight on with the camera
+      //                  - visible targets are in range [-180, 180]
+      // rotation Z - yaw - -90-degrees is perpendicular to the camera, rotated with the right side away from camera (not visible)
+      //                  - 180-degrees is straight on with the camera
       //                  - from the camera's perspective, rotation the left side of the target closer is positive
-      //                  - visible targets are in range [-180, 0]
+      //                  - visible targets are in range [-90, 90]
 
       cameraToTarget.getRotation().getAngle();
       SmartDashboard.putNumber("Target X", cameraToTarget.getX());
-      SmartDashboard.putNumber("Target Y", Units.metersToInches(cameraToTarget.getY()));
-      SmartDashboard.putNumber("Target Z", Units.metersToInches(cameraToTarget.getZ()));
+      SmartDashboard.putNumber("Target Y", cameraToTarget.getY());
+      SmartDashboard.putNumber("Target Z", cameraToTarget.getZ());
       SmartDashboard.putNumber("Target Rotation X", Units.radiansToDegrees(cameraToTarget.getRotation().getX()));
       SmartDashboard.putNumber("Target Rotation Y", Units.radiansToDegrees(cameraToTarget.getRotation().getY()));
       SmartDashboard.putNumber("Target Rotation Z", Units.radiansToDegrees(cameraToTarget.getRotation().getZ()));

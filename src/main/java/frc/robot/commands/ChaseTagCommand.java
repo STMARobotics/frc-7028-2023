@@ -81,10 +81,10 @@ public class ChaseTagCommand extends CommandBase {
           lastTarget = target;
 
           // Get the transformation from the camera to the tag (in 2d)
-          var camToTarget = target.getCameraToTarget();
+          var camToTarget = target.getBestCameraToTarget();
           var transform = new Transform2d(
             camToTarget.getTranslation().toTranslation2d(),
-            camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
+            camToTarget.getRotation().toRotation2d());
           
           // Transform the robot's pose to find the tag's pose
           var cameraPose = robotPose.transformBy(CAMERA_TO_ROBOT.inverse());

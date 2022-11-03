@@ -113,7 +113,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    drivetrainSubsystem.resetGyroAngle();
     poseEstimator.resetPosition(newPose, drivetrainSubsystem.getGyroscopeRotation());
   }
 
@@ -122,7 +121,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * what "forward" is for field oriented driving.
    */
   public void resetFieldPosition() {
-    drivetrainSubsystem.resetGyroAngle();
     poseEstimator.resetPosition(
       new Pose2d(), drivetrainSubsystem.getGyroscopeRotation());
   }

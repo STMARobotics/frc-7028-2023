@@ -171,10 +171,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }));
   }
 
-  public void resetGyroAngle() {
-    navx.zeroYaw();
-  }
-
   public Rotation2d getGyroscopeRotation() {
    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
    return Rotation2d.fromDegrees(360.0 - navx.getYaw());

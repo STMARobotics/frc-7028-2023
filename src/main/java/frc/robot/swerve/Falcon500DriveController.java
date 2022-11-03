@@ -70,8 +70,20 @@ public class Falcon500DriveController {
     motor.feed();
   }
 
+  /**
+   * Returns velocity in meters per second
+   * @return drive velocity in meters per second
+   */
   public double getStateVelocity() {
     return motor.getSelectedSensorVelocity() * sensorVelocityCoefficient;
+  }
+
+  /**
+   * Returns position in meters
+   * @return position in meters
+   */
+  public double getStatePosition() {
+    return motor.getSelectedSensorPosition() * sensorPositionCoefficient;
   }
 
   /**

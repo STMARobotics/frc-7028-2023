@@ -32,6 +32,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -220,6 +221,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
     };
   }
 
+  public SwerveModulePosition[] getModulePositions() {
+    return new SwerveModulePosition[] {
+      getSwerveModulePosition(frontLeftModule),
+      getSwerveModulePosition(frontRightModule),
+      getSwerveModulePosition(backLeftModule),
+      getSwerveModulePosition(backRightModule)
+    };
+  }
+
   private void setModuleStates(SwerveModuleState[] states) {
     setModuleState(frontLeftModule, states[0]);
     setModuleState(frontRightModule, states[1]);
@@ -237,6 +247,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
     return new SwerveModuleState(module.getDriveVelocity(), new Rotation2d(module.getSteerAngle()));
+  }
+
+  private static SwerveModulePosition getSwerveModulePosition(Falcon500SwerveModule module) {
+    return new SwerveModulePosition(module.getDrivePosition(), new Rotation2d(module.getSteerAngle()));
   }
 
   /**

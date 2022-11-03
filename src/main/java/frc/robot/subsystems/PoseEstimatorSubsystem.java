@@ -10,14 +10,19 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N5;
+import edu.wpi.first.math.numbers.N7;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -41,10 +46,26 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   // "trust" the estimate from that particular component more than the others. 
   // This in turn means the particualr component will have a stronger influence
   // on the final pose estimate.
-  private static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, degreesToRadians(5));
-  private static final Matrix<N1, N1> localMeasurementStdDevs = VecBuilder.fill(degreesToRadians(0.01));
-  private static final Matrix<N3, N1> visionMeasurementStdDevs = VecBuilder.fill(0.1, 0.1, degreesToRadians(5));
-  private final SwerveDrivePoseEstimator poseEstimator;
+
+  /**
+   * Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
+   * matrix is in the form [x, y, theta, s_0, ... s_n]ᵀ, with units in meters and radians, then meters.
+   */
+  private static final Vector<N7> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5), 0.05, 0.05, 0.05, 0.05);
+  
+  /**
+   * Standard deviations of the encoder and gyro measurements. Increase these numbers to trust sensor readings from
+   * encoders and gyros less. This matrix is in the form [theta, s_0, ... s_n], with units in radians followed by meters.
+   */
+  private static final Vector<N5> localMeasurementStdDevs = VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01);
+  
+  /**
+   * Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
+   * less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+   */
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+
+  private final SwerveDrivePoseEstimator<N7, N7, N5> poseEstimator;
 
   private final Field2d field2d = new Field2d();
 
@@ -56,12 +77,18 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
-    poseEstimator = new SwerveDrivePoseEstimator(
+    poseEstimator =  new SwerveDrivePoseEstimator<N7, N7, N5>(
+        Nat.N7(),
+        Nat.N7(),
+        Nat.N5(),
         drivetrainSubsystem.getGyroscopeRotation(),
         new Pose2d(),
-        DrivetrainSubsystem.KINEMATICS, stateStdDevs,
-        localMeasurementStdDevs, visionMeasurementStdDevs);
-    
+        drivetrainSubsystem.getModulePositions(),
+        DrivetrainSubsystem.KINEMATICS,
+        stateStdDevs,
+        localMeasurementStdDevs,
+        visionMeasurementStdDevs);
+   
     
     tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
     tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
@@ -87,10 +114,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       }
     }
     // Update pose estimator with drivetrain sensors
-    poseEstimator.updateWithTime(
-      Timer.getFPGATimestamp(),
+    poseEstimator.update(
       drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainSubsystem.getModuleStates());
+      drivetrainSubsystem.getModuleStates(),
+      drivetrainSubsystem.getModulePositions());
 
     field2d.setRobotPose(getCurrentPose());
   }

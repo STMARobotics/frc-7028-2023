@@ -14,8 +14,20 @@ public class Falcon500SwerveModule {
     this.steerController = steerController;
   }
 
+  /**
+   * Returns the drive velocity in meters per second
+   * @return drive velocity in meters per second
+   */
   public double getDriveVelocity() {
     return driveController.getStateVelocity();
+  }
+
+  /**
+   * Returns the drive position in meters
+   * @return drive position in meters
+   */
+  public double getDrivePosition() {
+    return driveController.getStatePosition();
   }
 
   public double getSteerAngle() {

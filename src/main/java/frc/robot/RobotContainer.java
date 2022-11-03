@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.HolonomicTargetCommand;
@@ -80,10 +80,10 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button zeros the gyroscope
-    new Button(controller::getBackButton)
-            .whenPressed(poseEstimator::resetFieldPosition, drivetrainSubsystem);
-    new Button(controller::getAButton).whileHeld(holonomicTargetCommand);
-    new Button(controller::getBButton).whileHeld(chaseTagCommand);
+    new JoystickButton(controller, XboxController.Button.kBack.value).onTrue(
+      new InstantCommand(poseEstimator::resetFieldPosition, drivetrainSubsystem));
+    new JoystickButton(controller, XboxController.Button.kA.value).whileTrue(holonomicTargetCommand);
+    new JoystickButton(controller, XboxController.Button.kB.value).whileTrue(chaseTagCommand);
   }
 
   /**

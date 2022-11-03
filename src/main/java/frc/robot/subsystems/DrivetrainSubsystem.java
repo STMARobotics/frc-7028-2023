@@ -159,7 +159,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_STEER_OFFSET
     );
 
-    new Trigger(RobotState::isEnabled).whenActive(new StartEndCommand(() -> {
+    new Trigger(RobotState::isEnabled).onTrue(new StartEndCommand(() -> {
       frontLeftModule.setNeutralMode(NeutralMode.Brake);
       frontRightModule.setNeutralMode(NeutralMode.Brake);
       backLeftModule.setNeutralMode(NeutralMode.Brake);

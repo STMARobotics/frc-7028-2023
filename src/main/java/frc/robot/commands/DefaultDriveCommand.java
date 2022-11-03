@@ -1,15 +1,17 @@
 package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
-
+  private final Supplier<Rotation2d> robotAngleSupplier;
   private final DoubleSupplier translationXSupplier;
   private final DoubleSupplier translationYSupplier;
   private final DoubleSupplier rotationSupplier;
@@ -21,15 +23,18 @@ public class DefaultDriveCommand extends CommandBase {
   /**
    * Constructor
    * @param drivetrainSubsystem drivetrain
+   * @param robotAngleSuppliser supplier for the current angle of the robot
    * @param translationXSupplier supplier for translation X component, in meters per second
    * @param translationYSupplier supplier for translation Y component, in meters per second
    * @param rotationSupplier supplier for rotation component, in radians per second
    */
   public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+      Supplier<Rotation2d> robotAngleSupplier,
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
       DoubleSupplier rotationSupplier) {
     this.drivetrainSubsystem = drivetrainSubsystem;
+    this.robotAngleSupplier = robotAngleSupplier;
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
     this.rotationSupplier = rotationSupplier;
@@ -45,7 +50,7 @@ public class DefaultDriveCommand extends CommandBase {
             translateXRateLimiter.calculate(translationXSupplier.getAsDouble()),
             translateYRateLimiter.calculate(translationYSupplier.getAsDouble()),
             rotationRateLimiter.calculate(rotationSupplier.getAsDouble()),
-            drivetrainSubsystem.getGyroscopeRotation()));
+            robotAngleSupplier.get()));
   }
 
   @Override

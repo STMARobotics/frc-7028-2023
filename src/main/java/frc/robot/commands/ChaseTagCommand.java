@@ -39,7 +39,6 @@ public class ChaseTagCommand extends CommandBase {
   private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
   private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRATINTS);
 
-  private Pose2d goalPose;
   private PhotonTrackedTarget lastTarget;
 
   public ChaseTagCommand(
@@ -60,7 +59,6 @@ public class ChaseTagCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    goalPose = null;
     lastTarget = null;
     var robotPose = poseProvider.get();
     omegaController.reset(robotPose.getRotation().getRadians());
@@ -83,50 +81,53 @@ public class ChaseTagCommand extends CommandBase {
       // Find the tag we want to chase
       var targetOpt = photonRes.getTargets().stream()
           .filter(t -> t.getFiducialId() == TAG_TO_CHASE)
+          .filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 && t.getPoseAmbiguity() != -1)
           .findFirst();
       if (targetOpt.isPresent()) {
         var target = targetOpt.get();
-        if (!target.equals(lastTarget) && target.getPoseAmbiguity() <= .2 && target.getPoseAmbiguity() != -1) {
-          // This is new target data, so recalculate the goal
-          lastTarget = target;
+        // This is new target data, so recalculate the goal
+        lastTarget = target;
 
-          // Get the transformation from the camera to the tag (in 2d)
-          var camToTarget = target.getBestCameraToTarget();
-          
-          // Transform the robot's pose to find the tag's pose
-          var cameraPose = robotPose.transformBy(CAMERA_TO_ROBOT.inverse());
-          var targetPose = cameraPose.transformBy(camToTarget);
-          
-          // Transform the tag's pose to set our goal
-          goalPose = targetPose.transformBy(TAG_TO_GOAL).toPose2d();
-        }
+        // Get the transformation from the camera to the tag (in 2d)
+        var camToTarget = target.getBestCameraToTarget();
+        
+        // Transform the robot's pose to find the tag's pose
+        var cameraPose = robotPose.transformBy(CAMERA_TO_ROBOT.inverse());
+        var targetPose = cameraPose.transformBy(camToTarget);
+        
+        // Transform the tag's pose to set our goal
+        var goalPose = targetPose.transformBy(TAG_TO_GOAL).toPose2d();
 
-        if (null != goalPose) {
-          // Drive
-          xController.setGoal(goalPose.getX());
-          yController.setGoal(goalPose.getY());
-          omegaController.setGoal(goalPose.getRotation().getRadians());
-        }
+        // Drive
+        xController.setGoal(goalPose.getX());
+        yController.setGoal(goalPose.getY());
+        omegaController.setGoal(goalPose.getRotation().getRadians());
       }
     }
     
-    var xSpeed = xController.calculate(robotPose.getX());
-    if (xController.atGoal()) {
-      xSpeed = 0;
-    }
+    if (lastTarget == null) {
+      // No target has been visible
+      drivetrainSubsystem.stop();
+    } else {
+      // Drive to the target
+      var xSpeed = xController.calculate(robotPose.getX());
+      if (xController.atGoal()) {
+        xSpeed = 0;
+      }
 
-    var ySpeed = yController.calculate(robotPose.getY());
-    if (yController.atGoal()) {
-      ySpeed = 0;
-    }
+      var ySpeed = yController.calculate(robotPose.getY());
+      if (yController.atGoal()) {
+        ySpeed = 0;
+      }
 
-    var omegaSpeed = omegaController.calculate(robotPose2d.getRotation().getRadians());
-    if (omegaController.atGoal()) {
-      omegaSpeed = 0;
-    }
+      var omegaSpeed = omegaController.calculate(robotPose2d.getRotation().getRadians());
+      if (omegaController.atGoal()) {
+        omegaSpeed = 0;
+      }
 
-    drivetrainSubsystem.drive(
-      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, robotPose2d.getRotation()));
+      drivetrainSubsystem.drive(
+        ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, robotPose2d.getRotation()));
+    }
   }
 
   @Override

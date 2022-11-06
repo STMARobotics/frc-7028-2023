@@ -82,4 +82,8 @@ public class Falcon500SwerveModule {
     driveController.setNeutralMode(neutralMode);
   }
 
+  public void resetDriveEncoders() {
+    driveController.resetPosition();
+  }
+
 }

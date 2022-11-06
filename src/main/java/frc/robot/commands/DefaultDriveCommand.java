@@ -1,5 +1,9 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.ArcadeDriveConstants.ROTATION_RATE_LIMIT;
+import static frc.robot.Constants.ArcadeDriveConstants.X_RATE_LIMIT;
+import static frc.robot.Constants.ArcadeDriveConstants.Y_RATE_LIMIT;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -16,9 +20,9 @@ public class DefaultDriveCommand extends CommandBase {
   private final DoubleSupplier translationYSupplier;
   private final DoubleSupplier rotationSupplier;
 
-  private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(6);
-  private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(6);
-  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(5 * Math.PI);
+  private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(X_RATE_LIMIT);
+  private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(Y_RATE_LIMIT);
+  private final SlewRateLimiter rotationRateLimiter = new SlewRateLimiter(ROTATION_RATE_LIMIT);
 
   /**
    * Constructor
@@ -55,6 +59,6 @@ public class DefaultDriveCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    drivetrainSubsystem.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
+    drivetrainSubsystem.stop();
   }
 }

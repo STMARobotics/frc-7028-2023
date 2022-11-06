@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
 public class Falcon500DriveController {
 
@@ -16,21 +17,24 @@ public class Falcon500DriveController {
   private static final int CAN_TIMEOUT_MS = 250;
   private static final double TICKS_PER_ROTATION = 2048.0;
 
-  private final WPI_TalonFX motor;
-
-  private final double sensorPositionCoefficient;
-  private final double sensorVelocityCoefficient;
-  private final double nominalVoltage = 12.0;
-
   /** Voltage needed to overcome the motor’s static friction. kS */
   public static final double kS = 0.6716;
   /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
   public static final double kV = 2.5913;
   /** Voltage needed to induce a given acceleration in the motor shaft. kA */
   public static final double kA = 0.19321;
+
+  private final WPI_TalonFX motor;
+
+  private final double sensorPositionCoefficient;
+  private final double sensorVelocityCoefficient;
+  private final double nominalVoltage = 12.0;
+
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kS, kV, kA);
 
-  public Falcon500DriveController(int port, ModuleConfiguration moduleConfiguration) {
+  private double referenceVelocity;
+
+  public Falcon500DriveController(int port, ModuleConfiguration moduleConfiguration, ShuffleboardContainer container) {
     sensorPositionCoefficient = Math.PI * moduleConfiguration.getWheelDiameter()
         * moduleConfiguration.getDriveReduction() / TICKS_PER_ROTATION;
     sensorVelocityCoefficient = sensorPositionCoefficient * 10.0;
@@ -41,7 +45,7 @@ public class Falcon500DriveController {
     motorConfiguration.supplyCurrLimit.currentLimit = 80;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    motorConfiguration.slot0.kP = 0.00565;
+    motorConfiguration.slot0.kP = 0.02;
     motorConfiguration.slot0.kI = 0.0;
     motorConfiguration.slot0.kD = 0.0;
 
@@ -58,15 +62,26 @@ public class Falcon500DriveController {
     CtreUtils.checkCtreError(
         motor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, STATUS_FRAME_GENERAL_PERIOD_MS, CAN_TIMEOUT_MS),
         "Failed to configure Falcon status frame period");
+    
+    addDashboardEntries(container);
   }
 
-  public void setReferenceVoltage(double voltage) {
-    motor.set(TalonFXControlMode.PercentOutput, voltage / nominalVoltage);
+  private void addDashboardEntries(ShuffleboardContainer container) {
+    if (container != null) {
+      container.addNumber("Current Velocity", () -> getStateVelocity());
+      container.addNumber("Target Velocity", () -> referenceVelocity);
+      container.addNumber("Current Position", () -> getStatePosition());
+    }
   }
 
   public void setReferenceVelocity(double velocity) {
+    this.referenceVelocity = velocity;
     var arbFeedForward = feedforward.calculate(velocity) / nominalVoltage;
-    motor.set(TalonFXControlMode.Velocity, velocity, DemandType.ArbitraryFeedForward, arbFeedForward);
+    motor.set(
+          TalonFXControlMode.Velocity,
+          velocity / sensorVelocityCoefficient,
+          DemandType.ArbitraryFeedForward,
+          arbFeedForward);
     motor.feed();
   }
 
@@ -92,6 +107,13 @@ public class Falcon500DriveController {
    */
   public void setNeutralMode(NeutralMode neutralMode) {
     motor.setNeutralMode(neutralMode);
+  }
+
+  /**
+   * Reset the postion to zero
+   */
+  public void resetPosition() {
+    motor.setSelectedSensorPosition(0);
   }
 
 }

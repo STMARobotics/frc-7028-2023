@@ -40,12 +40,6 @@ public class Falcon500SteerController {
 
   private boolean motorOffsetConfigured = false;
 
-  private void addDashboardEntries(ShuffleboardContainer container, Falcon500SteerController controller) {
-    container.addNumber("Current Angle", () -> Math.toDegrees(controller.getStateAngle()));
-    container.addNumber("Target Angle", () -> Math.toDegrees(controller.getReferenceAngle()));
-    container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition());
-  }
-
   public Falcon500SteerController(
       int motorPort,
       int canCoderPort,
@@ -104,8 +98,16 @@ public class Falcon500SteerController {
         motor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, STATUS_FRAME_GENERAL_PERIOD_MS, CAN_TIMEOUT_MS),
         "Failed to configure Falcon status frame period");
     
-    addDashboardEntries(container, this);
+    addDashboardEntries(container);
 
+  }
+
+  private void addDashboardEntries(ShuffleboardContainer container) {
+    if (container != null) {
+      container.addNumber("Current Angle", () -> Math.toDegrees(getStateAngle()));
+      container.addNumber("Target Angle", () -> Math.toDegrees(getReferenceAngle()));
+      container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition());
+    }
   }
 
   /**

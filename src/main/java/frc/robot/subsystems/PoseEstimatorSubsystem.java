@@ -72,7 +72,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     this.photonCamera = photonCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
 
-    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
 
     poseEstimator =  new SwerveDrivePoseEstimator<N7, N7, N5>(
         Nat.N7(),
@@ -80,16 +80,15 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         Nat.N5(),
         drivetrainSubsystem.getGyroscopeRotation(),
         new Pose2d(),
-        drivetrainSubsystem.getModulePositions(),
+        drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions(),
         DrivetrainSubsystem.KINEMATICS,
         stateStdDevs,
         localMeasurementStdDevs,
         visionMeasurementStdDevs);
    
     
-    tab.addString("Pose (X, Y)", this::getFomattedPose).withPosition(0, 4);
-    tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
-    tab.add(field2d);
+    tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
+    tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }
 
   @Override
@@ -111,19 +110,21 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       }
     }
     // Update pose estimator with drivetrain sensors
+    var drivetrainState = drivetrainSubsystem.getDrivetrainState();
     poseEstimator.update(
       drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainSubsystem.getModuleStates(),
-      drivetrainSubsystem.getModulePositions());
+      drivetrainState.getSwerveModuleStates(),
+      drivetrainState.getSwerveModulePositions());
 
     field2d.setRobotPose(getCurrentPose());
   }
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", 
-        Units.metersToInches(pose.getX()), 
-        Units.metersToInches(pose.getY()));
+    return String.format("(%.2f, %.2f) %.2f degrees", 
+        pose.getX(), 
+        pose.getY(),
+        pose.getRotation().getDegrees());
   }
 
   public Pose2d getCurrentPose() {
@@ -137,7 +138,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    poseEstimator.resetPosition(newPose, drivetrainSubsystem.getGyroscopeRotation());
+    drivetrainSubsystem.resetDriveEncoders();
+    poseEstimator.resetPosition(
+        newPose,
+        drivetrainSubsystem.getGyroscopeRotation(),
+        drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions());
   }
 
   /**
@@ -145,8 +150,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * what "forward" is for field oriented driving.
    */
   public void resetFieldPosition() {
-    poseEstimator.resetPosition(
-      new Pose2d(), drivetrainSubsystem.getGyroscopeRotation());
+    setCurrentPose(new Pose2d());
   }
 
 }

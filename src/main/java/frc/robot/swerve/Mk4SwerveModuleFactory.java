@@ -26,7 +26,7 @@ public final class Mk4SwerveModuleFactory {
             int steerEncoderPort,
             double steerOffset) {
       
-      var driveController = new Falcon500DriveController(driveMotorPort, moduleConfiguration);
+      var driveController = new Falcon500DriveController(driveMotorPort, moduleConfiguration, container);
       var steerController = 
           new Falcon500SteerController(steerMotorPort, steerEncoderPort, steerOffset, container, moduleConfiguration);
 

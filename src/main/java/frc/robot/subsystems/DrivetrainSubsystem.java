@@ -4,27 +4,28 @@
 
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.BACK_LEFT_MODULE_DRIVE_MOTOR;
-import static frc.robot.Constants.BACK_LEFT_MODULE_STEER_ENCODER;
-import static frc.robot.Constants.BACK_LEFT_MODULE_STEER_MOTOR;
-import static frc.robot.Constants.BACK_LEFT_MODULE_STEER_OFFSET;
-import static frc.robot.Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR;
-import static frc.robot.Constants.BACK_RIGHT_MODULE_STEER_ENCODER;
-import static frc.robot.Constants.BACK_RIGHT_MODULE_STEER_MOTOR;
-import static frc.robot.Constants.BACK_RIGHT_MODULE_STEER_OFFSET;
-import static frc.robot.Constants.DRIVETRAIN_TRACKWIDTH_METERS;
-import static frc.robot.Constants.DRIVETRAIN_WHEELBASE_METERS;
-import static frc.robot.Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR;
-import static frc.robot.Constants.FRONT_LEFT_MODULE_STEER_ENCODER;
-import static frc.robot.Constants.FRONT_LEFT_MODULE_STEER_MOTOR;
-import static frc.robot.Constants.FRONT_LEFT_MODULE_STEER_OFFSET;
-import static frc.robot.Constants.FRONT_RIGHT_MODULE_DRIVE_MOTOR;
-import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_ENCODER;
-import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_MOTOR;
-import static frc.robot.Constants.FRONT_RIGHT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.BACK_LEFT_MODULE_DRIVE_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.BACK_LEFT_MODULE_STEER_ENCODER;
+import static frc.robot.Constants.DrivetrainConstants.BACK_LEFT_MODULE_STEER_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.BACK_LEFT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_DRIVE_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_ENCODER;
+import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS;
+import static frc.robot.Constants.DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_DRIVE_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_STEER_ENCODER;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_STEER_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_RIGHT_MODULE_DRIVE_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_RIGHT_MODULE_STEER_ENCODER;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_RIGHT_MODULE_STEER_MOTOR;
+import static frc.robot.Constants.DrivetrainConstants.FRONT_RIGHT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.PIGEON_ID;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.kauailabs.navx.frc.AHRS;
+import com.ctre.phoenix.sensors.WPI_Pigeon2;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -32,20 +33,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.swerve.DrivetrainState;
 import frc.robot.swerve.Falcon500SwerveModule;
 import frc.robot.swerve.Mk4SwerveModuleFactory;
 import frc.robot.swerve.ModuleConfiguration;
@@ -92,7 +94,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // The important thing about how you configure your gyroscope is that rotating the robot counter-clockwise should
   // cause the angle reading to increase until it wraps back over to zero.
-  private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
+  private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(PIGEON_ID);
+  // private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
   // These are our modules. We initialize them in the constructor.
   private final Falcon500SwerveModule frontLeftModule;
@@ -101,63 +104,81 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final Falcon500SwerveModule backRightModule;
 
   private ChassisSpeeds chassisSpeeds;
+  private DrivetrainState currentDrivetrainState;
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+    pigeon.configMountPoseRoll(90);
+    pigeon.configMountPoseYaw(-90);
 
-    tab.addNumber("Rotation degrees", () -> this.getGyroscopeRotation().getDegrees());
+    ShuffleboardLayout frontLeftLayout = null;
+    ShuffleboardLayout frontRightLayout = null;
+    ShuffleboardLayout backLeftLayout = null;
+    ShuffleboardLayout backRightLayout = null;
 
+    if (DrivetrainConstants.ADD_TO_DASHBOARD) {
+      frontLeftLayout = tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+          .withSize(2, 4)
+          .withPosition(0, 0);
+
+      frontRightLayout = tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+          .withSize(2, 4)
+          .withPosition(2, 0);
+      
+      backLeftLayout =tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+          .withSize(2, 4)
+          .withPosition(4, 0);
+      
+      backRightLayout = tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+          .withSize(2, 4)
+          .withPosition(6, 0);
+    }
     // We use Falcon 500s in L1 configuration.
     frontLeftModule = Mk4SwerveModuleFactory.createFalcon500(
-            // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
-            tab.getLayout("Front Left Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(0, 0),
-            // This can either be L1, L2, L3, L4 depending on your gear configuration
-            ModuleConfiguration.MK4_L1,
-            // This is the ID of the drive motor
-            FRONT_LEFT_MODULE_DRIVE_MOTOR,
-            // This is the ID of the steer motor
-            FRONT_LEFT_MODULE_STEER_MOTOR,
-            // This is the ID of the steer encoder
-            FRONT_LEFT_MODULE_STEER_ENCODER,
-            // This is how much the steer encoder is offset from true zero (In our case, zero is facing straight forward)
-            FRONT_LEFT_MODULE_STEER_OFFSET
+        // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
+        frontLeftLayout,
+        // This can either be L1, L2, L3, L4 depending on your gear configuration
+        ModuleConfiguration.MK4_L1,
+        // This is the ID of the drive motor
+        FRONT_LEFT_MODULE_DRIVE_MOTOR,
+        // This is the ID of the steer motor
+        FRONT_LEFT_MODULE_STEER_MOTOR,
+        // This is the ID of the steer encoder
+        FRONT_LEFT_MODULE_STEER_ENCODER,
+        // This is how much the steer encoder is offset from true zero (In our case, zero is facing straight forward)
+        FRONT_LEFT_MODULE_STEER_OFFSET
     );
 
     // We will do the same for the other modules
     frontRightModule = Mk4SwerveModuleFactory.createFalcon500(
-            tab.getLayout("Front Right Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(2, 0),
-            ModuleConfiguration.MK4_L1,
-            FRONT_RIGHT_MODULE_DRIVE_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_ENCODER,
-            FRONT_RIGHT_MODULE_STEER_OFFSET
+        frontRightLayout,
+        ModuleConfiguration.MK4_L1,
+        FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+        FRONT_RIGHT_MODULE_STEER_MOTOR,
+        FRONT_RIGHT_MODULE_STEER_ENCODER,
+        FRONT_RIGHT_MODULE_STEER_OFFSET
     );
 
     backLeftModule = Mk4SwerveModuleFactory.createFalcon500(
-            tab.getLayout("Back Left Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(4, 0),
-            ModuleConfiguration.MK4_L1,
-            BACK_LEFT_MODULE_DRIVE_MOTOR,
-            BACK_LEFT_MODULE_STEER_MOTOR,
-            BACK_LEFT_MODULE_STEER_ENCODER,
-            BACK_LEFT_MODULE_STEER_OFFSET
+        backLeftLayout,
+        ModuleConfiguration.MK4_L1,
+        BACK_LEFT_MODULE_DRIVE_MOTOR,
+        BACK_LEFT_MODULE_STEER_MOTOR,
+        BACK_LEFT_MODULE_STEER_ENCODER,
+        BACK_LEFT_MODULE_STEER_OFFSET
     );
 
     backRightModule = Mk4SwerveModuleFactory.createFalcon500(
-            tab.getLayout("Back Right Module", BuiltInLayouts.kList)
-                    .withSize(2, 4)
-                    .withPosition(6, 0),
-            ModuleConfiguration.MK4_L1,
-            BACK_RIGHT_MODULE_DRIVE_MOTOR,
-            BACK_RIGHT_MODULE_STEER_MOTOR,
-            BACK_RIGHT_MODULE_STEER_ENCODER,
-            BACK_RIGHT_MODULE_STEER_OFFSET
+        backRightLayout,
+        ModuleConfiguration.MK4_L1,
+        BACK_RIGHT_MODULE_DRIVE_MOTOR,
+        BACK_RIGHT_MODULE_STEER_MOTOR,
+        BACK_RIGHT_MODULE_STEER_ENCODER,
+        BACK_RIGHT_MODULE_STEER_OFFSET
     );
+
+    this.currentDrivetrainState = 
+        new DrivetrainState(frontLeftModule, frontRightModule, backLeftModule, backRightModule);
 
     new Trigger(RobotState::isEnabled).onTrue(new StartEndCommand(() -> {
       frontLeftModule.setNeutralMode(NeutralMode.Brake);
@@ -173,8 +194,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public Rotation2d getGyroscopeRotation() {
-   // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
-   return Rotation2d.fromDegrees(360.0 - navx.getYaw());
+    return pigeon.getRotation2d();
+
+    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
+    // return Rotation2d.fromDegrees(360.0 - navx.getYaw());
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
@@ -187,45 +210,39 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Read the current states - only once per iteration
+    currentDrivetrainState = new DrivetrainState(frontLeftModule, frontRightModule, backLeftModule, backRightModule);
 
     // Set the swerve module states
-    if (chassisSpeeds == null) {
-      // For safety, stop the robot if the states have not been set this iteration
-      chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-    }
-    SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-    if(chassisSpeeds.vxMetersPerSecond == 0.0 && chassisSpeeds.vyMetersPerSecond == 0.0
-        && chassisSpeeds.omegaRadiansPerSecond == 0.0) {
-      // Keep the wheels at their current angle when stopped, don't snap back to straight
-      var currentStates = getModuleStates();
-      for(int i = 0; i < currentStates.length; i++) {
-        states[i].angle = currentStates[i].angle;
+    if (chassisSpeeds != null) {
+      var states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+      if(chassisSpeeds.vxMetersPerSecond == 0.0 && chassisSpeeds.vyMetersPerSecond == 0.0
+          && chassisSpeeds.omegaRadiansPerSecond == 0.0) {
+        // Keep the wheels at their current angle when stopped, don't snap back to straight
+        var currentStates = currentDrivetrainState.getSwerveModuleStates();
+        for(int i = 0; i < currentStates.length; i++) {
+          states[i].angle = currentStates[i].angle;
+        }
       }
-    }
 
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
-    setModuleStates(states);
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+      setModuleStates(states);
+    }
     chassisSpeeds = null;
   }
 
-  public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] {
-      getSwerveModuleState(frontLeftModule),
-      getSwerveModuleState(frontRightModule),
-      getSwerveModuleState(backLeftModule),
-      getSwerveModuleState(backRightModule)
-    };
+  /**
+   * Gets the current drivetrain state (position, velocity, and angle), as reported by the modules themselves.
+   * @return current drivetrain state. Array orders are frontLeft, frontRight, backLeft, backRight
+   */
+  public DrivetrainState getDrivetrainState() {
+    return currentDrivetrainState;
   }
 
-  public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] {
-      getSwerveModulePosition(frontLeftModule),
-      getSwerveModulePosition(frontRightModule),
-      getSwerveModulePosition(backLeftModule),
-      getSwerveModulePosition(backRightModule)
-    };
-  }
-
+  /**
+   * Sets the states of the modules.
+   * @param states array of states. Must be ordered frontLeft, frontRight, backLeft, backRight
+   */
   private void setModuleStates(SwerveModuleState[] states) {
     setModuleState(frontLeftModule, states[0]);
     setModuleState(frontRightModule, states[1]);
@@ -241,12 +258,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return KINEMATICS;
   }
 
-  private static SwerveModuleState getSwerveModuleState(Falcon500SwerveModule module) {
-    return new SwerveModuleState(module.getDriveVelocity(), new Rotation2d(module.getSteerAngle()));
-  }
-
-  private static SwerveModulePosition getSwerveModulePosition(Falcon500SwerveModule module) {
-    return new SwerveModulePosition(module.getDrivePosition(), new Rotation2d(module.getSteerAngle()));
+  public void resetDriveEncoders() {
+    frontLeftModule.resetDriveEncoders();
+    frontRightModule.resetDriveEncoders();
+    backLeftModule.resetDriveEncoders();
+    backRightModule.resetDriveEncoders();
   }
 
   /**

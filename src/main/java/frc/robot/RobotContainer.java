@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.HolonomicTargetCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -35,13 +34,12 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+
   private final PhotonCamera photonCamera = new PhotonCamera("gloworm");
+
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
   
-  private final HolonomicTargetCommand holonomicTargetCommand = 
-      new HolonomicTargetCommand(drivetrainSubsystem, photonCamera);
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
 
@@ -52,10 +50,6 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Set up the default command for the drivetrain.
-    // The controls are for field-oriented driving:
-    // Left stick Y axis -> forward and backwards movement
-    // Left stick X axis -> left and right movement
-    // Right stick X axis -> rotation
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             drivetrainSubsystem,
             () -> poseEstimator.getCurrentPose().getRotation(),
@@ -80,10 +74,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // Back button zeros the gyroscope
+    // Back button resets the robot pose
     new JoystickButton(controller, XboxController.Button.kBack.value).onTrue(
       Commands.runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
-    new JoystickButton(controller, XboxController.Button.kA.value).whileTrue(holonomicTargetCommand);
     new JoystickButton(controller, XboxController.Button.kB.value).whileTrue(chaseTagCommand);
   }
 

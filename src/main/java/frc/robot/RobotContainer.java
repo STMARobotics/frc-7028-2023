@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -43,7 +43,7 @@ public class RobotContainer {
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
 
-  private final XboxController controller = new XboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(0);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -75,9 +75,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button resets the robot pose
-    new JoystickButton(controller, XboxController.Button.kBack.value).onTrue(
-      Commands.runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
-    new JoystickButton(controller, XboxController.Button.kB.value).whileTrue(chaseTagCommand);
+    controller.back().onTrue(Commands.runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
+    controller.b().whileTrue(chaseTagCommand);
   }
 
   /**

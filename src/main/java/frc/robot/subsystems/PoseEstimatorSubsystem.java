@@ -79,8 +79,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         Nat.N7(),
         Nat.N5(),
         drivetrainSubsystem.getGyroscopeRotation(),
-        new Pose2d(),
         drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions(),
+        new Pose2d(),
         DrivetrainSubsystem.KINEMATICS,
         stateStdDevs,
         localMeasurementStdDevs,
@@ -140,9 +140,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public void setCurrentPose(Pose2d newPose) {
     drivetrainSubsystem.resetDriveEncoders();
     poseEstimator.resetPosition(
-        newPose,
-        drivetrainSubsystem.getGyroscopeRotation(),
-        drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions());
+      drivetrainSubsystem.getGyroscopeRotation(),
+      drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions(),
+      newPose);
   }
 
   /**

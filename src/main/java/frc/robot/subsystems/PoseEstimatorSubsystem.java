@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
@@ -21,7 +20,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.math.numbers.N7;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -66,7 +64,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private final Field2d field2d = new Field2d();
 
-  private PhotonPipelineResult previousPipelineResult = null;
+  private double previousPipelineTimestamp = 0;
 
   public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
     this.photonCamera = photonCamera;
@@ -95,9 +93,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public void periodic() {
     // Update pose estimator with the best visible target
     var pipelineResult = photonCamera.getLatestResult();
-    if (!pipelineResult.equals(previousPipelineResult) && pipelineResult.hasTargets()) {
-      previousPipelineResult = pipelineResult;
-      double imageCaptureTime = Timer.getFPGATimestamp() - (pipelineResult.getLatencyMillis() / 1000d);
+    var resultTimestamp = pipelineResult.getTimestampSeconds();
+    if (pipelineResult.hasTargets()) {
+      previousPipelineTimestamp = resultTimestamp;
       var target = pipelineResult.getBestTarget();
       var fiducialId = target.getFiducialId();
       if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && fiducialId < targetPoses.size()) {
@@ -106,7 +104,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
         var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
-        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), imageCaptureTime);
+        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
       }
     }
     // Update pose estimator with drivetrain sensors

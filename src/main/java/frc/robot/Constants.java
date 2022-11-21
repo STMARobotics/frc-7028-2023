@@ -63,14 +63,28 @@ public final class Constants {
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(74.8828125);
     
     public static final int PIGEON_ID = 30;
+
+    /** Voltage needed to overcome the motor’s static friction. kS */
+    public static final double DRIVE_kS = 0.6716;
+    /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
+    public static final double DRIVE_kV = 2.5913;
+    /** Voltage needed to induce a given acceleration in the motor shaft. kA */
+    public static final double DRIVE_kA = 0.19321;
+
+    public static final double STEER_kP = 0.2;
+    public static final double STEER_kI = 0.0;
+    public static final double STEER_kD = 0.1;
+
+    public static final double DRIVE_kP = 0.02;
+    public static final double DRIVE_kI = 0.0;
+    public static final double DRIVE_kD = 0.0;
+
   }
 
   public static final class ArcadeDriveConstants {
 
     public static final double X_RATE_LIMIT = 6.0;
-
     public static final double Y_RATE_LIMIT = 6.0;
-
     public static final double ROTATION_RATE_LIMIT = 5.0 * Math.PI;
 
   }

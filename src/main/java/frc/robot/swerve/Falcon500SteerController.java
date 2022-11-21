@@ -1,5 +1,9 @@
 package frc.robot.swerve;
 
+import static frc.robot.Constants.DrivetrainConstants.STEER_kD;
+import static frc.robot.Constants.DrivetrainConstants.STEER_kI;
+import static frc.robot.Constants.DrivetrainConstants.STEER_kP;
+
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -66,9 +70,9 @@ public class Falcon500SteerController {
     motorEncoderVelocityCoefficient = motorEncoderPositionCoefficient * 10.0;
 
     TalonFXConfiguration motorConfiguration = new TalonFXConfiguration();
-    motorConfiguration.slot0.kP = 0.2;
-    motorConfiguration.slot0.kI = 0.0;
-    motorConfiguration.slot0.kD = 0.1;
+    motorConfiguration.slot0.kP = STEER_kP;
+    motorConfiguration.slot0.kI = STEER_kI;
+    motorConfiguration.slot0.kD = STEER_kD;
 
     motorConfiguration.slot0.kF = (1023.0 * motorEncoderVelocityCoefficient / 12) * motionMagicVelocityConstant;
     motorConfiguration.motionCruiseVelocity = 2.0 / motionMagicVelocityConstant / motorEncoderVelocityCoefficient;

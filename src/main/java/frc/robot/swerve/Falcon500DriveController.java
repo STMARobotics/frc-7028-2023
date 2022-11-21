@@ -1,5 +1,12 @@
 package frc.robot.swerve;
 
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kA;
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kD;
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kI;
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kP;
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kS;
+import static frc.robot.Constants.DrivetrainConstants.DRIVE_kV;
+
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
@@ -17,20 +24,13 @@ public class Falcon500DriveController {
   private static final int CAN_TIMEOUT_MS = 250;
   private static final double TICKS_PER_ROTATION = 2048.0;
 
-  /** Voltage needed to overcome the motor’s static friction. kS */
-  public static final double kS = 0.6716;
-  /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-  public static final double kV = 2.5913;
-  /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-  public static final double kA = 0.19321;
-
   private final WPI_TalonFX motor;
 
   private final double sensorPositionCoefficient;
   private final double sensorVelocityCoefficient;
   private final double nominalVoltage = 12.0;
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kS, kV, kA);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DRIVE_kS, DRIVE_kV, DRIVE_kA);
 
   private double referenceVelocity;
 
@@ -45,9 +45,9 @@ public class Falcon500DriveController {
     motorConfiguration.supplyCurrLimit.currentLimit = 80;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    motorConfiguration.slot0.kP = 0.02;
-    motorConfiguration.slot0.kI = 0.0;
-    motorConfiguration.slot0.kD = 0.0;
+    motorConfiguration.slot0.kP = DRIVE_kP;
+    motorConfiguration.slot0.kI = DRIVE_kI;
+    motorConfiguration.slot0.kD = DRIVE_kD;
 
     motor = new WPI_TalonFX(port);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");

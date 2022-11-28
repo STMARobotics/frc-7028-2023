@@ -94,7 +94,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     // Update pose estimator with the best visible target
     var pipelineResult = photonCamera.getLatestResult();
     var resultTimestamp = pipelineResult.getTimestampSeconds();
-    if (pipelineResult.hasTargets()) {
+    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
       previousPipelineTimestamp = resultTimestamp;
       var target = pipelineResult.getBestTarget();
       var fiducialId = target.getFiducialId();

@@ -18,10 +18,11 @@ import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
-public class Falcon500SteerController {
+public class SwerveSteerController {
 
   private static final int ENCODER_RESET_ITERATIONS = 500;
   private static final double ENCODER_RESET_MAX_ANGULAR_VELOCITY = Math.toRadians(0.5);
@@ -38,13 +39,13 @@ public class Falcon500SteerController {
   private final double motionMagicVelocityConstant = .125;
   private final double motionMagicAccelerationConstant = .0625;
 
-  private double referenceAngleRadians = 0.0;
+  private double desiredAngleRadians = 0.0;
 
   private double resetIteration = 0;
 
   private boolean motorOffsetConfigured = false;
 
-  public Falcon500SteerController(
+  public SwerveSteerController(
       int motorPort,
       int canCoderPort,
       double canCoderOffset,
@@ -108,8 +109,8 @@ public class Falcon500SteerController {
 
   private void addDashboardEntries(ShuffleboardContainer container) {
     if (container != null) {
-      container.addNumber("Current Angle", () -> Math.toDegrees(getStateAngle()));
-      container.addNumber("Target Angle", () -> Math.toDegrees(getReferenceAngle()));
+      container.addNumber("Current Angle", () -> getStateRotation().getDegrees());
+      container.addNumber("Target Angle", () -> Math.toDegrees(desiredAngleRadians));
       container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition());
     }
   }
@@ -151,11 +152,8 @@ public class Falcon500SteerController {
     return angle;
   }
 
-  public double getReferenceAngle() {
-    return referenceAngleRadians;
-  }
-
-  public void setReferenceAngle(double referenceAngleRadians) {
+  public void setDesiredRotation(Rotation2d desiredRotation) {
+    var desiredAngleRadians = desiredRotation.getRadians();
     double currentAngleRadians = motor.getSelectedSensorPosition() * motorEncoderPositionCoefficient;
 
     // Reset the Falcon's encoder periodically when the module is not rotating.
@@ -177,25 +175,25 @@ public class Falcon500SteerController {
 
     // The reference angle has the range [0, 2pi) but the Falcon's encoder can go
     // above that
-    double adjustedReferenceAngleRadians = referenceAngleRadians + currentAngleRadians - currentAngleRadiansMod;
-    if (referenceAngleRadians - currentAngleRadiansMod > Math.PI) {
+    double adjustedReferenceAngleRadians = desiredAngleRadians + currentAngleRadians - currentAngleRadiansMod;
+    if (desiredAngleRadians - currentAngleRadiansMod > Math.PI) {
       adjustedReferenceAngleRadians -= 2.0 * Math.PI;
-    } else if (referenceAngleRadians - currentAngleRadiansMod < -Math.PI) {
+    } else if (desiredAngleRadians - currentAngleRadiansMod < -Math.PI) {
       adjustedReferenceAngleRadians += 2.0 * Math.PI;
     }
     motor.set(TalonFXControlMode.MotionMagic, adjustedReferenceAngleRadians / motorEncoderPositionCoefficient);
 
-    this.referenceAngleRadians = referenceAngleRadians;
+    this.desiredAngleRadians = desiredAngleRadians;
   }
 
-  public double getStateAngle() {
+  public Rotation2d getStateRotation() {
     double motorAngleRadians = motor.getSelectedSensorPosition() * motorEncoderPositionCoefficient;
     motorAngleRadians %= 2.0 * Math.PI;
     if (motorAngleRadians < 0.0) {
       motorAngleRadians += 2.0 * Math.PI;
     }
 
-    return motorAngleRadians;
+    return new Rotation2d(motorAngleRadians);
   }
 
   /**

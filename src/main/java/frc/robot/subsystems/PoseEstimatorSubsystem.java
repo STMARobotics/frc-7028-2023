@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DrivetrainConstants;
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
 
@@ -77,9 +78,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         Nat.N7(),
         Nat.N5(),
         drivetrainSubsystem.getGyroscopeRotation(),
-        drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions(),
+        drivetrainSubsystem.getModulePositions(),
         new Pose2d(),
-        DrivetrainSubsystem.KINEMATICS,
+        DrivetrainConstants.KINEMATICS,
         stateStdDevs,
         localMeasurementStdDevs,
         visionMeasurementStdDevs);
@@ -108,11 +109,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       }
     }
     // Update pose estimator with drivetrain sensors
-    var drivetrainState = drivetrainSubsystem.getDrivetrainState();
     poseEstimator.update(
       drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainState.getSwerveModuleStates(),
-      drivetrainState.getSwerveModulePositions());
+      drivetrainSubsystem.getModuleStates(),
+      drivetrainSubsystem.getModulePositions());
 
     field2d.setRobotPose(getCurrentPose());
   }
@@ -136,10 +136,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    drivetrainSubsystem.resetDriveEncoders();
     poseEstimator.resetPosition(
       drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainSubsystem.getDrivetrainState().getSwerveModulePositions(),
+      drivetrainSubsystem.getModulePositions(),
       newPose);
   }
 

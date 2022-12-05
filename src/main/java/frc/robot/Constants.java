@@ -9,7 +9,11 @@ import static java.lang.Math.toRadians;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.swerve.ModuleConfiguration;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -64,6 +68,36 @@ public final class Constants {
     
     public static final int PIGEON_ID = 30;
 
+    /**
+     * The maximum velocity of the robot in meters per second.
+     * <p>
+     * This is a measure of how fast the robot should be able to drive in a straight line.
+     */
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
+        ModuleConfiguration.MK4_L1.getDriveReduction() *
+        ModuleConfiguration.MK4_L1.getWheelDiameter() * Math.PI;
+
+     /**
+     * The maximum angular velocity of the robot in radians per second.
+     * <p>
+     * This is a measure of how fast the robot can rotate in place.
+     */
+    // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
+    public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
+        (DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND /
+        Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0));
+
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+        // Front left
+        new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+        // Front right
+        new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
+        // Back left
+        new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+        // Back right
+        new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
+    );
+
     /** Voltage needed to overcome the motor’s static friction. kS */
     public static final double DRIVE_kS = 0.6716;
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
@@ -97,5 +131,21 @@ public final class Constants {
     public static final Transform3d CAMERA_TO_ROBOT =
         new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
     public static final Transform3d ROBOT_TO_CAMERA = CAMERA_TO_ROBOT.inverse();
+  }
+
+  public static class AutoConstants {
+    public static TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(Math.PI, 2 / Math.PI);
+    public static double THETA_kP = 5.0;
+    public static double THETA_kI = 0.0;
+    public static double THETA_kD = 0.0;
+    
+    public static double X_kP = 16.0;
+    public static double X_kI = 0.0;
+    public static double X_kD = 0.0;
+
+    public static double Y_kP = 16.0;
+    public static double Y_kI = 0.0;
+    public static double Y_kD = 0.0;
+
   }
 }

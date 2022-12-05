@@ -11,14 +11,13 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
-public class Falcon500DriveController {
+public class SwerveSpeedController {
 
   private static final int STATUS_FRAME_GENERAL_PERIOD_MS = 250;
   private static final int CAN_TIMEOUT_MS = 250;
@@ -34,7 +33,7 @@ public class Falcon500DriveController {
 
   private double referenceVelocity;
 
-  public Falcon500DriveController(int port, ModuleConfiguration moduleConfiguration, ShuffleboardContainer container) {
+  public SwerveSpeedController(int port, ModuleConfiguration moduleConfiguration, ShuffleboardContainer container) {
     sensorPositionCoefficient = Math.PI * moduleConfiguration.getWheelDiameter()
         * moduleConfiguration.getDriveReduction() / TICKS_PER_ROTATION;
     sensorVelocityCoefficient = sensorPositionCoefficient * 10.0;
@@ -53,8 +52,7 @@ public class Falcon500DriveController {
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");
     motor.enableVoltageCompensation(true);
     motor.setNeutralMode(NeutralMode.Coast);
-    motor.setInverted(
-        moduleConfiguration.isDriveInverted() ? TalonFXInvertType.Clockwise : TalonFXInvertType.CounterClockwise);
+    motor.setInverted(moduleConfiguration.isDriveInverted());
     motor.setSensorPhase(true);
     motor.setSafetyEnabled(true);
 
@@ -107,13 +105,6 @@ public class Falcon500DriveController {
    */
   public void setNeutralMode(NeutralMode neutralMode) {
     motor.setNeutralMode(neutralMode);
-  }
-
-  /**
-   * Reset the postion to zero
-   */
-  public void resetPosition() {
-    motor.setSelectedSensorPosition(0);
   }
 
 }

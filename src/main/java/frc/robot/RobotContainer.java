@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -53,9 +54,9 @@ public class RobotContainer {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             drivetrainSubsystem,
             () -> poseEstimator.getCurrentPose().getRotation(),
-            () -> -modifyAxis(controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
+            () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
     ));
 
     // Configure the button bindings
@@ -91,7 +92,7 @@ public class RobotContainer {
                 1,
                 1)
             // Add kinematics to ensure max speed is actually obeyed
-            .setKinematics(drivetrainSubsystem.getKinematics());
+            .setKinematics(DrivetrainConstants.KINEMATICS);
 
     // An example trajectory to follow.  All units in meters.
     Trajectory exampleTrajectory =
@@ -107,7 +108,7 @@ public class RobotContainer {
     return new PrintCommand("Starting auto")
         .andThen(new InstantCommand(
             () -> poseEstimator.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
-        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator))
+        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator::getCurrentPose))
         .andThen(new RunCommand(drivetrainSubsystem::stop, drivetrainSubsystem))
         .andThen(new PrintCommand("Done with auto"));
   }

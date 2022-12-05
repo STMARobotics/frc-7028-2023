@@ -45,13 +45,14 @@ public class RobotContainer {
   
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
+  
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand = new FieldHeadingDriveCommand(
-        () -> modifyAxis(controller.getLeftX()), 
-        () -> modifyAxis(-controller.getLeftY()),
-        () -> controller.getRightX(), 
-        () -> -controller.getRightY(),
-        drivetrainSubsystem,
-        poseEstimator::getCurrentPose);
+      drivetrainSubsystem,
+      () -> poseEstimator.getCurrentPose().getRotation(),
+      () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND, 
+      () -> -controller.getRightY(),
+      () -> -controller.getRightX());
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -59,11 +60,11 @@ public class RobotContainer {
   public RobotContainer() {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-            drivetrainSubsystem,
-            () -> poseEstimator.getCurrentPose().getRotation(),
-            () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
+        drivetrainSubsystem,
+        () -> poseEstimator.getCurrentPose().getRotation(),
+        () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
     ));
 
     // Configure the button bindings

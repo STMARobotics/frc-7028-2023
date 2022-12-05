@@ -1,11 +1,14 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.ArcadeDriveConstants.X_RATE_LIMIT;
+import static frc.robot.Constants.ArcadeDriveConstants.Y_RATE_LIMIT;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -16,48 +19,48 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class FieldHeadingDriveCommand extends CommandBase {
 
-  // Rotation of -90-degrees to get from positive X-axis (right) to the positive Y-axis (up)
-  private static final Rotation2d X_TO_Y = new Rotation2d(-Math.PI / 2);
-
+  private final DrivetrainSubsystem drivetrainSubsystem;
+  private final Supplier<Rotation2d> robotAngleSupplier;
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier omegaXSupplier;
   private final DoubleSupplier omegaYSupplier;
-  private final DrivetrainSubsystem drivetrainSubsystem;
-  private final Supplier<Pose2d> poseSupplier;
+
+  private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(X_RATE_LIMIT);
+  private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(Y_RATE_LIMIT);
 
   private final ProfiledPIDController thetaController;
 
   public FieldHeadingDriveCommand(
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier omegaXSupplier,
-      DoubleSupplier omegaYSupplier,
       DrivetrainSubsystem drivetrainSubsystem,
-      Supplier<Pose2d> poseSupplier) {
+      Supplier<Rotation2d> robotAngle,
+      DoubleSupplier translationXSupplier,
+      DoubleSupplier translationYSupplier,
+      DoubleSupplier omegaXSupplier,
+      DoubleSupplier omegaYSupplier) {
 
-    this.xSupplier = xSupplier;
-    this.ySupplier = ySupplier;
+    this.drivetrainSubsystem = drivetrainSubsystem;
+    this.robotAngleSupplier = robotAngle;
+    this.xSupplier = translationXSupplier;
+    this.ySupplier = translationYSupplier;
     this.omegaXSupplier = omegaXSupplier;
     this.omegaYSupplier = omegaYSupplier;
-    this.drivetrainSubsystem = drivetrainSubsystem;
-    this.poseSupplier = poseSupplier;
-
-    // FIXME tune theta constraints
-    TrapezoidProfile.Constraints kThetaControllerConstraints = 
-      new TrapezoidProfile.Constraints(Math.PI * 4, 2 * Math.PI);
-    
-    // FIXME set theta PID values
-    thetaController = new ProfiledPIDController(5, 0, 0, kThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    thetaController.setTolerance(Units.degreesToRadians(3));
 
     addRequirements(drivetrainSubsystem);
+
+    TrapezoidProfile.Constraints kThetaControllerConstraints = 
+        new TrapezoidProfile.Constraints(Math.PI * 2, Math.PI * 2);
+        
+    thetaController = new ProfiledPIDController(2, 0, 0.0, kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    thetaController.setTolerance(Units.degreesToRadians(1.5));
+
   }
 
   @Override
   public void initialize() {
-    thetaController.reset(poseSupplier.get().getRotation().getRadians());
+    thetaController.reset(robotAngleSupplier.get().getRadians());
+    // TODO reset slew limiters to current speed
   }
 
   @Override
@@ -70,21 +73,24 @@ public class FieldHeadingDriveCommand extends CommandBase {
     Rotation2d heading;
     if (centered) {
       // Hold heading when stick is centered
-      heading = poseSupplier.get().getRotation();
+      heading = robotAngleSupplier.get();
     } else {
       // Calculate heading from Y-Axis to X, Y coordinates
-      heading = new Rotation2d(omegaX, omegaY).rotateBy(X_TO_Y);
+      heading = new Rotation2d(omegaX, omegaY);
     }
-    SmartDashboard.putNumber("Heading", heading.getDegrees());
+    SmartDashboard.putNumber("heading", heading.getDegrees());
 
     // Calculate the angular rate for the robot to turn
-    var omega = thetaController.calculate(poseSupplier.get().getRotation().getRadians(), heading.getRadians());
+    var omega = thetaController.calculate(robotAngleSupplier.get().getRadians(), heading.getRadians());
     if (thetaController.atGoal() || centered) {
       omega = 0;
     }
 
     drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(
-        xSupplier.getAsDouble(), ySupplier.getAsDouble(), omega, drivetrainSubsystem.getGyroscopeRotation()));
+        translateXRateLimiter.calculate(xSupplier.getAsDouble()),
+        translateYRateLimiter.calculate(ySupplier.getAsDouble()),
+        omega,
+        robotAngleSupplier.get()));
   }
 
   @Override

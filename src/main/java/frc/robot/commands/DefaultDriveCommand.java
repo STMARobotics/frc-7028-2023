@@ -27,12 +27,13 @@ public class DefaultDriveCommand extends CommandBase {
   /**
    * Constructor
    * @param drivetrainSubsystem drivetrain
-   * @param robotAngleSuppliser supplier for the current angle of the robot
+   * @param robotAngleSupplier supplier for the current angle of the robot
    * @param translationXSupplier supplier for translation X component, in meters per second
    * @param translationYSupplier supplier for translation Y component, in meters per second
    * @param rotationSupplier supplier for rotation component, in radians per second
    */
-  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+  public DefaultDriveCommand(
+      DrivetrainSubsystem drivetrainSubsystem,
       Supplier<Rotation2d> robotAngleSupplier,
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
@@ -44,6 +45,11 @@ public class DefaultDriveCommand extends CommandBase {
     this.rotationSupplier = rotationSupplier;
 
     addRequirements(drivetrainSubsystem);
+  }
+
+  @Override
+  public void initialize() {
+    // TODO reset slew limiters to current speed
   }
 
   @Override

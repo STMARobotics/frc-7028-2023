@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -36,6 +37,7 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
  */
 public class RobotContainer {
 
+  private final CommandXboxController controller = new CommandXboxController(0);
   private final PhotonCamera photonCamera = new PhotonCamera("gloworm");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
@@ -43,8 +45,13 @@ public class RobotContainer {
   
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
-
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final FieldHeadingDriveCommand fieldHeadingDriveCommand = new FieldHeadingDriveCommand(
+        () -> modifyAxis(controller.getLeftX()), 
+        () -> modifyAxis(-controller.getLeftY()),
+        () -> controller.getRightX(), 
+        () -> -controller.getRightY(),
+        drivetrainSubsystem,
+        poseEstimator::getCurrentPose);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -78,6 +85,7 @@ public class RobotContainer {
     // Back button resets the robot pose
     controller.back().onTrue(Commands.runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
     controller.b().whileTrue(chaseTagCommand);
+    controller.start().toggleOnTrue(fieldHeadingDriveCommand);
   }
 
   /**

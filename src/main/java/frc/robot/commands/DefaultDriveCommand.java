@@ -1,8 +1,8 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.ArcadeDriveConstants.ROTATION_RATE_LIMIT;
-import static frc.robot.Constants.ArcadeDriveConstants.X_RATE_LIMIT;
-import static frc.robot.Constants.ArcadeDriveConstants.Y_RATE_LIMIT;
+import static frc.robot.Constants.TeleopDriveConstants.ROTATION_RATE_LIMIT;
+import static frc.robot.Constants.TeleopDriveConstants.X_RATE_LIMIT;
+import static frc.robot.Constants.TeleopDriveConstants.Y_RATE_LIMIT;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -49,7 +49,19 @@ public class DefaultDriveCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    // TODO reset slew limiters to current speed
+    var robotAngle = robotAngleSupplier.get();
+
+    // Calculate field relative speeds
+    var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
+    var robotSpeeds = new ChassisSpeeds(
+        chassisSpeeds.vxMetersPerSecond * robotAngle.getCos() - chassisSpeeds.vyMetersPerSecond * robotAngle.getSin(),
+        chassisSpeeds.vyMetersPerSecond * robotAngle.getCos() + chassisSpeeds.vxMetersPerSecond * robotAngle.getSin(),
+        chassisSpeeds.omegaRadiansPerSecond);
+    
+    // Reset the slew rate limiters, in case the robot is already moving
+    translateXRateLimiter.reset(robotSpeeds.vxMetersPerSecond);
+    translateYRateLimiter.reset(robotSpeeds.vyMetersPerSecond);
+    rotationRateLimiter.reset(robotSpeeds.omegaRadiansPerSecond);
   }
 
   @Override

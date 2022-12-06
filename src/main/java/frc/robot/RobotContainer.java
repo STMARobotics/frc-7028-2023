@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
+
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
@@ -124,7 +126,7 @@ public class RobotContainer {
 
   private static double modifyAxis(double value) {
     // Deadband
-    value = MathUtil.applyDeadband(value, 0.1);
+    value = MathUtil.applyDeadband(value, DEADBAND);
 
     // Square the axis
     value = Math.copySign(value * value, value);

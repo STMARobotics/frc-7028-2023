@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
+import static java.lang.Math.PI;
 import static java.lang.Math.toRadians;
 
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -75,7 +77,7 @@ public final class Constants {
      */
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
         ModuleConfiguration.MK4_L1.getDriveReduction() *
-        ModuleConfiguration.MK4_L1.getWheelDiameter() * Math.PI;
+        ModuleConfiguration.MK4_L1.getWheelDiameter() * PI;
 
      /**
      * The maximum angular velocity of the robot in radians per second.
@@ -115,11 +117,22 @@ public final class Constants {
 
   }
 
-  public static final class ArcadeDriveConstants {
+  public static final class TeleopDriveConstants {
+
+    public static final double DEADBAND = 0.1;
 
     public static final double X_RATE_LIMIT = 6.0;
     public static final double Y_RATE_LIMIT = 6.0;
-    public static final double ROTATION_RATE_LIMIT = 5.0 * Math.PI;
+    public static final double ROTATION_RATE_LIMIT = 5.0 * PI;
+
+    public static final double HEADING_MAX_VELOCITY = PI * 2;
+    public static final double HEADING_MAX_ACCELERATION = PI * 2;
+    
+    public static final double HEADING_kP = 2.0;
+    public static final double HEADING_kI = 0.0;
+    public static final double HEADING_kD = 0.0;
+
+    public static final double HEADING_TOLERANCE = degreesToRadians(1.5);
 
   }
 
@@ -134,7 +147,7 @@ public final class Constants {
   }
 
   public static class AutoConstants {
-    public static TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(Math.PI, 2 / Math.PI);
+    public static TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(PI, 2 / PI);
     public static double THETA_kP = 5.0;
     public static double THETA_kI = 0.0;
     public static double THETA_kD = 0.0;

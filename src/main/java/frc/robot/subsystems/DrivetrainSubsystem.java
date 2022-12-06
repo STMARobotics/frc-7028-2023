@@ -168,12 +168,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // return Rotation2d.fromDegrees(360.0 - navx.getYaw());
   }
 
+  /**
+   * Sets the desired chassis speeds
+   * @param chassisSpeeds desired chassis speeds
+   */
   public void drive(ChassisSpeeds chassisSpeeds) {
     desiredChassisSpeeds = chassisSpeeds;
   }
 
+  /**
+   * Sets the desired speeds to zero
+   */
   public void stop() {
-    desiredChassisSpeeds = new ChassisSpeeds();
+    drive(new ChassisSpeeds());
+  }
+
+  /**
+   * Gets the actual chassis speeds
+   * @return actual chassis speeds
+   */
+  public ChassisSpeeds getChassisSpeeds() {
+    return DrivetrainConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
   }
 
   @Override
@@ -231,14 +246,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     SwerveControllerCommand swerveControllerCommand =
         new SwerveControllerCommand(
-          trajectory,
-          poseSupplier,
-          DrivetrainConstants.KINEMATICS,
-          new PIDController(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
-          new PIDController(AutoConstants.Y_kP, AutoConstants.Y_kI, AutoConstants.Y_kD),
-          thetaController,
-          this::setModuleStates,
-          this);
+            trajectory,
+            poseSupplier,
+            DrivetrainConstants.KINEMATICS,
+            new PIDController(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
+            new PIDController(AutoConstants.Y_kP, AutoConstants.Y_kI, AutoConstants.Y_kD),
+            thetaController,
+            this::setModuleStates,
+            this);
             
       return swerveControllerCommand;
   }

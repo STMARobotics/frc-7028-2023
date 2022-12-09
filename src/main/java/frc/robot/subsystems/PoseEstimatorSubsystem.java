@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.photonvision.PhotonCamera;
 
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -17,8 +16,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.numbers.N5;
-import edu.wpi.first.math.numbers.N7;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -45,15 +42,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   /**
    * Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
-   * matrix is in the form [x, y, theta, s_0, ... s_n]ᵀ, with units in meters and radians, then meters.
+   * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then meters.
    */
-  private static final Vector<N7> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5), 0.05, 0.05, 0.05, 0.05);
-  
-  /**
-   * Standard deviations of the encoder and gyro measurements. Increase these numbers to trust sensor readings from
-   * encoders and gyros less. This matrix is in the form [theta, s_0, ... s_n], with units in radians followed by meters.
-   */
-  private static final Vector<N5> localMeasurementStdDevs = VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01);
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
   
   /**
    * Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
@@ -61,7 +52,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    */
   private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
 
-  private final SwerveDrivePoseEstimator<N7, N7, N5> poseEstimator;
+  private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
 
@@ -73,18 +64,13 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
     ShuffleboardTab tab = Shuffleboard.getTab("Vision");
 
-    poseEstimator =  new SwerveDrivePoseEstimator<N7, N7, N5>(
-        Nat.N7(),
-        Nat.N7(),
-        Nat.N5(),
+    poseEstimator =  new SwerveDrivePoseEstimator(
+        DrivetrainConstants.KINEMATICS,
         drivetrainSubsystem.getGyroscopeRotation(),
         drivetrainSubsystem.getModulePositions(),
         new Pose2d(),
-        DrivetrainConstants.KINEMATICS,
         stateStdDevs,
-        localMeasurementStdDevs,
         visionMeasurementStdDevs);
-   
     
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
@@ -111,7 +97,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
       drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainSubsystem.getModuleStates(),
       drivetrainSubsystem.getModulePositions());
 
     field2d.setRobotPose(getCurrentPose());

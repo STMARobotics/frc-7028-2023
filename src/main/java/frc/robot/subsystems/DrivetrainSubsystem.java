@@ -195,11 +195,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void periodic() {
     // Set the swerve module states
     if (desiredChassisSpeeds != null) {
-      var currentStates = getModuleStates();
       var desiredStates = DrivetrainConstants.KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
-
       if(desiredChassisSpeeds.vxMetersPerSecond == 0.0 && desiredChassisSpeeds.vyMetersPerSecond == 0.0
           && desiredChassisSpeeds.omegaRadiansPerSecond == 0.0) {
+        var currentStates = getModuleStates();
         // Keep the wheels at their current angle when stopped, don't snap back to straight
         IntStream.range(0, currentStates.length).forEach(i -> desiredStates[i].angle = currentStates[i].angle);
       }
@@ -207,6 +206,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
       setModuleStates(desiredStates);
     }
+    // Always reset desiredChassisSpeeds to null to prevent latching to the last state (aka motor safety)!!
     desiredChassisSpeeds = null;
   }
 
@@ -214,7 +214,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Gets the current drivetrain state (velocity, and angle), as reported by the modules themselves.
    * @return current drivetrain state. Array orders are frontLeft, frontRight, backLeft, backRight
    */
-  public SwerveModuleState[] getModuleStates() {
+  private SwerveModuleState[] getModuleStates() {
     return Arrays.stream(swerveModules).map(module -> module.getState()).toArray(SwerveModuleState[]::new);
   }
 

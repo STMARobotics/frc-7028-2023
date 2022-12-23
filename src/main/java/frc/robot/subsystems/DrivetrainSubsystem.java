@@ -235,6 +235,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   /**
+   * Reseeds the Talon FX steer motors from their CANCoder absolute position. Workaround for "dead wheel"
+   */
+  public void reseedSteerMotorOffsets() {
+    Arrays.stream(swerveModules).forEach(SwerveModule::reseedSteerMotorOffset);
+  }
+
+  /**
    * Creates a command to follow a Trajectory on the drivetrain.
    * @param trajectory trajectory to follow
    * @return command that will run the trajectory

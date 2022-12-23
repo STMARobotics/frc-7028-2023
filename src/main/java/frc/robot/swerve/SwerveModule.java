@@ -50,4 +50,11 @@ public class SwerveModule {
     driveController.setNeutralMode(neutralMode);
   }
 
+  /**
+   * Reseeds to Talon FX motor offset from the CANCoder. Workaround for "dead wheel"
+   */
+  public void reseedSteerMotorOffset() {
+    steerController.configMotorOffset(false);
+  }
+
 }

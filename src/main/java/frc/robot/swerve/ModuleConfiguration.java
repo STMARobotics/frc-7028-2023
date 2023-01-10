@@ -10,32 +10,53 @@ package frc.robot.swerve;
 public enum ModuleConfiguration {
 
   MK4_L1(
-    0.10033,
-    (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
-    true,
-    (15.0 / 32.0) * (10.0 / 60.0),
-    true),
+      0.10033,
+      (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
+      true,
+      (15.0 / 32.0) * (10.0 / 60.0),
+      true),
 
-MK4_L2(
-    0.10033,
-    (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
-    true,
-    (15.0 / 32.0) * (10.0 / 60.0),
-    true),
+  MK4_L2(
+      0.10033,
+      (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
+      true,
+      (15.0 / 32.0) * (10.0 / 60.0),
+      true),
 
-MK4_L3(
-    0.10033,
-    (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0),
-    true,
-    (15.0 / 32.0) * (10.0 / 60.0),
-    true),
-    
-MK4_L4(
-    0.10033,
-    (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 45.0),
-    true,
-    (15.0 / 32.0) * (10.0 / 60.0),
-    true);
+  MK4_L3(
+      0.10033,
+      (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0),
+      true,
+      (15.0 / 32.0) * (10.0 / 60.0),
+      true),
+
+  MK4_L4(
+      0.10033,
+      (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 45.0),
+      true,
+      (15.0 / 32.0) * (10.0 / 60.0),
+      true),
+
+  MK4I_L1(
+      0.10033,
+      (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0),
+      true,
+      (14.0 / 50.0) * (10.0 / 60.0),
+      false),
+
+  MK4I_L2(
+      0.10033,
+      (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
+      true,
+      (14.0 / 50.0) * (10.0 / 60.0),
+      false),
+
+  MK4I_L3(
+      0.10033,
+      (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0),
+      true,
+      (14.0 / 50.0) * (10.0 / 60.0),
+      false);
 
   private final double wheelDiameter;
   private final double driveReduction;
@@ -47,19 +68,24 @@ MK4_L4(
   /**
    * Creates a new module configuration.
    *
-   * @param wheelDiameter  The diameter of the module's wheel in meters.
-   * @param driveReduction The overall drive reduction of the module. Multiplying
-   *                       motor rotations by this value
-   *                       should result in wheel rotations.
-   * @param driveInverted  Whether the drive motor should be inverted. If there is
-   *                       an odd number of gea reductions
-   *                       this is typically true.
-   * @param steerReduction The overall steer reduction of the module. Multiplying
-   *                       motor rotations by this value
-   *                       should result in rotations of the steering pulley.
-   * @param steerInverted  Whether the steer motor should be inverted. If there is
-   *                       an odd number of gear reductions
-   *                       this is typically true.
+   * @param wheelDiameter
+   *          The diameter of the module's wheel in meters.
+   * @param driveReduction
+   *          The overall drive reduction of the module. Multiplying
+   *          motor rotations by this value
+   *          should result in wheel rotations.
+   * @param driveInverted
+   *          Whether the drive motor should be inverted. If there is
+   *          an odd number of gea reductions
+   *          this is typically true.
+   * @param steerReduction
+   *          The overall steer reduction of the module. Multiplying
+   *          motor rotations by this value
+   *          should result in rotations of the steering pulley.
+   * @param steerInverted
+   *          Whether the steer motor should be inverted. If there is
+   *          an odd number of gear reductions
+   *          this is typically true.
    */
   private ModuleConfiguration(double wheelDiameter, double driveReduction, boolean driveInverted,
       double steerReduction, boolean steerInverted) {
@@ -70,9 +96,7 @@ MK4_L4(
     this.steerInverted = steerInverted;
   }
 
-  /**
-   * Gets the diameter of the wheel in meters.
-   */
+  /** Gets the diameter of the wheel in meters. */
   public double getWheelDiameter() {
     return wheelDiameter;
   }
@@ -87,9 +111,7 @@ MK4_L4(
     return driveReduction;
   }
 
-  /**
-   * Gets if the drive motor should be inverted.
-   */
+  /** Gets if the drive motor should be inverted. */
   public boolean isDriveInverted() {
     return driveInverted;
   }
@@ -104,9 +126,7 @@ MK4_L4(
     return steerReduction;
   }
 
-  /**
-   * Gets if the steering motor should be inverted.
-   */
+  /** Gets if the steering motor should be inverted. */
   public boolean isSteerInverted() {
     return steerInverted;
   }

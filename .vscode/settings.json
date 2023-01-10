@@ -34,5 +34,6 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "java.format.settings.url": ".vscode/eclipse-formatter.xml"
 }

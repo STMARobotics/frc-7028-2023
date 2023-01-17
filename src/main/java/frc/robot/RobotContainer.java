@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.print;
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
 import java.util.List;
@@ -19,10 +21,6 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
@@ -86,9 +84,9 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button resets the robot pose
-    controller.back().onTrue(Commands.runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
+    controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
     // Start button reseeds the steer motors to fix dead wheel
-    controller.start().onTrue(Commands.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets, drivetrainSubsystem));
+    controller.start().onTrue(runOnce(drivetrainSubsystem::reseedSteerMotorOffsets, drivetrainSubsystem));
     controller.b().whileTrue(chaseTagCommand);
     controller.start().toggleOnTrue(fieldHeadingDriveCommand);
   }
@@ -118,12 +116,12 @@ public class RobotContainer {
             new Pose2d(3, 0, Rotation2d.fromDegrees(90)),
             config);
     
-    return new PrintCommand("Starting auto")
-        .andThen(new InstantCommand(
+    return print("Starting auto")
+        .andThen(runOnce(
             () -> poseEstimator.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
         .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator::getCurrentPose))
-        .andThen(new RunCommand(drivetrainSubsystem::stop, drivetrainSubsystem))
-        .andThen(new PrintCommand("Done with auto"));
+        .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
+        .andThen(print("Done with auto"));
   }
 
   private static double modifyAxis(double value) {

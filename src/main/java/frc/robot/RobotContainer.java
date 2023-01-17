@@ -84,9 +84,9 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button resets the robot pose
-    controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition, drivetrainSubsystem));
+    controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition));
     // Start button reseeds the steer motors to fix dead wheel
-    controller.start().onTrue(runOnce(drivetrainSubsystem::reseedSteerMotorOffsets, drivetrainSubsystem));
+    controller.start().onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
     controller.b().whileTrue(chaseTagCommand);
     controller.start().toggleOnTrue(fieldHeadingDriveCommand);
   }

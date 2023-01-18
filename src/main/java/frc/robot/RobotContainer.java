@@ -38,7 +38,7 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
 public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
-  private final PhotonCamera photonCamera = new PhotonCamera("gloworm");
+  private final PhotonCamera photonCamera = new PhotonCamera("LimeLight");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);

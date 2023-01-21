@@ -1,5 +1,6 @@
 package frc.robot.swerve;
 
+import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
 import static frc.robot.Constants.DrivetrainConstants.STEER_kD;
 import static frc.robot.Constants.DrivetrainConstants.STEER_kI;
 import static frc.robot.Constants.DrivetrainConstants.STEER_kP;
@@ -58,7 +59,7 @@ public class SwerveSteerController {
     config.sensorDirection = false;
     config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
 
-    encoder = new CANCoder(canCoderPort);
+    encoder = new CANCoder(canCoderPort, CANIVORE_BUS_NAME);
     CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");
     CtreUtils.checkCtreError(encoder.setPositionToAbsolute(250), "Failed to set CANCoder to absolute");
 
@@ -83,7 +84,7 @@ public class SwerveSteerController {
     motorConfiguration.supplyCurrLimit.currentLimit = 20;
     motorConfiguration.supplyCurrLimit.enable = true;
 
-    motor = new WPI_TalonFX(motorPort);
+    motor = new WPI_TalonFX(motorPort, CANIVORE_BUS_NAME);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration, CAN_TIMEOUT_MS),
         "Failed to configure Falcon 500 settings");
 

@@ -5,10 +5,12 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.print;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.photonvision.PhotonCamera;
 
@@ -21,6 +23,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
@@ -46,6 +49,14 @@ public class RobotContainer {
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
   
+  private final DefaultDriveCommand defaultDriveCommand = new DefaultDriveCommand(
+      drivetrainSubsystem,
+      () -> poseEstimator.getCurrentPose().getRotation(),
+      () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
+  );
+
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand = new FieldHeadingDriveCommand(
       drivetrainSubsystem,
       () -> poseEstimator.getCurrentPose().getRotation(),
@@ -59,13 +70,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Set up the default command for the drivetrain.
-    drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-        drivetrainSubsystem,
-        () -> poseEstimator.getCurrentPose().getRotation(),
-        () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
-    ));
+    drivetrainSubsystem.setDefaultCommand(defaultDriveCommand);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -87,8 +92,24 @@ public class RobotContainer {
     controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition));
     // Start button reseeds the steer motors to fix dead wheel
     controller.start().onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
+    // B to chase a tag
     controller.b().whileTrue(chaseTagCommand);
-    controller.start().toggleOnTrue(fieldHeadingDriveCommand);
+
+    // POV up for standard drive
+    controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(defaultDriveCommand))
+        .andThen(new ScheduleCommand(defaultDriveCommand)));
+    // POV down for field heading
+    controller.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
+        .andThen(new ScheduleCommand(fieldHeadingDriveCommand)));
+
+    // X to put the wheels in an X until the driver tries to drive
+    BooleanSupplier driverDriving = 
+        () -> modifyAxis(controller.getLeftY()) != 0.0 
+            || modifyAxis(controller.getLeftX()) != 0.0
+            || modifyAxis(controller.getRightY()) != 0.0
+            || modifyAxis(controller.getRightX()) != 0.0;
+    controller.x().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
+            
   }
 
   /**

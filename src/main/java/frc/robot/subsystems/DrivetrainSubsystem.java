@@ -13,6 +13,7 @@ import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_DRIVE_MO
 import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_ENCODER;
 import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_MOTOR;
 import static frc.robot.Constants.DrivetrainConstants.BACK_RIGHT_MODULE_STEER_OFFSET;
+import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
 import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_DRIVE_MOTOR;
 import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_STEER_ENCODER;
 import static frc.robot.Constants.DrivetrainConstants.FRONT_LEFT_MODULE_STEER_MOTOR;
@@ -58,7 +59,7 @@ import frc.robot.swerve.SwerveSteerController;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
-  private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(PIGEON_ID);
+  private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(PIGEON_ID, CANIVORE_BUS_NAME);
   // private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
   private final SwerveModule[] swerveModules;
 
@@ -178,6 +179,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   /**
+   * Set the wheels to an X pattern to plant the robot.
+   */
+  public void setWheelsToX() {
+    desiredChassisSpeeds = null;
+    setModuleStates(new SwerveModuleState[] {
+      // front left
+      new SwerveModuleState(0.0, Rotation2d.fromDegrees(45.0)),
+      // front right
+      new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45.0)),
+      // back left
+      new SwerveModuleState(0.0, Rotation2d.fromDegrees(135.0)),
+      // back right
+      new SwerveModuleState(0.0, Rotation2d.fromDegrees(-135.0))
+    });
+  }
+
+  /**
    * Sets the desired speeds to zero
    */
   public void stop() {
@@ -197,13 +215,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // Set the swerve module states
     if (desiredChassisSpeeds != null) {
       var desiredStates = DrivetrainConstants.KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds);
-      if(desiredChassisSpeeds.vxMetersPerSecond == 0.0 && desiredChassisSpeeds.vyMetersPerSecond == 0.0
-          && desiredChassisSpeeds.omegaRadiansPerSecond == 0.0) {
-        var currentStates = getModuleStates();
-        // Keep the wheels at their current angle when stopped, don't snap back to straight
-        IntStream.range(0, currentStates.length).forEach(i -> desiredStates[i].angle = currentStates[i].angle);
-      }
-
       SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
       setModuleStates(desiredStates);
     }

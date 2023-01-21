@@ -1,5 +1,6 @@
 package frc.robot.swerve;
 
+import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kA;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kD;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kI;
@@ -48,7 +49,7 @@ public class SwerveSpeedController {
     motorConfiguration.slot0.kI = DRIVE_kI;
     motorConfiguration.slot0.kD = DRIVE_kD;
 
-    motor = new WPI_TalonFX(port);
+    motor = new WPI_TalonFX(port, CANIVORE_BUS_NAME);
     CtreUtils.checkCtreError(motor.configAllSettings(motorConfiguration), "Failed to configure Falcon 500");
     motor.enableVoltageCompensation(true);
     motor.setNeutralMode(NeutralMode.Coast);

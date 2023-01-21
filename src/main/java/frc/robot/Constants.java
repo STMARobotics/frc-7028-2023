@@ -48,6 +48,8 @@ public final class Constants {
      */
     public static final double DRIVETRAIN_WHEELBASE_METERS = inchesToMeters(24.5);
 
+    public static final String CANIVORE_BUS_NAME = "swerve";
+
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 0;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 10;
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 20;

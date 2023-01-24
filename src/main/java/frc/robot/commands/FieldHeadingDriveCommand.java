@@ -18,6 +18,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -89,12 +90,11 @@ public class FieldHeadingDriveCommand extends CommandBase {
     // Reset the theta controller to the current heading
     thetaController.reset(robotAngle.getRadians());
 
-    // Calculate field relative speeds
+    // Calculate field relative speeds by rotating the chasis relative speeds by the robot's angle on the field
     var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
-    var robotSpeeds = new ChassisSpeeds(
-        chassisSpeeds.vxMetersPerSecond * robotAngle.getCos() - chassisSpeeds.vyMetersPerSecond * robotAngle.getSin(),
-        chassisSpeeds.vyMetersPerSecond * robotAngle.getCos() + chassisSpeeds.vxMetersPerSecond * robotAngle.getSin(),
-        chassisSpeeds.omegaRadiansPerSecond);
+    var fieldSpeeds = 
+        new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).rotateBy(robotAngle);
+    var robotSpeeds = new ChassisSpeeds(fieldSpeeds.getX(), fieldSpeeds.getY(), chassisSpeeds.omegaRadiansPerSecond);
 
     // Reset the slew rate limiters, in case the robot is already moving
     translateXRateLimiter.reset(robotSpeeds.vxMetersPerSecond);

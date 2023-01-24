@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
-import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
+import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -49,7 +49,7 @@ public class RobotContainer {
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
   
-  private final DefaultDriveCommand defaultDriveCommand = new DefaultDriveCommand(
+  private final FieldOrientedDriveCommand fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
       drivetrainSubsystem,
       () -> poseEstimator.getCurrentPose().getRotation(),
       () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
@@ -70,7 +70,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Set up the default command for the drivetrain.
-    drivetrainSubsystem.setDefaultCommand(defaultDriveCommand);
+    drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -95,10 +95,10 @@ public class RobotContainer {
     // B to chase a tag
     controller.b().whileTrue(chaseTagCommand);
 
-    // POV up for standard drive
-    controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(defaultDriveCommand))
-        .andThen(new ScheduleCommand(defaultDriveCommand)));
-    // POV down for field heading
+    // POV up for field oriented drive
+    controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
+        .andThen(new ScheduleCommand(fieldOrientedDriveCommand)));
+    // POV down for field heading drive
     controller.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
         .andThen(new ScheduleCommand(fieldHeadingDriveCommand)));
 

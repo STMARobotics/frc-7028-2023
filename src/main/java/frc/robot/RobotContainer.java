@@ -21,6 +21,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -65,6 +66,8 @@ public class RobotContainer {
       () -> -controller.getRightY(),
       () -> -controller.getRightX());
 
+  private final Timer reseedTimer = new Timer();
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -75,6 +78,7 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     configureDashboard();
+    reseedTimer.start();
   }
 
   private void configureDashboard() {
@@ -143,6 +147,13 @@ public class RobotContainer {
         .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator::getCurrentPose))
         .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
         .andThen(print("Done with auto"));
+  }
+
+  public void disabledPeriodic() {
+    // Reseed the motor offset continuously when the robot is disabled to help solve dead wheel issue
+    if (reseedTimer.advanceIfElapsed(1.0)) {
+      drivetrainSubsystem.reseedSteerMotorOffsets();
+    }
   }
 
   private static double modifyAxis(double value) {

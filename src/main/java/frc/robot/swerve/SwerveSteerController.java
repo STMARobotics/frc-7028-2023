@@ -20,13 +20,13 @@ import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 
 public class SwerveSteerController {
 
-  private static final int ENCODER_RESET_ITERATIONS = 500;
-  private static final double ENCODER_RESET_MAX_ANGULAR_VELOCITY = Math.toRadians(0.5);
+  private static final double ENCODER_RESEED_SECONDS = 10.0;
+  private static final double ENCODER_RESEED_MAX_ANGULAR_VELOCITY = Math.toRadians(0.5);
   private static final int STATUS_FRAME_GENERAL_PERIOD_MS = 250;
   private static final double TICKS_PER_ROTATION = 2048.0;
   private static final int CAN_TIMEOUT_MS = 250;
@@ -41,10 +41,7 @@ public class SwerveSteerController {
   private final double motionMagicAccelerationConstant = .0625;
 
   private double desiredAngleRadians = 0.0;
-
-  private double resetIteration = 0;
-
-  private boolean motorOffsetConfigured = false;
+  private Timer reseedTimer = new Timer();
 
   public SwerveSteerController(
       int motorPort,
@@ -105,6 +102,7 @@ public class SwerveSteerController {
         "Failed to configure Falcon status frame period");
     
     addDashboardEntries(container);
+    reseedTimer.start();
 
   }
 
@@ -126,18 +124,8 @@ public class SwerveSteerController {
     double angle = getAbsoluteAngle();
     var angleErrorCode = encoder.getLastError();
 
-    if ((angleErrorCode != ErrorCode.OK) && logErrors) {
-      // If this happens, we will have a misaligned wheel
-      DriverStation.reportError(
-          "Failed to configure swerve module position. CANCoder ID: " + encoder.getDeviceID(), false);
-    } else {
-      var positionErrorCode = motor.setSelectedSensorPosition(angle / motorEncoderPositionCoefficient, 0, CAN_TIMEOUT_MS);
-      if (logErrors) {
-        CtreUtils.checkCtreError(
-            positionErrorCode, "Failed to set Falcon 500 encoder position. ID: " + motor.getDeviceID());
-      }
-      motorOffsetConfigured = 
-          motorOffsetConfigured || ((angleErrorCode == ErrorCode.OK) && (positionErrorCode == ErrorCode.OK));
+    if (angleErrorCode == ErrorCode.OK) {
+      motor.setSelectedSensorPosition(angle / motorEncoderPositionCoefficient, 0, CAN_TIMEOUT_MS);
     }
     return angle;
   }
@@ -156,18 +144,16 @@ public class SwerveSteerController {
 
   public void setDesiredRotation(Rotation2d desiredRotation) {
     var desiredAngleRadians = desiredRotation.getRadians();
-    double currentAngleRadians = motor.getSelectedSensorPosition() * motorEncoderPositionCoefficient;
+    double currentAngleRadians;
 
     // Reset the Falcon's encoder periodically when the module is not rotating.
     // Sometimes (~5% of the time) when we initialize, the absolute encoder isn't fully set up, and we don't
     // end up getting a good reading. If we reset periodically this won't matter anymore.
-    if (motor.getSelectedSensorVelocity() * motorEncoderVelocityCoefficient < ENCODER_RESET_MAX_ANGULAR_VELOCITY) {
-      if (++resetIteration >= ENCODER_RESET_ITERATIONS || !motorOffsetConfigured) {
-        resetIteration = 0;
-        currentAngleRadians = configMotorOffset(false);
-      }
+    if (reseedTimer.advanceIfElapsed(ENCODER_RESEED_SECONDS) && 
+        motor.getSelectedSensorVelocity() * motorEncoderVelocityCoefficient < ENCODER_RESEED_MAX_ANGULAR_VELOCITY) {
+      currentAngleRadians = configMotorOffset(false);
     } else {
-      resetIteration = 0;
+      currentAngleRadians = motor.getSelectedSensorPosition() * motorEncoderPositionCoefficient;
     }
 
     double currentAngleRadiansMod = currentAngleRadians % (2.0 * Math.PI);

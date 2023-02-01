@@ -9,23 +9,29 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
 import org.photonvision.PhotonCamera;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
@@ -122,31 +128,50 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Create config for trajectory
-    TrajectoryConfig config =
-        new TrajectoryConfig(
-                1,
-                1)
-            // Add kinematics to ensure max speed is actually obeyed
-            .setKinematics(DrivetrainConstants.KINEMATICS);
+    var trajectory = PathPlanner.generatePath(new PathConstraints(1, 1), 
+      new PathPoint(new Translation2d(0, 0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)),
+      new PathPoint(new Translation2d(3, 0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90))
+    );
 
-    // An example trajectory to follow.  All units in meters.
-    Trajectory exampleTrajectory =
-        TrajectoryGenerator.generateTrajectory(
-            // Start at the origin facing the +X direction
-            new Pose2d(0, 0, new Rotation2d(0)),
-            // Pass through these no interior waypoints
-            List.of(),
-            // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(3, 0, Rotation2d.fromDegrees(90)),
-            config);
-    
     return print("Starting auto")
         .andThen(runOnce(
             () -> poseEstimator.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
-        .andThen(drivetrainSubsystem.createCommandForTrajectory(exampleTrajectory, poseEstimator::getCurrentPose))
+        .andThen(drivetrainSubsystem
+            .createCommandForTrajectory(trajectory, poseEstimator::getCurrentPose, true))
         .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
         .andThen(print("Done with auto"));
+  }
+
+  public Command getPathPlannerCommand() {
+    var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
+
+    return print("Starting TestPath")
+        .andThen(runOnce(() -> poseEstimator.setCurrentPose(testPath.getInitialHolonomicPose())))
+        .andThen(drivetrainSubsystem
+            .createCommandForTrajectory(testPath, poseEstimator::getCurrentPose, true))
+        .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
+        .andThen(print("Done with TestPath"));
+  }
+
+  public Command getPathPlannerAutoCommand() {
+    var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
+
+    var eventMap = new HashMap<String, Command>();
+    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+
+    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+        poseEstimator::getCurrentPose,
+        poseEstimator::setCurrentPose,
+        DrivetrainConstants.KINEMATICS,
+        new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
+        new PIDConstants(AutoConstants.ROTATION_kP, AutoConstants.ROTATION_kI, AutoConstants.ROTATION_kD),
+        drivetrainSubsystem::setModuleStates,
+        eventMap,
+        true,
+        drivetrainSubsystem
+    );
+
+    return autoBuilder.fullAuto(testPath);
   }
 
   public void disabledPeriodic() {

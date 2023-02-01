@@ -162,5 +162,9 @@ public final class Constants {
     public static double Y_kI = 0.0;
     public static double Y_kD = 0.0;
 
+    public static double ROTATION_kP = 5.0;
+    public static double ROTATION_kI = 0.0;
+    public static double ROTATION_kD = 0.0;
+
   }
 }

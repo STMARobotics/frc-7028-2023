@@ -30,6 +30,8 @@ import java.util.stream.IntStream;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -242,7 +244,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Sets the states of the modules.
    * @param states array of states. Must be ordered frontLeft, frontRight, backLeft, backRight
    */
-  private void setModuleStates(SwerveModuleState[] states) {
+  public void setModuleStates(SwerveModuleState[] states) {
     IntStream.range(0, swerveModules.length).forEach(i -> swerveModules[i].setDesiredState(states[i]));
   }
 
@@ -276,4 +278,26 @@ public class DrivetrainSubsystem extends SubsystemBase {
             
       return swerveControllerCommand;
   }
+
+  public Command createCommandForTrajectory(
+        PathPlannerTrajectory trajectory, Supplier<Pose2d> poseSupplier, boolean useAllianceColor) {
+          
+    var thetaController = new PIDController(AutoConstants.THETA_kP, AutoConstants.THETA_kI, AutoConstants.THETA_kD);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    
+    var ppSwerveCommand = new PPSwerveControllerCommand(
+      trajectory, 
+      poseSupplier,
+      DrivetrainConstants.KINEMATICS,
+      new PIDController(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
+      new PIDController(AutoConstants.Y_kP, AutoConstants.Y_kI, AutoConstants.Y_kD),
+      thetaController,
+      this::setModuleStates,
+      useAllianceColor,
+      this
+    );
+
+    return ppSwerveCommand;
+  }
+
 }

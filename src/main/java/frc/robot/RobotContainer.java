@@ -28,16 +28,22 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.ChaseTagCommand;
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,10 +54,15 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
 public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
+
   private final PhotonCamera photonCamera = new PhotonCamera("LimeLight");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private final WristSubsystem wristSubsystem = new WristSubsystem();
+  private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   
   private final ChaseTagCommand chaseTagCommand = 
       new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
@@ -80,6 +91,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
+    elevatorSubsystem.setDefaultCommand(new ElevatorCommand(
+      elevatorSubsystem, operatorController::getRightTriggerAxis, operatorController::getLeftTriggerAxis));
+    wristSubsystem.setDefaultCommand(new WristCommand(wristSubsystem, () -> -operatorController.getRightY()));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -119,7 +133,13 @@ public class RobotContainer {
             || modifyAxis(controller.getRightY()) != 0.0
             || modifyAxis(controller.getRightX()) != 0.0;
     controller.x().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
-            
+
+    // Operator
+    operatorController.rightBumper().whileTrue(Commands.startEnd(
+      ()-> shooterSubsystem.shootDutyCycle(0.9), shooterSubsystem::stop, shooterSubsystem));
+    
+    operatorController.leftBumper().whileTrue(Commands.startEnd(
+      ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
   }
 
   /**

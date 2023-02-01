@@ -167,4 +167,19 @@ public final class Constants {
     public static double ROTATION_kD = 0.0;
 
   }
+  
+  public static class ElevatorConstants{
+    public static int ELEVATOR_LEADER_ID = 1;
+    public static int ELEVATOR_FOLLOWER_ID = 2;
+  }
+
+  public static class WristConstants{
+    public static int WRIST_LEADER_ID = 3;
+    public static int WRIST_FOLLOWER_ID = 4;
+  }
+
+  public static class ShooterConstants{
+    public static int SHOOTER_LEADER_ID = 5;
+    public static int SHOOTER_FOLLOWER_ID = 6;
+  }
 }

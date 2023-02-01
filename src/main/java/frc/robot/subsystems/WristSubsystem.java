@@ -1,9 +1,13 @@
 package frc.robot.subsystems;
 
+import static com.revrobotics.CANSparkMax.SoftLimitDirection.kForward;
+import static com.revrobotics.CANSparkMax.SoftLimitDirection.kReverse;
+import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
+import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -11,22 +15,30 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
 
 public class WristSubsystem extends SubsystemBase {
-  private final CANSparkMax wristMotor1;
-  private final CANSparkMax wristMotor2;
+  private final CANSparkMax wristLeader;
+  private final CANSparkMax wristFollower;
 
   private final SparkMaxAbsoluteEncoder wristEncoder;
 
 
   public WristSubsystem() {
-    wristMotor1 = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
-    wristMotor2 = new CANSparkMax(WristConstants.WRIST_FOLLOWER_ID, MotorType.kBrushless);
+    wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
+    wristFollower = new CANSparkMax(WristConstants.WRIST_FOLLOWER_ID, MotorType.kBrushless);
 
-    wristMotor1.restoreFactoryDefaults();
-    wristMotor2.restoreFactoryDefaults();
+    wristLeader.restoreFactoryDefaults();
+    wristFollower.restoreFactoryDefaults();
 
-    wristMotor2.follow(wristMotor1, true);
+    wristLeader.enableSoftLimit(kForward, false);
+    wristLeader.enableSoftLimit(kReverse, false);
+    wristLeader.getForwardLimitSwitch(kNormallyOpen).enableLimitSwitch(false);
+    wristLeader.getReverseLimitSwitch(kNormallyOpen).enableLimitSwitch(false);
 
-    wristEncoder = wristMotor1.getAbsoluteEncoder(Type.kDutyCycle);
+    wristFollower.follow(wristLeader, true);
+
+    wristLeader.burnFlash();
+    wristFollower.burnFlash();
+    
+    wristEncoder = wristLeader.getAbsoluteEncoder(kDutyCycle);
   }
 
   @Override
@@ -34,22 +46,13 @@ public class WristSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
   }
 
-  public void wristUp(double speed){
-    speed = MathUtil.clamp(speed, 0, 1);
-    wristMotor1.set(0);
-  }
-  
-  public void wristDown(double speed){
-    speed = MathUtil.clamp(speed, -1, 0);
-    wristMotor1.set(0);
-  }
-
-  public void moveWrist(double speed) {
-    wristMotor1.set(speed);
+  public void moveWrist(double speed){
+    speed = MathUtil.applyDeadband(speed, 0.05);
+    wristLeader.set(speed);
   }
 
   public void stop() {
-    wristMotor1.stopMotor();
+    wristLeader.stopMotor();
   }
 
 }

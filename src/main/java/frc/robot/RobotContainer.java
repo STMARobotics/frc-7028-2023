@@ -130,10 +130,10 @@ public class RobotContainer {
 
     // Operator
     operatorController.rightBumper().whileTrue(Commands.startEnd(
-      ()-> shooterSubsystem.shootDutyCycle(0.8), shooterSubsystem::stop, shooterSubsystem));
+      ()-> shooterSubsystem.shootDutyCycle(0.9), shooterSubsystem::stop, shooterSubsystem));
     
     operatorController.leftBumper().whileTrue(Commands.startEnd(
-      ()-> shooterSubsystem.shootDutyCycle(-0.3), shooterSubsystem::stop, shooterSubsystem));
+      ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
   }
 
   /**

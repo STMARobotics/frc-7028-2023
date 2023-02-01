@@ -21,14 +21,17 @@ public class ElevatorCommand extends CommandBase {
   @Override
   public void execute() {
     double upSpeed = upSupplier.getAsDouble();
-    double downSpeed = downSupplier.getAsDouble();
+    upSpeed = Math.copySign(upSpeed * upSpeed, upSpeed);
 
-    if (upSpeed > 0 && downSpeed > 0) {
-      elevatorSubsystem.stop();
-    } else if (upSpeed > 0) {
+    double downSpeed = downSupplier.getAsDouble();
+    downSpeed = Math.copySign(downSpeed * downSpeed, downSpeed);
+    
+    if (upSpeed > 0) {
       elevatorSubsystem.elevatorUp(upSpeed);
     } else if (downSpeed > 0) {
       elevatorSubsystem.elevatorDown(-downSpeed);
+    } else {
+      elevatorSubsystem.stop();
     }
   }
 

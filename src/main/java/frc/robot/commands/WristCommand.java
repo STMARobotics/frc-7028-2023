@@ -19,7 +19,7 @@ public class WristCommand extends CommandBase {
   @Override
   public void execute() {
     double speed = speedSupplier.getAsDouble();
-    wristSubsystem.wristUp(speed);
+    wristSubsystem.moveWrist(Math.copySign(speed * speed, speed));
   }
 
   @Override

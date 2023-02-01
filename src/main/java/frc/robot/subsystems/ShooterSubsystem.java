@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ShooterConstants.SHOOTER_FOLLOWER_ID;
+import static frc.robot.Constants.ShooterConstants.SHOOTER_LEADER_ID;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -23,8 +26,8 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kD = 0;
     config.voltageCompSaturation = 12;
 
-    shooterLeader = new WPI_TalonFX(1);
-    shooterFollower = new WPI_TalonFX(0);
+    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID, "swerve");
+    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID, "swerve");
 
     shooterLeader.configAllSettings(config);
     shooterFollower.configAllSettings(config);

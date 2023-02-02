@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.wpilibj2.command.Commands.print;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
 import java.util.List;
@@ -24,15 +25,11 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.commands.ChaseTagCommand;
-import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
-import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -48,7 +45,6 @@ import frc.robot.subsystems.WristSubsystem;
 public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   private final PhotonCamera photonCamera = new PhotonCamera("LimeLight");
 
@@ -57,9 +53,6 @@ public class RobotContainer {
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final WristSubsystem wristSubsystem = new WristSubsystem();
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-  
-  private final ChaseTagCommand chaseTagCommand = 
-      new ChaseTagCommand(photonCamera, drivetrainSubsystem, poseEstimator::getCurrentPose);
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
       drivetrainSubsystem,
@@ -85,9 +78,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
-    elevatorSubsystem.setDefaultCommand(new ElevatorCommand(
-      elevatorSubsystem, operatorController::getRightTriggerAxis, operatorController::getLeftTriggerAxis));
-    wristSubsystem.setDefaultCommand(new WristCommand(wristSubsystem, () -> -operatorController.getRightY()));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -110,8 +100,6 @@ public class RobotContainer {
     controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition));
     // Start button reseeds the steer motors to fix dead wheel
     controller.start().onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
-    // B to chase a tag
-    controller.b().whileTrue(chaseTagCommand);
 
     // POV up for field oriented drive
     controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
@@ -120,19 +108,31 @@ public class RobotContainer {
     controller.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
         .andThen(new ScheduleCommand(fieldHeadingDriveCommand)));
 
-    // X to put the wheels in an X until the driver tries to drive
+    // POV Right to put the wheels in an X until the driver tries to drive
     BooleanSupplier driverDriving = 
         () -> modifyAxis(controller.getLeftY()) != 0.0 
             || modifyAxis(controller.getLeftX()) != 0.0
             || modifyAxis(controller.getRightY()) != 0.0
             || modifyAxis(controller.getRightX()) != 0.0;
-    controller.x().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
+    controller.povRight().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
 
-    // Operator
-    operatorController.rightBumper().whileTrue(Commands.startEnd(
-      ()-> shooterSubsystem.shootDutyCycle(0.9), shooterSubsystem::stop, shooterSubsystem));
+    // Elevator
+    controller.y().whileTrue(
+        startEnd(() -> elevatorSubsystem.moveElevator(0.8), elevatorSubsystem::stop, elevatorSubsystem));
+    controller.b().whileTrue(
+        startEnd(() -> elevatorSubsystem.moveElevator(-0.95), elevatorSubsystem::stop, elevatorSubsystem));
+
+    // Wrist
+    controller.x().whileTrue(
+        startEnd(() -> wristSubsystem.moveWrist(.3), wristSubsystem::stop, wristSubsystem));
+    controller.a().whileTrue(
+        startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
+
+    // Shooter
+    controller.rightBumper().whileTrue(startEnd(
+      ()-> shooterSubsystem.shootDutyCycle(0.46), shooterSubsystem::stop, shooterSubsystem));
     
-    operatorController.leftBumper().whileTrue(Commands.startEnd(
+    controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
   }
 

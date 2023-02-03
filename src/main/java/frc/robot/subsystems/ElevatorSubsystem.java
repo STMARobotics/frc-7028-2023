@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAnalogSensor;
 import com.revrobotics.SparkMaxLimitSwitch.Type;
+import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,9 +18,20 @@ import frc.robot.Constants.ElevatorConstants;
  */
 public class ElevatorSubsystem extends SubsystemBase {
 
+  private static final int SMART_MOTION_SLOT = 0;
+  private static final double LIMIT_BOTTOM = 0.6487;
+  private static final double LIMIT_TOP = 2.38377;
+  // Elevator height, in meters
+  private static final double ELEVATOR_HEIGHT = 1.0;
+  // Coefficient in meters per sensor value
+  private static final double SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (LIMIT_TOP - LIMIT_BOTTOM);
+  // Offset to add to sensor value - offset from elevator bottom to sensor bottom
+  private static final double SENSOR_OFFSET = -LIMIT_BOTTOM * SENSOR_COEFFICIENT;
+
   private final CANSparkMax elevatorLeader;
   private final CANSparkMax elevatorFollower;
   private final SparkMaxAnalogSensor analogSensor;
+  private final SparkMaxPIDController pidController;
 
   public ElevatorSubsystem() {
     elevatorLeader = new CANSparkMax(ElevatorConstants.ELEVATOR_LEADER_ID, MotorType.kBrushless);
@@ -26,17 +39,50 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     elevatorLeader.restoreFactoryDefaults();
     elevatorFollower.restoreFactoryDefaults();
-    
+
     // Configure potentiometer
     analogSensor = elevatorLeader.getAnalog(SparkMaxAnalogSensor.Mode.kAbsolute);
     analogSensor.setInverted(true);
+    pidController = elevatorLeader.getPIDController();
+    pidController.setFeedbackDevice(analogSensor);
+
+    // Configure closed-loop control
+    double kP = .00005; 
+    double kI = 0;
+    double kD = 0; 
+    double kIz = 0; 
+    double kFF = 0.000156;
+    double kMaxOutput = .6; // TODO safe values that can be increased when confident
+    double kMinOutput = -.6;
+    double allowedErr = 0;
+
+    // Smart Motion Coefficients
+    double maxVel = 2000; // rpm
+    double maxAcc = 1500;
+    double minVel = 0;
+
+    pidController.setP(kP);
+    pidController.setI(kI);
+    pidController.setD(kD);
+    pidController.setIZone(kIz);
+    pidController.setFF(kFF);
+    pidController.setOutputRange(kMinOutput, kMaxOutput); 
+
+    pidController.setSmartMotionMaxVelocity(maxVel, SMART_MOTION_SLOT);
+    pidController.setSmartMotionMinOutputVelocity(minVel, SMART_MOTION_SLOT);
+    pidController.setSmartMotionMaxAccel(maxAcc, SMART_MOTION_SLOT);
+    pidController.setSmartMotionAllowedClosedLoopError(allowedErr, SMART_MOTION_SLOT);
+
+    // Voltage compensation and current limits
+    elevatorLeader.enableVoltageCompensation(12);
+    elevatorLeader.setSmartCurrentLimit(20);
+    elevatorFollower.setSmartCurrentLimit(20);
 
     // Configure soft limits
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kForward, 2.38377f);
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, .82f); // real limit was 0.6487
+    elevatorLeader.setSoftLimit(SoftLimitDirection.kForward, (float) LIMIT_TOP);
+    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, .82f); // LIMIT_BOTTOM);
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kForward, true);
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    elevatorLeader.getPIDController().setFeedbackDevice(analogSensor);
 
     // Configure limit switches, or lack thereof
     elevatorLeader.getForwardLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(false);
@@ -56,15 +102,48 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Elevator Position", analogSensor.getPosition());
+    SmartDashboard.putNumber("Elevator Position Raw", analogSensor.getPosition());
+    SmartDashboard.putNumber("Elevator Position Meters", getElevatorPosition());
+    SmartDashboard.putNumber("Elevator RPM (?)", elevatorLeader.getEncoder().getVelocity());
   }
 
+  /**
+   * Moves the elevator using duty cycle
+   * @param speed duty cycle [-1, 1]
+   */
   public void moveElevator(double speed) {
     elevatorLeader.set(speed);
   }
 
+  /**
+   * Moves the elevator to a position
+   * @param meters position in meters
+   */
+  public void moveToPosition(double meters) {
+    pidController.setReference(metersToAnalogPosition(meters), ControlType.kSmartMotion);
+  }
+  
+  /**
+   * Get the elevator position in meters
+   * @return position in meters
+   */
+  public double getElevatorPosition() {
+    return analogPositionToMeters(analogSensor.getPosition());
+  }
+
+  /**
+   * Stop the elevator
+   */
   public void stop() {
     elevatorLeader.stopMotor();
+  }
+
+  static double analogPositionToMeters(double analogPosition) {
+    return (analogPosition * SENSOR_COEFFICIENT) + SENSOR_OFFSET;
+  }
+
+  static double metersToAnalogPosition(double positionMeters) {
+    return (positionMeters / SENSOR_COEFFICIENT) - (SENSOR_OFFSET / SENSOR_COEFFICIENT);
   }
   
 }

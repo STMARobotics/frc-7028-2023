@@ -47,22 +47,35 @@ public class ShooterSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Leader Speed", shooterLeader.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("Follower Speed", shooterFollower.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Leader Speed Raw", shooterLeader.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Follower Speed Raw", shooterFollower.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Leader Speed RPS", getVelocity());
   }
 
-  public void shootVelocity(double nativeSpeed) {
-    var feedForwardVolts = feedForward.calculate(edgesPerDecisecToRPS(nativeSpeed / 5));
+  public void shootVelocity(double rps) {
+    var feedForwardVolts = feedForward.calculate(rps);
 
     shooterLeader.set(
         ControlMode.Velocity,
-        nativeSpeed,
+        rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
   }
 
   public void shootDutyCycle(double speed) {
     shooterLeader.set(speed);
+  }
+
+  /**
+   * Gets the velocity in RPS
+   * @return velocity in RPS
+   */
+  public double getVelocity() {
+    return edgesPerDecisecToRPS(shooterLeader.getSelectedSensorVelocity());
+  }
+
+  public boolean hasCone() {
+    return shooterLeader.isFwdLimitSwitchClosed() == 1;
   }
 
   public void stop() {

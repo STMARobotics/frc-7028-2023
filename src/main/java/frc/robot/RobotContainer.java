@@ -121,12 +121,16 @@ public class RobotContainer {
         startEnd(() -> elevatorSubsystem.moveElevator(0.8), elevatorSubsystem::stop, elevatorSubsystem));
     controller.b().whileTrue(
         startEnd(() -> elevatorSubsystem.moveElevator(-0.95), elevatorSubsystem::stop, elevatorSubsystem));
+    // controller.y().whileTrue(
+    //     startEnd(() -> elevatorSubsystem.moveToPosition(Units.inchesToMeters(6)), elevatorSubsystem::stop, elevatorSubsystem));
 
     // Wrist
     controller.x().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(.3), wristSubsystem::stop, wristSubsystem));
     controller.a().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
+    // controller.a().whileTrue(
+    //     startEnd(() -> wristSubsystem.moveToPosition(.5), wristSubsystem::stop, wristSubsystem));
 
     // Shooter
     controller.rightBumper().whileTrue(startEnd(
@@ -134,6 +138,11 @@ public class RobotContainer {
     
     controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
+    
+    // controller.rightTrigger().whileTrue(new JustShootCommand(
+    //     0.3, 0.5, 10, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    // controller.leftTrigger().whileTrue(new JustPickupConeCommand(
+    //     0.1, 0.0, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**

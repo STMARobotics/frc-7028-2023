@@ -5,7 +5,6 @@ import static com.revrobotics.CANSparkMax.SoftLimitDirection.kReverse;
 import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
 import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
 import static edu.wpi.first.math.util.Units.radiansToRotations;
-import static edu.wpi.first.math.util.Units.rotationsToRadians;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
@@ -15,6 +14,7 @@ import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
@@ -26,18 +26,16 @@ public class WristSubsystem extends SubsystemBase {
 
   private static final int SMART_MOTION_SLOT = 0;
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
-  private static final double ENCODER_OFFSET = -0.59117d; // TODO: Negated position measured when arm is horizontal
-  private static final double GRAVITY_FF = 0.07; // TODO find this
-  private static final float LIMIT_BOTTOM = 0.59117f;
-  private static final float LIMIT_TOP = 0.87317f;
+  private static final double ENCODER_OFFSET = -0.58342d;
+  private static final double GRAVITY_FF = 0.01;
+  private static final float LIMIT_BOTTOM = 0.5737f;
+  private static final float LIMIT_TOP = 0.8995f;
 
   private final CANSparkMax wristLeader;
   private final CANSparkMax wristFollower;
 
   private final SparkMaxPIDController pidController;
   private final SparkMaxAbsoluteEncoder wristEncoder;
-
-  double maxGravityFF = 0.07;
 
   public WristSubsystem() {
     wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
@@ -52,17 +50,17 @@ public class WristSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(wristEncoder);
 
     // Configure closed-loop control
-    double kP = .00005; 
+    double kP = .0025; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0; 
-    double kFF = 0.000156;
-    double kMaxOutput = .2;  // TODO safe values that can be increased when confident
-    double kMinOutput = -.2;
-    double allowedErr = 0;
+    double kFF = 0;
+    double kMaxOutput = .3;  // TODO safe values that can be increased when confident
+    double kMinOutput = -.3;
+    double allowedErr = 0.002;
 
     // Smart Motion Coefficients
-    double maxVel = 2000; // rpm
+    double maxVel = 1500; // rpm
     double maxAcc = 1500;
     double minVel = 0;
 
@@ -84,7 +82,7 @@ public class WristSubsystem extends SubsystemBase {
     wristFollower.setSmartCurrentLimit(20);
 
     // Configure soft limits
-    wristLeader.setSoftLimit(kForward, 0.76f); // LIMIT_TOP);
+    wristLeader.setSoftLimit(kForward, LIMIT_TOP);
     wristLeader.setSoftLimit(kReverse, LIMIT_BOTTOM);
     wristLeader.enableSoftLimit(kForward, true);
     wristLeader.enableSoftLimit(kReverse, true);
@@ -125,9 +123,9 @@ public class WristSubsystem extends SubsystemBase {
    * @param radians position in radians
    */
   public void moveToPosition(double radians) {
-    double positionRotations = getWristPosition();
-    double cosineScalar = Math.cos(rotationsToRadians(positionRotations));
+    double cosineScalar = Math.cos(getWristPosition());
     double feedForward = GRAVITY_FF * cosineScalar;
+    SmartDashboard.putNumber("Wrist FFF", feedForward);
 
     pidController.setReference(armRadiansToEncoderRotations(radians), ControlType.kSmartMotion, 0, feedForward, ArbFFUnits.kPercentOut);
   }
@@ -137,7 +135,7 @@ public class WristSubsystem extends SubsystemBase {
    * @return position in radians
    */
   public double getWristPosition() {
-    return wristEncoder.getPosition() + ENCODER_OFFSET;
+    return Units.rotationsToRadians(wristEncoder.getPosition() + ENCODER_OFFSET);
   }
 
   /**

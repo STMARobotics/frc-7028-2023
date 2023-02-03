@@ -9,6 +9,7 @@ import com.revrobotics.SparkMaxAnalogSensor;
 import com.revrobotics.SparkMaxLimitSwitch.Type;
 import com.revrobotics.SparkMaxPIDController;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -19,10 +20,10 @@ import frc.robot.Constants.ElevatorConstants;
 public class ElevatorSubsystem extends SubsystemBase {
 
   private static final int SMART_MOTION_SLOT = 0;
-  private static final double LIMIT_BOTTOM = 0.6487;
+  private static final double LIMIT_BOTTOM = 0.646978;
   private static final double LIMIT_TOP = 2.38377;
   // Elevator height, in meters
-  private static final double ELEVATOR_HEIGHT = 1.0;
+  private static final double ELEVATOR_HEIGHT = Units.inchesToMeters(16.875);
   // Coefficient in meters per sensor value
   private static final double SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (LIMIT_TOP - LIMIT_BOTTOM);
   // Offset to add to sensor value - offset from elevator bottom to sensor bottom
@@ -47,17 +48,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(analogSensor);
 
     // Configure closed-loop control
-    double kP = .00005; 
+    double kP = .00002; 
     double kI = 0;
     double kD = 0; 
-    double kIz = 0; 
-    double kFF = 0.000156;
-    double kMaxOutput = .6; // TODO safe values that can be increased when confident
-    double kMinOutput = -.6;
-    double allowedErr = 0;
+    double kIz = 0;
+    double kFF = 0.007;
+    double kMaxOutput = 1; // TODO safe values that can be increased when confident
+    double kMinOutput = -1;
+    double allowedErr = 0.004;
 
     // Smart Motion Coefficients
-    double maxVel = 2000; // rpm
+    double maxVel = 6500; // rpm
     double maxAcc = 1500;
     double minVel = 0;
 
@@ -80,7 +81,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Configure soft limits
     elevatorLeader.setSoftLimit(SoftLimitDirection.kForward, (float) LIMIT_TOP);
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, .82f); // LIMIT_BOTTOM);
+    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, 0.67f); // Didn't use constant to avoid crashing into limit switch
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kForward, true);
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
@@ -103,7 +104,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator Position Raw", analogSensor.getPosition());
-    SmartDashboard.putNumber("Elevator Position Meters", getElevatorPosition());
+    SmartDashboard.putNumber("Elevator Position Inches",  Units.metersToInches(getElevatorPosition()));
     SmartDashboard.putNumber("Elevator RPM (?)", elevatorLeader.getEncoder().getVelocity());
   }
 

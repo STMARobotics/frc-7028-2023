@@ -134,7 +134,7 @@ public class RobotContainer {
 
     // Shooter
     controller.rightBumper().whileTrue(startEnd(
-      ()-> shooterSubsystem.shootDutyCycle(0.46), shooterSubsystem::stop, shooterSubsystem));
+      ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem));
     
     controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));

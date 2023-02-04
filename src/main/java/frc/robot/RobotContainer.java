@@ -33,6 +33,7 @@ import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustPickupConeCommand;
 import frc.robot.commands.JustShootCommand;
+import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -137,8 +138,8 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
-    controller.rightTrigger().whileTrue(new JustShootCommand(
-        Units.inchesToMeters(16), 1.127, 31, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    controller.rightTrigger().whileTrue(new ShootCommand(
+        Units.inchesToMeters(16), 1.127, 31, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
         Units.inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 

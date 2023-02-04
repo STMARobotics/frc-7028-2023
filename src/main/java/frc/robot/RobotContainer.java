@@ -25,7 +25,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -87,9 +86,6 @@ public class RobotContainer {
     configureButtonBindings();
     configureDashboard();
     reseedTimer.start();
-    SmartDashboard.putNumber("Wrist Setpoint", .1);
-    SmartDashboard.putNumber("Elevator Setpoint", 6);
-    SmartDashboard.putNumber("Shooter Setpoint", 30);
   }
 
   private void configureDashboard() {
@@ -142,12 +138,13 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
     controller.rightTrigger().whileTrue(new JustShootCommand(
-        Units.inchesToMeters(16), 1.127, 30, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        Units.inchesToMeters(16), 1.127, 31, elevatorSubsystem, wristSubsystem, shooterSubsystem));
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
         Units.inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 
+    // Shoot low
     controller.povLeft().whileTrue(new JustShootCommand(
-        Units.inchesToMeters(1.135), 1.25, 27, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        Units.inchesToMeters(1.135), 1.25, 29, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**

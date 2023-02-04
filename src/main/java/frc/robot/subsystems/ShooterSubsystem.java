@@ -56,7 +56,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
-    SmartDashboard.putNumber("Feed Forward", feedForwardVolts);
 
     shooterLeader.set(
         ControlMode.Velocity,

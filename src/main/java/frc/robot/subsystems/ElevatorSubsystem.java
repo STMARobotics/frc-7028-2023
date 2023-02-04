@@ -105,7 +105,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Elevator Position Raw", analogSensor.getPosition());
     SmartDashboard.putNumber("Elevator Position Inches",  Units.metersToInches(getElevatorPosition()));
-    SmartDashboard.putNumber("Elevator RPM (?)", elevatorLeader.getEncoder().getVelocity());
   }
 
   /**

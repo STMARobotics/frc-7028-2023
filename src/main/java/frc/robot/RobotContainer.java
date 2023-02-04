@@ -21,15 +21,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.JustPickupConeCommand;
+import frc.robot.commands.JustShootCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -83,6 +87,9 @@ public class RobotContainer {
     configureButtonBindings();
     configureDashboard();
     reseedTimer.start();
+    SmartDashboard.putNumber("Wrist Setpoint", .1);
+    SmartDashboard.putNumber("Elevator Setpoint", 6);
+    SmartDashboard.putNumber("Shooter Setpoint", 30);
   }
 
   private void configureDashboard() {
@@ -121,28 +128,26 @@ public class RobotContainer {
         startEnd(() -> elevatorSubsystem.moveElevator(0.8), elevatorSubsystem::stop, elevatorSubsystem));
     controller.b().whileTrue(
         startEnd(() -> elevatorSubsystem.moveElevator(-0.95), elevatorSubsystem::stop, elevatorSubsystem));
-    // controller.y().whileTrue(
-    //     startEnd(() -> elevatorSubsystem.moveToPosition(Units.inchesToMeters(6)), elevatorSubsystem::stop, elevatorSubsystem));
 
     // Wrist
     controller.x().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(.3), wristSubsystem::stop, wristSubsystem));
     controller.a().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
-    // controller.a().whileTrue(
-    //     startEnd(() -> wristSubsystem.moveToPosition(.5), wristSubsystem::stop, wristSubsystem));
 
     // Shooter
     controller.rightBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem));
-    
     controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
-    
-    // controller.rightTrigger().whileTrue(new JustShootCommand(
-    //     0.3, 0.5, 10, elevatorSubsystem, wristSubsystem, shooterSubsystem));
-    // controller.leftTrigger().whileTrue(new JustPickupConeCommand(
-    //     0.1, 0.0, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+
+    controller.rightTrigger().whileTrue(new JustShootCommand(
+        Units.inchesToMeters(16), 1.127, 30, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    controller.leftTrigger().whileTrue(new JustPickupConeCommand(
+        Units.inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+
+    controller.povLeft().whileTrue(new JustShootCommand(
+        Units.inchesToMeters(1.135), 1.25, 27, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**

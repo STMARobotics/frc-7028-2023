@@ -48,11 +48,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(analogSensor);
 
     // Configure closed-loop control
-    double kP = .00002; 
+    double kP = .00004; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0;
-    double kFF = 0.007;
+    double kFF = 0.008;
     double kMaxOutput = 1;
     double kMinOutput = -1;
     double allowedErr = 0.004;

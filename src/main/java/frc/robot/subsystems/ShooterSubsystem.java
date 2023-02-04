@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_FOLLOWER_ID;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_LEADER_ID;
 
@@ -14,24 +15,25 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DrivetrainConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
   
+  private static final double ENCODER_CPR = 2048;
+
   private final WPI_TalonFX shooterLeader;
   private final WPI_TalonFX shooterFollower;
 
-  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.025103, 0.55611, 0.31053);
+  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.0015732, 1.1092 / 9.0, 0.034441);
 
   public ShooterSubsystem() {
     var config = new TalonFXConfiguration();
-    config.slot0.kP = .01;
+    config.slot0.kP = 0.03;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
     config.voltageCompSaturation = 12;
 
-    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID, DrivetrainConstants.CANIVORE_BUS_NAME);
-    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID, DrivetrainConstants.CANIVORE_BUS_NAME);
+    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID, CANIVORE_BUS_NAME);
+    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID, CANIVORE_BUS_NAME);
 
     shooterLeader.configAllSettings(config);
     shooterFollower.configAllSettings(config);
@@ -54,6 +56,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
+    SmartDashboard.putNumber("Feed Forward", feedForwardVolts);
 
     shooterLeader.set(
         ControlMode.Velocity,
@@ -83,7 +86,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public static double edgesPerDecisecToRPS(double edgesPerDecisec) {
-    var rotationsPerDecisecond = edgesPerDecisec / 2048;
+    var rotationsPerDecisecond = edgesPerDecisec / ENCODER_CPR;
     return rotationsPerDecisecond * 10;
   }
 
@@ -95,7 +98,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * @return velocity in edges per decisecond (native talon units)
    */
   public static double rpsToedgesPerDecisec(double rps) {
-    var edgesPerSecond = rps * 2048;
+    var edgesPerSecond = rps * ENCODER_CPR;
     return edgesPerSecond / 10;
   }
 

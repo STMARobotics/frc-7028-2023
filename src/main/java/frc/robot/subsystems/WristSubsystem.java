@@ -55,9 +55,9 @@ public class WristSubsystem extends SubsystemBase {
     double kD = 0; 
     double kIz = 0; 
     double kFF = 0;
-    double kMaxOutput = .3;  // TODO safe values that can be increased when confident
+    double kMaxOutput = .3;
     double kMinOutput = -.3;
-    double allowedErr = 0.002;
+    double allowedErr = 0.002; // Error in rotations, not radians
 
     // Smart Motion Coefficients
     double maxVel = 1500; // rpm
@@ -107,7 +107,7 @@ public class WristSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Wrist Position Raw", wristEncoder.getPosition());
     SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
-    SmartDashboard.putNumber("Wrist RPM (?)", wristLeader.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Wrist RPM", wristLeader.getEncoder().getVelocity());
   }
 
   /**
@@ -125,7 +125,6 @@ public class WristSubsystem extends SubsystemBase {
   public void moveToPosition(double radians) {
     double cosineScalar = Math.cos(getWristPosition());
     double feedForward = GRAVITY_FF * cosineScalar;
-    SmartDashboard.putNumber("Wrist FFF", feedForward);
 
     pidController.setReference(armRadiansToEncoderRotations(radians), ControlType.kSmartMotion, 0, feedForward, ArbFFUnits.kPercentOut);
   }

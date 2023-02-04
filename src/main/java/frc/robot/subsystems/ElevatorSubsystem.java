@@ -53,7 +53,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     double kD = 0; 
     double kIz = 0;
     double kFF = 0.007;
-    double kMaxOutput = 1; // TODO safe values that can be increased when confident
+    double kMaxOutput = 1;
     double kMinOutput = -1;
     double allowedErr = 0.004;
 

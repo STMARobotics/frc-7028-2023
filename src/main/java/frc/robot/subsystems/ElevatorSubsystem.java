@@ -33,7 +33,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Configure soft limits
     elevatorLeader.setSoftLimit(SoftLimitDirection.kForward, 2.38377f);
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, .82f); // real limit was 0.6487
+    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, .8f); // real limit was 0.6487
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kForward, true);
     elevatorLeader.enableSoftLimit(SoftLimitDirection.kReverse, true);
     elevatorLeader.getPIDController().setFeedbackDevice(analogSensor);

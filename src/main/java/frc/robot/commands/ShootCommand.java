@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -19,8 +20,10 @@ public class ShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double AIM_TOLERANCE = 2.0;
+  private static final double AIM_TOLERANCE = 1.0;
+  private static final double DISTANCE_TOLERANCE = 0.15;
   private static final double SHOOT_TIME = 1.0;
+  private static final double TARGET_Y_SETPOINT = 4.2; // degrees in the limelight top target
 
   private final double elevatorMeters;
   private final double wristRadians;
@@ -36,6 +39,8 @@ public class ShootCommand extends CommandBase {
 
   private final ProfiledPIDController aimController = 
       new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
+  
+  private final PIDController distanceController = new PIDController(.5, 0, 0);
 
   private boolean isShooting = false;
 
@@ -68,35 +73,42 @@ public class ShootCommand extends CommandBase {
     shootTimer.reset();
     isShooting = false;
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
+    distanceController.setSetpoint(TARGET_Y_SETPOINT);
+    LimelightHelpers.setPipelineIndex("limelight", 1);
   }
 
   @Override
   public void execute() {
+    // TODO make sure we see a target
     double targetX = LimelightHelpers.getTX("limelight");
-    var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
-    var targetHeadingRadians = drivetrainHeading.getRadians() - Units.degreesToRadians(targetX);
-    
-    aimController.setGoal(targetHeadingRadians);
-    var output = aimController.calculate(drivetrainHeading.getRadians());
+    double targetY = LimelightHelpers.getTY("limelight");
 
-    elevatorSubsystem.moveToPosition(elevatorMeters);
-    wristSubsystem.moveToPosition(wristRadians);
+    if (!isShooting) {
+      var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
+      var targetHeadingRadians = drivetrainHeading.getRadians() - Units.degreesToRadians(targetX);
+      
+      aimController.setGoal(targetHeadingRadians);
+      var rotationCorrection = 
+          Math.abs(targetX) > AIM_TOLERANCE ? aimController.calculate(drivetrainHeading.getRadians()) : 0;
+      var distanceCorrection =
+          Math.abs(targetY - TARGET_Y_SETPOINT) > DISTANCE_TOLERANCE ? distanceController.calculate(targetY) : 0;
 
-    if (Math.abs(targetX) < AIM_TOLERANCE) {
-      drivetrainSubsystem.stop();
-    } else {
-      drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, output));
+      drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0, rotationCorrection));
     }
 
     var readyToShoot =
         Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
         && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE
-        && Math.abs(targetX) < AIM_TOLERANCE;
+        && Math.abs(targetX) < AIM_TOLERANCE
+        && Math.abs(targetY - TARGET_Y_SETPOINT) < DISTANCE_TOLERANCE;
 
     if (isShooting || readyToShoot) {
       shooterSubsystem.shootVelocity(shooterRPS);
       shootTimer.start();
       isShooting = true;
+    } else {
+      elevatorSubsystem.moveToPosition(elevatorMeters);
+      wristSubsystem.moveToPosition(wristRadians);
     }
   }
 

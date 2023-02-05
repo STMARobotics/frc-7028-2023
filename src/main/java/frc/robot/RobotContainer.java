@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustPickupConeCommand;
@@ -74,6 +75,9 @@ public class RobotContainer {
       () -> -controller.getRightY(),
       () -> -controller.getRightX());
 
+  private final DefaultWristCommand defaultWristCommand = 
+      new DefaultWristCommand(wristSubsystem, shooterSubsystem::hasCone);
+
   private final Timer reseedTimer = new Timer();
 
   /**
@@ -82,6 +86,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
+    wristSubsystem.setDefaultCommand(defaultWristCommand);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -139,7 +144,7 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
     controller.rightTrigger().whileTrue(new ShootCommand(
-        Units.inchesToMeters(16), 1.127, 31, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        Units.inchesToMeters(16), 1.127, 34.5, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
         Units.inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 

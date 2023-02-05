@@ -77,7 +77,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean hasCone() {
-    return shooterLeader.isFwdLimitSwitchClosed() == 1;
+    return shooterLeader.isRevLimitSwitchClosed() == 1;
   }
 
   public void stop() {

@@ -14,7 +14,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
 /**
- * Basic command to position elevator and wrist, and then shoot
+ * Command to drive within range, turn to target, position elevator and wrist, and then shoot
  */
 public class ShootCommand extends CommandBase {
   
@@ -35,11 +35,8 @@ public class ShootCommand extends CommandBase {
   private final Timer shootTimer = new Timer();
 
   private final TrapezoidProfile.Constraints kThetaControllerConstraints = 
-  new TrapezoidProfile.Constraints(2 * Math.PI, 2 * Math.PI);
-
-  private final ProfiledPIDController aimController = 
-      new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
-  
+      new TrapezoidProfile.Constraints(2 * Math.PI, 2 * Math.PI);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
   private final PIDController distanceController = new PIDController(.5, 0, 0);
 
   private boolean isShooting = false;

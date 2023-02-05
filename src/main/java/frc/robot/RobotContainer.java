@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.wpilibj2.command.Commands.print;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
@@ -21,7 +22,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -144,13 +144,13 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
     controller.rightTrigger().whileTrue(new ShootCommand(
-        Units.inchesToMeters(16), 1.127, 34.5, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(16), 1.127, 34.5, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
-        Units.inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 
     // Shoot low
     controller.povLeft().whileTrue(new JustShootCommand(
-        Units.inchesToMeters(1.135), 1.25, 29, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(1.135), 1.25, 29, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**

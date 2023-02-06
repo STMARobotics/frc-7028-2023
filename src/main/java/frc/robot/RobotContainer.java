@@ -29,15 +29,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.LimeLightConstants;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustPickupConeCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.subsystems.ConeLimelightSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -58,6 +61,8 @@ public class RobotContainer {
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final WristSubsystem wristSubsystem = new WristSubsystem();
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+  private final ConeLimelightSubsystem coneLimelightSubsystem =
+      new ConeLimelightSubsystem(LimeLightConstants.LIMELIGHT_CONFIG);
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
       drivetrainSubsystem,
@@ -143,12 +148,15 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
-    controller.rightTrigger().whileTrue(new ShootCommand(
-        inchesToMeters(16), 1.127, 34.5, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    // Intake
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
         inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 
-    // Shoot low
+    // Shoot
+    controller.rightTrigger().whileTrue(new ShootCommand(
+        inchesToMeters(16), 1.127, 34.5, Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        shooterSubsystem, coneLimelightSubsystem));
+    // TODO shoot low
     controller.povLeft().whileTrue(new JustShootCommand(
         inchesToMeters(1.135), 1.25, 29, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }

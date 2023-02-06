@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.subsystems.LimelightConfig;
 import frc.robot.swerve.ModuleConfiguration;
 
 /**
@@ -146,6 +147,17 @@ public final class Constants {
     public static final Transform3d CAMERA_TO_ROBOT =
         new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
     public static final Transform3d ROBOT_TO_CAMERA = CAMERA_TO_ROBOT.inverse();
+  }
+
+  public static final class LimeLightConstants {
+
+    public static final LimelightConfig LIMELIGHT_CONFIG = LimelightConfig.Builder.create()
+        .withMountDepth(inchesToMeters(11))
+        .withMountDistanceFromCenter(inchesToMeters(0))
+        .withMountingAngle(0.0)
+        .withMountingHeight(inchesToMeters(20.0))
+        .withNetworkTableName("limelight")
+        .build();
   }
 
   public static class AutoConstants {

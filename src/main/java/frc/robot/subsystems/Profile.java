@@ -7,10 +7,10 @@ import edu.wpi.first.math.util.Units;
  */
 public enum Profile {
 
-  /** Top cone vision target */
-  TOP(0, Units.inchesToMeters(22.125 + 2.0)),
-  /** Middle cone vision target */
-  MIDDLE(1, Units.inchesToMeters(41.875));
+  /** Middle of the Top cone vision target */
+  TOP(0, Units.inchesToMeters(24.125)),
+  /** Middle of the Middle cone vision target */
+  MIDDLE(1, Units.inchesToMeters(43.875));
 
   /** ID for the Limelight profile */
   public final int pipelineId;

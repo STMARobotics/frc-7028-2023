@@ -61,7 +61,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     this.drivetrainSubsystem = drivetrainSubsystem;
     AprilTagFieldLayout layout;
     try {
-      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
       var alliance = DriverStation.getAlliance();
       layout.setOrigin(alliance == Alliance.Blue ?
           OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);

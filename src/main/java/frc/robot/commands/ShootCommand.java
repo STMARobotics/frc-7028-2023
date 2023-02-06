@@ -39,9 +39,9 @@ public class ShootCommand extends CommandBase {
   private final PIDController distanceController = new PIDController(.5, 0, 0);
 
   private final Profile limelightProfile;
-  protected double elevatorMeters;
-  protected double wristRadians;
-  protected double shooterRPS;
+  private final double elevatorMeters;
+  private final double wristRadians;
+  private final double shooterRPS;
 
   private boolean isShooting = false;
 
@@ -73,19 +73,6 @@ public class ShootCommand extends CommandBase {
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
 
-  protected ShootCommand(
-      Profile limeProfile, DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem,
-      WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem, ConeLimelightSubsystem limelightSubsystem) {
-    this.limelightProfile = limeProfile;
-    this.drivetrainSubsystem = drivetrainSubsystem;
-    this.elevatorSubsystem = elevatorSubsystem;
-    this.wristSubsystem = wristSubsystem;
-    this.shooterSubsystem = shooterSubsystem;
-    this.limelightSubsystem = limelightSubsystem;
-
-    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
-    }
-
   @Override
   public void initialize() {
     shootTimer.reset();
@@ -99,11 +86,11 @@ public class ShootCommand extends CommandBase {
   @Override
   public void execute() {
     var limelightResults = limelightSubsystem.getLatestResults();
-    if (limelightResults.valid) {
+    if (limelightResults.valid && limelightResults.RetroreflectiveTargets.length > 0) {
 
-      var limelightRetroResults = limelightResults.targets_Retro[0];
-      var targetX =  limelightRetroResults.tx;
-      var targetY = limelightRetroResults.ty;
+      var limelightRetroResults = limelightResults.RetroreflectiveTargets[0];
+      var targetX =  limelightRetroResults.targetXDegrees;
+      var targetY = limelightRetroResults.targetYDegrees;
 
       elevatorSubsystem.moveToPosition(elevatorMeters);
       wristSubsystem.moveToPosition(wristRadians);

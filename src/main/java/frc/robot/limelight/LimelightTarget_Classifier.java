@@ -20,16 +20,16 @@ public class LimelightTarget_Classifier {
   public double zone;
 
   @JsonProperty("tx")
-  public double tx;
+  public double targetXDegrees;
 
   @JsonProperty("txp")
-  public double tx_pixels;
+  public double targetXPixels;
 
   @JsonProperty("ty")
-  public double ty;
+  public double targetYDegrees;
 
   @JsonProperty("typ")
-  public double ty_pixels;
+  public double targetYPixels;
 
   public LimelightTarget_Classifier() {
   }

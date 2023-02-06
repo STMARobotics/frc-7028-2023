@@ -18,23 +18,23 @@ public class LimelightTarget_Detector {
 
   /** The size of the target as a percentage of the image (0-1) */
   @JsonProperty("ta")
-  public double ta;
+  public double targetArea;
 
   /** X-coordinate of the center of the target in degrees. Positive-right, center-zero */
   @JsonProperty("tx")
-  public double tx;
+  public double targetXDegrees;
 
   /** X-coordinate of the center of the target in pixels. Positive-right, center-zero */
   @JsonProperty("txp")
-  public double tx_pixels;
+  public double targetXPixels;
 
   /** Y-coordinate of the center of the target in degrees. Positive-down, center-zero */
   @JsonProperty("ty")
-  public double ty;
+  public double targetYDegrees;
 
   /** Y-coordinate of the center of the target in pixels. Positive-down, center-zero */
   @JsonProperty("typ")
-  public double ty_pixels;
+  public double targetYPixels;
 
   public LimelightTarget_Detector() {
   }

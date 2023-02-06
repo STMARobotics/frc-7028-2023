@@ -23,9 +23,9 @@ public class ConeLimelightSubsystem extends LimelightSubsystem {
    */
   private double getLimelightDistanceToTarget() {
     var results = getLatestResults();
-    if (results.valid && results.targets_Retro.length > 0) {
+    if (results.valid && results.RetroreflectiveTargets.length > 0) {
       return (activeProfile.targetHeight - limelightConfig.getMountHeight())
-          / Math.tan(Units.degreesToRadians(limelightConfig.getMountAngle() + results.targets_Retro[0].tx));
+          / Math.tan(Units.degreesToRadians(limelightConfig.getMountAngle() + results.RetroreflectiveTargets[0].targetXDegrees));
     }
     return 0.0;
   }

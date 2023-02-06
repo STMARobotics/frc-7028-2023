@@ -8,21 +8,21 @@ public class LimelightResults {
 
   /** Current pipeline index */
   @JsonProperty("pID")
-  public double pipelineID;
+  public double pipelineIndex;
 
   /** Targeting latency (milliseconds consumed by tracking loop this frame) */
   @JsonProperty("tl")
-  public double latency_pipeline;
+  public double pipelineLatency;
 
   @JsonProperty("tl_cap")
-  public double latency_capture;
+  public double captureLatency;
 
   /** Timestamp in milliseconds from boot. */
   @JsonProperty("ts")
-  public double timestamp_LIMELIGHT_publish;
+  public double limelightTimestamp;
 
   @JsonProperty("ts_rio")
-  public double timestamp_RIOFPGA_capture;
+  public double rioTimestamp;
 
   /** Validity indicator. */
   @JsonProperty("v")
@@ -35,35 +35,31 @@ public class LimelightResults {
 
   /** Botpose (MegaTag, WPI Red driverstation): x,y,z, roll, pitch, yaw (meters, degrees) */
   @JsonProperty("botpose_wpired")
-  public double[] botpose_wpired;
+  public double[] botposeWPIRed;
 
   /** Botpose (MegaTag, WPI Blue driverstation): x,y,z, roll, pitch, yaw (meters, degrees) */
   @JsonProperty("botpose_wpiblue")
-  public double[] botpose_wpiblue;
+  public double[] botposeWPIBlue;
 
   @JsonProperty("Retro")
-  public LimelightTarget_Retro[] targets_Retro;
+  public LimelightTarget_Retro[] RetroreflectiveTargets;
 
   @JsonProperty("Fiducial")
-  public LimelightTarget_Fiducial[] targets_Fiducials;
+  public LimelightTarget_Fiducial[] FiducialTargets;
 
   @JsonProperty("Classifier")
-  public LimelightTarget_Classifier[] targets_Classifier;
+  public LimelightTarget_Classifier[] classifierTargets;
 
   @JsonProperty("Detector")
-  public LimelightTarget_Detector[] targets_Detector;
-
-  @JsonProperty("Barcode")
-  public LimelightTarget_Barcode[] targets_Barcode;
+  public LimelightTarget_Detector[] detectorTargets;
 
   public LimelightResults() {
       botpose = new double[6];
-      botpose_wpired = new double[6];
-      botpose_wpiblue = new double[6];
-      targets_Retro = new LimelightTarget_Retro[0];
-      targets_Fiducials = new LimelightTarget_Fiducial[0];
-      targets_Classifier = new LimelightTarget_Classifier[0];
-      targets_Detector = new LimelightTarget_Detector[0];
-      targets_Barcode = new LimelightTarget_Barcode[0];
+      botposeWPIRed = new double[6];
+      botposeWPIBlue = new double[6];
+      RetroreflectiveTargets = new LimelightTarget_Retro[0];
+      FiducialTargets = new LimelightTarget_Fiducial[0];
+      classifierTargets = new LimelightTarget_Classifier[0];
+      detectorTargets = new LimelightTarget_Detector[0];
   }
 }

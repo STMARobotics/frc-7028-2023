@@ -13,52 +13,52 @@ public class LimelightTarget_Fiducial {
   public String fiducialFamily;
 
   @JsonProperty("t6c_ts")
-  public double[] cameraPose_TargetSpace;
+  public double[] cameraPoseTargetSpace;
 
   /** Robot Pose in field space as computed by this fiducial (x,y,z,rx,ry,rz) */
   @JsonProperty("t6r_fs")
-  public double[] robotPose_FieldSpace;
+  public double[] robotPoseFieldSpace;
 
   /** Robot Pose in target space as computed by this fiducial (x,y,z,rx,ry,rz) */
   @JsonProperty("t6r_ts")
-  public double[] robotPose_TargetSpace;
+  public double[] robotPoseTargetSpace;
 
   /** Target Pose in camera space as computed by this fiducial (x,y,z,rx,ry,rz) */
   @JsonProperty("t6t_cs")
-  public double[] targetPose_CameraSpace;
+  public double[] targetPoseCameraSpace;
 
   /** Target Pose in robot space as computed by this fiducial (x,y,z,rx,ry,rz) */
   @JsonProperty("t6t_rs")
-  public double[] targetPose_RobotSpace;
+  public double[] targetPoseRobotSpace;
 
   /** The size of the target as a percentage of the image (0-1) */
   @JsonProperty("ta")
-  public double ta;
+  public double targetArea;
 
   /** X-coordinate of the center of the target in degrees. Positive-right, center-zero */
   @JsonProperty("tx")
-  public double tx;
+  public double targetXDegrees;
 
   /** X-coordinate of the center of the target in pixels. Positive-right, center-zero */
   @JsonProperty("txp")
-  public double tx_pixels;
+  public double targetXPixels;
 
   /** Y-coordinate of the center of the target in degrees. Positive-down, center-zero */
   @JsonProperty("ty")
-  public double ty;
+  public double targetYDegrees;
 
   /** Y-coordinate of the center of the target in pixels. Positive-down, center-zero */
   @JsonProperty("typ")
-  public double ty_pixels;
+  public double targetYPixels;
 
   @JsonProperty("ts")
   public double ts;
 
   public LimelightTarget_Fiducial() {
-      cameraPose_TargetSpace = new double[6];
-      robotPose_FieldSpace = new double[6];
-      robotPose_TargetSpace = new double[6];
-      targetPose_CameraSpace = new double[6];
-      targetPose_RobotSpace = new double[6];
+      cameraPoseTargetSpace = new double[6];
+      robotPoseFieldSpace = new double[6];
+      robotPoseTargetSpace = new double[6];
+      targetPoseCameraSpace = new double[6];
+      targetPoseRobotSpace = new double[6];
   }
 }

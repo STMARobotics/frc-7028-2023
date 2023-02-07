@@ -64,14 +64,14 @@ public class ShooterSubsystem extends SubsystemBase {
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
 
-    shooterLeader.selectProfileSlot(1, 1);
+    shooterLeader.selectProfileSlot(0, 0);
     shooterLeader.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
 
-    shooterFollower.selectProfileSlot(1, 1);
+    shooterFollower.selectProfileSlot(0, 0);
     shooterFollower.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),

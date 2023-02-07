@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT;
+import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_TO_ROBOT;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     this.drivetrainSubsystem = drivetrainSubsystem;
     AprilTagFieldLayout layout;
     try {
-      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
       var alliance = DriverStation.getAlliance();
       layout.setOrigin(alliance == Alliance.Blue ?
           OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
@@ -101,7 +101,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         Transform3d camToTarget = target.getBestCameraToTarget();
         Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-        var visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT);
+        var visionMeasurement = camPose.transformBy(APRILTAG_CAMERA_TO_ROBOT);
         poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
       }
     }

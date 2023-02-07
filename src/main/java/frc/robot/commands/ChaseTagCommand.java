@@ -1,6 +1,6 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.VisionConstants.ROBOT_TO_CAMERA;
+import static frc.robot.Constants.VisionConstants.APRILTAG_ROBOT_TO_CAMERA;
 
 import java.util.function.Supplier;
 
@@ -89,7 +89,7 @@ public class ChaseTagCommand extends CommandBase {
         lastTarget = target;
         
         // Transform the robot's pose to find the camera's pose
-        var cameraPose = robotPose.transformBy(ROBOT_TO_CAMERA);
+        var cameraPose = robotPose.transformBy(APRILTAG_ROBOT_TO_CAMERA);
 
         // Trasnform the camera's pose to the target's pose
         var camToTarget = target.getBestCameraToTarget();

@@ -6,8 +6,11 @@ package frc.robot;
 
 import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
+import static frc.robot.commands.VelocityAngleInterpolator.ConeShooterSettings.shooterSettings;
 import static java.lang.Math.PI;
 import static java.lang.Math.toRadians;
+
+import java.util.List;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -15,6 +18,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.commands.VelocityAngleInterpolator;
+import frc.robot.subsystems.LimelightConfig;
 import frc.robot.swerve.ModuleConfiguration;
 
 /**
@@ -141,11 +146,21 @@ public final class Constants {
   public static class VisionConstants {
 
     /**
-     * Physical location of the camera on the robot, relative to the center of the robot.
+     * Physical location of the apriltag camera on the robot, relative to the center of the robot.
      */
-    public static final Transform3d CAMERA_TO_ROBOT =
+    public static final Transform3d APRILTAG_CAMERA_TO_ROBOT =
         new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
-    public static final Transform3d ROBOT_TO_CAMERA = CAMERA_TO_ROBOT.inverse();
+    public static final Transform3d APRILTAG_ROBOT_TO_CAMERA = APRILTAG_CAMERA_TO_ROBOT.inverse();
+
+    /**
+     * Physical location of the shooter camera on the robot, relative to the center of the robot.
+     */
+    public static final Transform3d SHOOTER_CAMERA_TO_ROBOT =
+        new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
+    public static final Transform3d SHOOTER_ROBOT_TO_CAMERA = SHOOTER_CAMERA_TO_ROBOT.inverse();
+
+    public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
+        new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);
   }
 
   public static class AutoConstants {
@@ -168,18 +183,32 @@ public final class Constants {
 
   }
   
-  public static class ElevatorConstants{
+  public static class ElevatorConstants {
     public static int ELEVATOR_LEADER_ID = 1;
     public static int ELEVATOR_FOLLOWER_ID = 2;
   }
 
-  public static class WristConstants{
+  public static class WristConstants {
     public static int WRIST_LEADER_ID = 3;
     public static int WRIST_FOLLOWER_ID = 4;
   }
 
-  public static class ShooterConstants{
+  public static class ShooterConstants {
     public static int SHOOTER_LEADER_ID = 5;
     public static int SHOOTER_FOLLOWER_ID = 6;
   }
+
+  public static class ConeShootingConstants {
+    public static double SHOOT_TIME = 0.5;
+
+    public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
+        shooterSettings(1.0, 0.4064, 1.127, 34.5)
+    ));
+
+    public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
+      shooterSettings(1.0, 0.4064, 1.127, 34.5)
+    ));
+
+  }
+
 }

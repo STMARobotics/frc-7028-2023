@@ -6,8 +6,11 @@ package frc.robot;
 
 import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
+import static frc.robot.commands.VelocityAngleInterpolator.ConeShooterSettings.shooterSettings;
 import static java.lang.Math.PI;
 import static java.lang.Math.toRadians;
+
+import java.util.List;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -15,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.commands.VelocityAngleInterpolator;
 import frc.robot.subsystems.LimelightConfig;
 import frc.robot.swerve.ModuleConfiguration;
 
@@ -176,18 +180,25 @@ public final class Constants {
 
   }
   
-  public static class ElevatorConstants{
+  public static class ElevatorConstants {
     public static int ELEVATOR_LEADER_ID = 1;
     public static int ELEVATOR_FOLLOWER_ID = 2;
   }
 
-  public static class WristConstants{
+  public static class WristConstants {
     public static int WRIST_LEADER_ID = 3;
     public static int WRIST_FOLLOWER_ID = 4;
   }
 
-  public static class ShooterConstants{
+  public static class ShooterConstants {
     public static int SHOOTER_LEADER_ID = 5;
     public static int SHOOTER_FOLLOWER_ID = 6;
   }
+
+  public static class ConeShootingConstants {
+    public static VelocityAngleInterpolator VELOCITY_TABLE = new VelocityAngleInterpolator(List.of(
+        shooterSettings(1.0, 0.4064, 1.127, 34.5)
+    ));
+  }
+
 }

@@ -2,8 +2,9 @@ package frc.robot.commands;
 
 import static frc.robot.Constants.ConeShootingConstants.SHOOT_TIME;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LimelightRetroCalcs;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -19,13 +21,11 @@ import frc.robot.subsystems.WristSubsystem;
 /**
  * Command to drive within range, turn to target, position elevator and wrist, and then shoot
  */
-public class ShootCommand extends CommandBase {
+public class InterpolateShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double AIM_TOLERANCE = 1.0;
-  private static final double DISTANCE_TOLERANCE = 0.15;
-  private static final double TARGET_Y_SETPOINT = 4.2; // degrees in the limelight top target
+  private static final double AIM_TOLERANCE = Units.degreesToRadians(1.0);
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
@@ -37,39 +37,33 @@ public class ShootCommand extends CommandBase {
   private final TrapezoidProfile.Constraints kThetaControllerConstraints = 
       new TrapezoidProfile.Constraints(2 * Math.PI, 2 * Math.PI);
   private final ProfiledPIDController aimController = new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
-  private final PIDController distanceController = new PIDController(.5, 0, 0);
 
   private final Profile shooterProfile;
-  private final double elevatorMeters;
-  private final double wristRadians;
-  private final double shooterRPS;
+  private final LimelightRetroCalcs limelightCalcs;
 
   private boolean isShooting = false;
 
   /**
    * Constructor
-   * @param elevatorMeters position of elevator in meters
-   * @param wristRadians position of wrist in radians
-   * @param shooterRPS velocity of shooter in rotations per second
-   * @param shooterProfile limelight profile
+   * @param shooterProfile shooter profile
    * @param drivetrainSubsystem drivetrain
    * @param elevatorSubsystem elevator
    * @param wristSubsystem wrist
    * @param shooterSubsystem shooter
    * @param limelightSubssystem limelight
+   * @param cameraToRobot camera to robot transformation
    */
-  public ShootCommand(double elevatorMeters, double wristRadians, double shooterRPS, Profile shooterProfile,
+  public InterpolateShootCommand(Profile shooterProfile,
       DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
       ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem) {
-    this.elevatorMeters = elevatorMeters;
-    this.wristRadians = wristRadians;
-    this.shooterRPS = shooterRPS;
     this.shooterProfile = shooterProfile;
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
+
+    this.limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -79,7 +73,6 @@ public class ShootCommand extends CommandBase {
     shootTimer.reset();
     isShooting = false;
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
-    distanceController.setSetpoint(TARGET_Y_SETPOINT);
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
   }
@@ -88,31 +81,31 @@ public class ShootCommand extends CommandBase {
   public void execute() {
     limelightSubsystem.getLatestRetroTarget().ifPresentOrElse((limelightRetroResults) -> {
 
-      var targetX =  limelightRetroResults.targetXDegrees;
-      var targetY = limelightRetroResults.targetYDegrees;
+      // get the distance and angle of the target, relative to the robot
+      var targetPose = limelightCalcs.getTargetPose(limelightRetroResults);
+      var targetDistance = targetPose.getTranslation().getDistance(new Translation2d());
+      var targetAngle = new Rotation2d(targetPose.getX(), targetPose.getY());
 
-      elevatorSubsystem.moveToPosition(elevatorMeters);
-      wristSubsystem.moveToPosition(wristRadians);
+      var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
+      elevatorSubsystem.moveToPosition(shooterSettings.height);
+      wristSubsystem.moveToPosition(shooterSettings.angle);
 
       var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
-      var targetHeadingRadians = drivetrainHeading.getRadians() - Units.degreesToRadians(targetX);
+      var targetHeadingRadians = drivetrainHeading.minus(targetAngle).getRadians();
       
       aimController.setGoal(targetHeadingRadians);
       var rotationCorrection = 
-          Math.abs(targetX) > AIM_TOLERANCE ? aimController.calculate(drivetrainHeading.getRadians()) : 0;
-      var distanceCorrection =
-          Math.abs(targetY - TARGET_Y_SETPOINT) > DISTANCE_TOLERANCE ? distanceController.calculate(targetY) : 0;
+          Math.abs(targetAngle.getRadians()) > AIM_TOLERANCE ? aimController.calculate(drivetrainHeading.getRadians()) : 0;
 
-      drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0, rotationCorrection));
+      drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, rotationCorrection));
 
       var readyToShoot =
-          Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
-          && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE
-          && Math.abs(targetX) < AIM_TOLERANCE
-          && Math.abs(targetY - TARGET_Y_SETPOINT) < DISTANCE_TOLERANCE;
+          Math.abs(elevatorSubsystem.getElevatorPosition() - shooterSettings.height) < ELEVATOR_TOLERANCE
+          && Math.abs(wristSubsystem.getWristPosition() - shooterSettings.angle) < WRIST_TOLERANCE
+          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE;
 
       if (isShooting || readyToShoot) {
-        shooterSubsystem.shootVelocity(shooterRPS);
+        shooterSubsystem.shootVelocity(shooterSettings.velocity);
         shootTimer.start();
         isShooting = true;
       }

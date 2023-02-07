@@ -42,24 +42,24 @@ public class LimelightResults {
   public double[] botposeWPIBlue;
 
   @JsonProperty("Retro")
-  public LimelightTarget_Retro[] RetroreflectiveTargets;
+  public RetroLimelightTarget[] RetroreflectiveTargets;
 
   @JsonProperty("Fiducial")
-  public LimelightTarget_Fiducial[] FiducialTargets;
+  public FiducialLimelightTarget[] FiducialTargets;
 
   @JsonProperty("Classifier")
-  public LimelightTarget_Classifier[] classifierTargets;
+  public ClassifierLimelightTarget[] classifierTargets;
 
   @JsonProperty("Detector")
-  public LimelightTarget_Detector[] detectorTargets;
+  public DetectorLimelightTarget[] detectorTargets;
 
   public LimelightResults() {
       botpose = new double[6];
       botposeWPIRed = new double[6];
       botposeWPIBlue = new double[6];
-      RetroreflectiveTargets = new LimelightTarget_Retro[0];
-      FiducialTargets = new LimelightTarget_Fiducial[0];
-      classifierTargets = new LimelightTarget_Classifier[0];
-      detectorTargets = new LimelightTarget_Detector[0];
+      RetroreflectiveTargets = new RetroLimelightTarget[0];
+      FiducialTargets = new FiducialLimelightTarget[0];
+      classifierTargets = new ClassifierLimelightTarget[0];
+      detectorTargets = new DetectorLimelightTarget[0];
   }
 }

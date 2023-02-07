@@ -2,32 +2,25 @@ package frc.robot.limelight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class LimelightTarget_Fiducial {
+public class RetroLimelightTarget {
 
-  /** Fiducial tag ID */
-  @JsonProperty("fid")
-  public double fiducialID;
-
-  /** Fiducial Family (16H5C, 25H9C, 36H11C, etc) */
-  @JsonProperty("fam")
-  public String fiducialFamily;
-
+  /** Camera Pose in target space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6c_ts")
   public double[] cameraPoseTargetSpace;
 
-  /** Robot Pose in field space as computed by this fiducial (x,y,z,rx,ry,rz) */
+  /** Robot Pose in field space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6r_fs")
   public double[] robotPoseFieldSpace;
 
-  /** Robot Pose in target space as computed by this fiducial (x,y,z,rx,ry,rz) */
+  /** Robot Pose in target space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6r_ts")
   public double[] robotPoseTargetSpace;
 
-  /** Target Pose in camera space as computed by this fiducial (x,y,z,rx,ry,rz) */
+  /** Target Pose in camera space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6t_cs")
   public double[] targetPoseCameraSpace;
 
-  /** Target Pose in robot space as computed by this fiducial (x,y,z,rx,ry,rz) */
+  /** Target Pose in robot space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6t_rs")
   public double[] targetPoseRobotSpace;
 
@@ -54,11 +47,12 @@ public class LimelightTarget_Fiducial {
   @JsonProperty("ts")
   public double ts;
 
-  public LimelightTarget_Fiducial() {
+  public RetroLimelightTarget() {
       cameraPoseTargetSpace = new double[6];
       robotPoseFieldSpace = new double[6];
       robotPoseTargetSpace = new double[6];
       targetPoseCameraSpace = new double[6];
       targetPoseRobotSpace = new double[6];
   }
+
 }

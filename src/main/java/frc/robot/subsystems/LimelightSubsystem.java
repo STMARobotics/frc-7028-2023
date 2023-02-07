@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.limelight.LimelightResults;
 import frc.robot.limelight.LimelightResultsWrapper;
+import frc.robot.limelight.RetroLimelightTarget;
 
 
 /**
@@ -60,6 +63,14 @@ public class LimelightSubsystem extends SubsystemBase {
       }
     }
     return latestLimelightResults;
+  }
+  
+  public Optional<RetroLimelightTarget> getLatestRetroTarget() {
+    var results = getLatestResults();
+    if (results.valid && results.RetroreflectiveTargets.length > 0) {
+      Optional.of(results.RetroreflectiveTargets[0]);
+    }
+    return Optional.empty();
   }
 
   @Override
@@ -118,7 +129,7 @@ public class LimelightSubsystem extends SubsystemBase {
     takeSnapshot = true;
   }
 
-  protected void setPipelineId(int pipelineId) {
+  public void setPipelineId(int pipelineId) {
     activePipelineId = pipelineId;
   }
 

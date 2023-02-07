@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.ConeShootingConstants.SHOOT_TIME;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -13,16 +15,16 @@ public class JustShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double SHOOT_TIME = 0.1;
 
-  private final double elevatorMeters;
-  private final double wristRadians;
-  private final double shooterRPS;
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final Timer shootTimer = new Timer();
 
+  protected double elevatorMeters;
+  protected double wristRadians;
+  protected double shooterRPS;
+  
   private boolean isShooting = false;
 
   /**
@@ -39,6 +41,15 @@ public class JustShootCommand extends CommandBase {
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
     this.shooterRPS = shooterRPS;
+    this.elevatorSubsystem = elevatorSubsystem;
+    this.wristSubsystem = wristSubsystem;
+    this.shooterSubsystem = shooterSubsystem;
+
+    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem);
+  }
+
+  protected JustShootCommand(ElevatorSubsystem elevatorSubsystem,
+      WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
     this.shooterSubsystem = shooterSubsystem;

@@ -1,0 +1,57 @@
+package frc.robot.subsystems;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.limelight.RetroLimelightTarget;
+
+/**
+ * Unit tests for LimelightRetroCalcs. Uses some values created with a sketchup drawing.
+ */
+public class LimelightRetroCalcsTest {
+
+  private Transform3d cameraToRobot = new Transform3d(new Translation3d(-12.625, 25.6875, 13.5625), new Rotation3d());
+
+  @Test
+  public void testCameraDistanceToTarget() {
+    var target = new RetroLimelightTarget();
+    target.targetYDegrees = 26.7;
+
+    var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
+
+    assertEquals(79.33, retroCalcs.getCameraToTargetDistance(target), .005);
+  }
+
+  @Test
+  public void testRobotDistanceToTarget() {
+    var target = new RetroLimelightTarget();
+    target.targetYDegrees = 26.7;
+    target.targetXDegrees = -48.3;
+
+    var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
+
+    var targetPose = retroCalcs.getTargetPose(target);
+    var distance = targetPose.getTranslation().getDistance(new Translation2d());
+    assertEquals(73.4, distance, .11);
+  }
+
+  @Test
+  public void testRobotAngleToTarget() {
+    var target = new RetroLimelightTarget();
+    target.targetYDegrees = 26.7;
+    target.targetXDegrees = -48.3;
+
+    var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
+
+    var targetPose = retroCalcs.getTargetPose(target);
+    var angle = new Rotation2d(targetPose.getX(), targetPose.getY()).getDegrees();
+    assertEquals(27.1, angle, .1);
+  }
+  
+}

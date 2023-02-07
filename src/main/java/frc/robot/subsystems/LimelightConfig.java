@@ -1,19 +1,20 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Transform3d;
+
 /**
  * Holds configuration for a limelight to use with ShooterLimelightSubsystem.
  */
 public class LimelightConfig {
 
-  private String networkTableName;
+  private final String networkTableName;
 
-  private double mountHeight;
-
-  private double mountDepth;
-
-  private double mountAngle;
-
-  private double mountDistanceFromCenter;
+  private final Transform3d cameraToRobot;
+  
+  public LimelightConfig(String networkTableName, Transform3d cameraToRobot) {
+    this.networkTableName = networkTableName;
+    this.cameraToRobot = cameraToRobot;
+  }
 
   /**
    * Gets the name of the Limelight network table
@@ -24,102 +25,11 @@ public class LimelightConfig {
   }
 
   /**
-   * Gets the height of the limelight on the bot in meters
-   * @return limelight height
+   * Gets the physical location of the camera on the robot, relative to the center of the robot.
+   * @return
    */
-  public double getMountHeight() {
-    return mountHeight;
-  }
-
-  /**
-   * Distance Limelight is mounted from the front frame of the bot
-   * @return mount depth
-   */
-  public double getMountDepth() {
-    return mountDepth;
-  }
-
-  /**
-   * Angle of the limelight in degrees
-   * @return mount angle
-   */
-  public double getMountAngle() {
-    return mountAngle;
-  }
-
-  /**
-   * Distance Limelight is mounted from the centerline of the bot
-   * @return limelight distance from center
-   */
-  public double getMountDistanceFromCenter() {
-    return mountDistanceFromCenter;
-  }
-
-  /**
-   * Builder to create immutable LimelightConfig.
-   */
-  public static class Builder {
-    
-    private LimelightConfig limelightConfig = new LimelightConfig();
-
-    /** Creates an instance of the Builder */
-    public static Builder create() {
-      return new Builder();
-    }
-
-    /**
-     * Name of the Limelight network table
-     * @param networkTableName network table name
-     */
-    public Builder withNetworkTableName(String networkTableName) {
-      limelightConfig.networkTableName = networkTableName;
-      return this;
-    }
-
-    /**
-     * Height of the limelight on the bot in meters
-     * @param mountingHeight mounting height
-     */
-    public Builder withMountingHeight(double mountingHeight) {
-      limelightConfig.mountHeight = mountingHeight;
-      return this;
-    }
-
-    /**
-     * Distance Limelight is mounted from the front frame of the bot
-     * @param mountDepth mount depth
-     */
-    public Builder withMountDepth(double mountDepth) {
-      limelightConfig.mountDepth = mountDepth;
-      return this;
-    }
-
-    /**
-     * Angle of the limelight in degrees
-     * @param mountingAngle mount angle
-     */
-    public Builder withMountingAngle(double mountingAngle) {
-      limelightConfig.mountAngle = mountingAngle;
-      return this;
-    }
-
-    /**
-     * Distance Limelight is mounted from the centerline of the bot
-     * @param mountDistanceFromCenter distance from center
-     */
-    public Builder withMountDistanceFromCenter(double mountDistanceFromCenter) {
-      limelightConfig.mountDistanceFromCenter = mountDistanceFromCenter;
-      return this;
-    }
-
-    /**
-     * Builds the Limelight config after setting the parameters
-     * @return LimelightConfig instance
-     */
-    public LimelightConfig build() {
-      return limelightConfig;
-    }
-
+  public Transform3d getCameraToRobot() {
+    return cameraToRobot;
   }
 
 }

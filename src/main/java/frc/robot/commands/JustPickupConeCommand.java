@@ -60,8 +60,6 @@ public class JustPickupConeCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    elevatorSubsystem.stop();
-    wristSubsystem.stop();
     shooterSubsystem.stop();
   }
 

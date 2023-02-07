@@ -68,7 +68,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
     pigeon.configMountPoseRoll(0);
-    pigeon.configMountPoseYaw(90);
+    pigeon.configMountPoseYaw(0);
     pigeon.configMountPosePitch(0);
 
     ShuffleboardLayout frontLeftLayout = null;

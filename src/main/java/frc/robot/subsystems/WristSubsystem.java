@@ -28,7 +28,7 @@ public class WristSubsystem extends SubsystemBase {
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
   private static final double ENCODER_OFFSET = -0.58342d;
   private static final double GRAVITY_FF = 0.01;
-  private static final float LIMIT_BOTTOM = 0.5737f;
+  private static final float LIMIT_BOTTOM = 0.5804f;
   private static final float LIMIT_TOP = 0.8995f;
 
   private final CANSparkMax wristLeader;
@@ -116,6 +116,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
+    SmartDashboard.putNumber("Wrist Position Raw", wristEncoder.getPosition());
   }
 
   /**

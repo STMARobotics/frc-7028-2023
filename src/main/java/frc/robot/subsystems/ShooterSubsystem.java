@@ -6,9 +6,9 @@ import static frc.robot.Constants.ShooterConstants.SHOOTER_LEADER_ID;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -30,6 +30,11 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kP = 0.03;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
+    config.slot1.kP = 0.3;
+    config.slot1.kI = 0;
+    config.slot1.kD = 0;
+    config.slot1.allowableClosedloopError = 0;
+    config.neutralDeadband = 0;
     config.voltageCompSaturation = 12;
 
     shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID, CANIVORE_BUS_NAME);
@@ -43,8 +48,9 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFollower.enableVoltageCompensation(true);
 
     shooterLeader.setInverted(true);
-    shooterFollower.follow(shooterLeader);
-    shooterFollower.setInverted(InvertType.OpposeMaster);
+
+    shooterLeader.setNeutralMode(NeutralMode.Brake);
+    shooterFollower.setNeutralMode(NeutralMode.Brake);
   }
 
   @Override
@@ -52,20 +58,37 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Leader Speed Raw", shooterLeader.getSelectedSensorVelocity());
     SmartDashboard.putNumber("Follower Speed Raw", shooterFollower.getSelectedSensorVelocity());
     SmartDashboard.putNumber("Leader Speed RPS", getVelocity());
+    SmartDashboard.putNumber("Leader Position", shooterLeader.getSelectedSensorPosition());
   }
 
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
 
+    shooterLeader.selectProfileSlot(1, 1);
     shooterLeader.set(
+        ControlMode.Velocity,
+        rpsToedgesPerDecisec(rps),
+        DemandType.ArbitraryFeedForward,
+        feedForwardVolts / 12);
+
+    shooterFollower.selectProfileSlot(1, 1);
+    shooterFollower.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
   }
 
+  public void activeStop() {
+    shooterLeader.selectProfileSlot(1, 0);
+    shooterLeader.set(ControlMode.Position, shooterLeader.getSelectedSensorPosition());
+    shooterFollower.selectProfileSlot(1, 0);
+    shooterFollower.set(ControlMode.Position, shooterFollower.getSelectedSensorPosition());
+  }
+
   public void shootDutyCycle(double speed) {
     shooterLeader.set(speed);
+    shooterFollower.set(speed);
   }
 
   /**

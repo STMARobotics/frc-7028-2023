@@ -41,6 +41,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -159,7 +160,8 @@ public class RobotContainer {
     //     0.4064, 1.127, 34.5, Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
     //     shooterSubsystem, coneLimelightSubsystem));
     
-    controller.rightTrigger().whileTrue(new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    controller.rightTrigger().whileTrue(
+        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 
     // controller.rightTrigger().whileTrue(new InterpolateShootCommand(
     //     Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem));

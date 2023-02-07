@@ -37,6 +37,8 @@ public class WristSubsystem extends SubsystemBase {
   private final SparkMaxPIDController pidController;
   private final SparkMaxAbsoluteEncoder wristEncoder;
 
+  private Double targetPosition = null;
+
   public WristSubsystem() {
     wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
     wristFollower = new CANSparkMax(WristConstants.WRIST_FOLLOWER_ID, MotorType.kBrushless);
@@ -105,26 +107,35 @@ public class WristSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (targetPosition != null) {
+      // Calculate feed forward based on angle to counteract gravity
+      double cosineScalar = Math.cos(getWristPosition());
+      double feedForward = GRAVITY_FF * cosineScalar;
+      pidController.setReference(armRadiansToEncoderRotations(targetPosition), 
+          ControlType.kSmartMotion, 0, feedForward, ArbFFUnits.kPercentOut);
+    }
+
     SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
   }
 
   /**
-   * Moves the wrist using duty cycle
+   * Moves the wrist using duty cycle. There is no motor safety, so calling this will continue to move until another
+   * method is called.
    * @param speed duty cycle [-1,1]
    */
   public void moveWrist(double speed){
+    targetPosition = null;
     wristLeader.set(speed);
   }
 
   /**
-   * Moves the elevator to a position. Zero is horizontal, up is positive
+   * Moves the elevator to a position. Zero is horizontal, up is positive. There is no motor safety, so calling this
+   * will continue to move to this position, and hold it until another method is called.
    * @param radians position in radians
    */
   public void moveToPosition(double radians) {
-    double cosineScalar = Math.cos(getWristPosition());
-    double feedForward = GRAVITY_FF * cosineScalar;
-
-    pidController.setReference(armRadiansToEncoderRotations(radians), ControlType.kSmartMotion, 0, feedForward, ArbFFUnits.kPercentOut);
+    // Set the target position, but move in execute() so feed forward keeps updating
+    targetPosition = radians;
   }
 
   /**
@@ -148,6 +159,7 @@ public class WristSubsystem extends SubsystemBase {
    * Stop the elevator
    */
   public void stop() {
+    targetPosition = null;
     wristLeader.stopMotor();
   }
 

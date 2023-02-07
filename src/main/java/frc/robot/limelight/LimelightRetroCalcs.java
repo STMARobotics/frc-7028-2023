@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.limelight;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.limelight.RetroLimelightTarget;
 
 /**
  * Class to perform calculations from a limelight retroreflective target
@@ -33,7 +32,7 @@ public class LimelightRetroCalcs {
    * @param retroResults limelight target data
    * @return distance from the camera to the target
    */
-  protected double getCameraToTargetDistance(RetroLimelightTarget retroResults) {
+  protected double getCameraToTargetDistance(LimelightRetroTarget retroResults) {
     var cameraPitch = cameraToRobot.getRotation().getY();
     var cameraHeight = cameraToRobot.getZ();
     return (targetHeight - cameraHeight)
@@ -45,7 +44,7 @@ public class LimelightRetroCalcs {
    * @param targetHeight height to the center of the target
    * @return robot relative pose
    */
-  public Pose2d getTargetPose(RetroLimelightTarget retroResults) {
+  public Pose2d getTargetPose(LimelightRetroTarget retroResults) {
     var targetOnCameraCoordinates = new Translation2d(
         getCameraToTargetDistance(retroResults),
         Rotation2d.fromDegrees(-retroResults.targetXDegrees));

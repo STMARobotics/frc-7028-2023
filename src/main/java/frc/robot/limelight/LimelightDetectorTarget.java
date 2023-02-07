@@ -2,7 +2,7 @@ package frc.robot.limelight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DetectorLimelightTarget {
+public class LimelightDetectorTarget {
 
   /** Human-readable class name string */
   @JsonProperty("class")
@@ -36,6 +36,6 @@ public class DetectorLimelightTarget {
   @JsonProperty("typ")
   public double targetYPixels;
 
-  public DetectorLimelightTarget() {
+  public LimelightDetectorTarget() {
   }
 }

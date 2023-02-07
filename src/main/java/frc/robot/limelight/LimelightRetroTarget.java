@@ -2,7 +2,7 @@ package frc.robot.limelight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RetroLimelightTarget {
+public class LimelightRetroTarget {
 
   /** Camera Pose in target space as computed by solvepnp (x,y,z,rx,ry,rz) */
   @JsonProperty("t6c_ts")
@@ -47,7 +47,7 @@ public class RetroLimelightTarget {
   @JsonProperty("ts")
   public double ts;
 
-  public RetroLimelightTarget() {
+  public LimelightRetroTarget() {
       cameraPoseTargetSpace = new double[6];
       robotPoseFieldSpace = new double[6];
       robotPoseTargetSpace = new double[6];

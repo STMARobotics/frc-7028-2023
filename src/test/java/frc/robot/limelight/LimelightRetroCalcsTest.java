@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.limelight;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import frc.robot.limelight.RetroLimelightTarget;
 
 /**
  * Unit tests for LimelightRetroCalcs. Uses some values created with a sketchup drawing.
@@ -20,7 +19,7 @@ public class LimelightRetroCalcsTest {
 
   @Test
   public void testCameraDistanceToTarget() {
-    var target = new RetroLimelightTarget();
+    var target = new LimelightRetroTarget();
     target.targetYDegrees = 26.7;
 
     var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
@@ -30,7 +29,7 @@ public class LimelightRetroCalcsTest {
 
   @Test
   public void testRobotDistanceToTarget() {
-    var target = new RetroLimelightTarget();
+    var target = new LimelightRetroTarget();
     target.targetYDegrees = 26.7;
     target.targetXDegrees = -48.3;
 
@@ -43,7 +42,7 @@ public class LimelightRetroCalcsTest {
 
   @Test
   public void testRobotAngleToTarget() {
-    var target = new RetroLimelightTarget();
+    var target = new LimelightRetroTarget();
     target.targetYDegrees = 26.7;
     target.targetXDegrees = -48.3;
 

@@ -2,7 +2,7 @@ package frc.robot.limelight;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FiducialLimelightTarget {
+public class LimelightFiducialTarget {
 
   /** Fiducial tag ID */
   @JsonProperty("fid")
@@ -54,7 +54,7 @@ public class FiducialLimelightTarget {
   @JsonProperty("ts")
   public double ts;
 
-  public FiducialLimelightTarget() {
+  public LimelightFiducialTarget() {
       cameraPoseTargetSpace = new double[6];
       robotPoseFieldSpace = new double[6];
       robotPoseTargetSpace = new double[6];

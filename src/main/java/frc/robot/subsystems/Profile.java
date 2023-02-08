@@ -12,10 +12,10 @@ import frc.robot.commands.VelocityAngleInterpolator;
 public enum Profile {
 
   /** Middle of the Top cone vision target */
-  TOP(1, Units.inchesToMeters(24.125), ConeShootingConstants.TOP_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT),
+  TOP(1, Units.inchesToMeters(44.0), ConeShootingConstants.TOP_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT),
 
   /** Middle of the Middle cone vision target */
-  MIDDLE(0, Units.inchesToMeters(43.875), ConeShootingConstants.MIDDLE_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT);
+  MIDDLE(0, Units.inchesToMeters(24.125), ConeShootingConstants.MIDDLE_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT);
 
   /** ID for the Limelight profile */
   public final int pipelineId;

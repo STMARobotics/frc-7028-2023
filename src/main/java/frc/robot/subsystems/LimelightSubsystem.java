@@ -67,8 +67,8 @@ public class LimelightSubsystem extends SubsystemBase {
   
   public Optional<LimelightRetroTarget> getLatestRetroTarget() {
     var results = getLatestResults();
-    if (results.valid && results.RetroreflectiveTargets.length > 0) {
-      Optional.of(results.RetroreflectiveTargets[0]);
+    if (results != null && results.valid && results.RetroreflectiveTargets.length > 0) {
+      return Optional.of(results.RetroreflectiveTargets[0]);
     }
     return Optional.empty();
   }

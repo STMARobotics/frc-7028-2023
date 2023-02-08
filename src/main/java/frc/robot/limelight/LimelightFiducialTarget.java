@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LimelightFiducialTarget {
 
   /** Fiducial tag ID */
-  @JsonProperty("fid")
+  @JsonProperty("fiD")
   public double fiducialID;
 
   /** Fiducial Family (16H5C, 25H9C, 36H11C, etc) */

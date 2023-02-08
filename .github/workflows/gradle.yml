@@ -20,3 +20,15 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: test
+    - name: Send status to Slack
+      if: always()
+      id: slack
+      uses: slackapi/slack-github-action@v1.18.0
+      with:
+        channel-id: 'C8Q6UHPA5'
+        payload: |
+          {
+            "text": "GitHub Action: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }} #${{ github.run_number }}>\nStatus: ${{ job.status }}\nBranch/Tag: ${{ github.ref_name }}\nTriggered by: ${{ github.actor }}"
+          }
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

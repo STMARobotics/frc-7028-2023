@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class LimelightRetroCalcsTest {
 
-  private Transform3d cameraToRobot = new Transform3d(new Translation3d(-12.625, 25.6875, 13.5625), new Rotation3d());
+  private Transform3d cameraToRobot = new Transform3d(new Translation3d(-12.625, 25.6875, -13.5625), new Rotation3d());
 
   @Test
   public void testCameraDistanceToTarget() {

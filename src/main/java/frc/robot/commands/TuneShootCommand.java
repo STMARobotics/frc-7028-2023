@@ -53,6 +53,7 @@ public class TuneShootCommand extends JustShootCommand {
   public void initialize() {
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
+    super.initialize();
   }
 
   @Override

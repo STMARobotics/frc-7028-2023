@@ -1,7 +1,8 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.ConeShootingConstants.SHOOT_TIME;
-
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -20,6 +21,10 @@ public class JustShootCommand extends CommandBase {
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final Timer shootTimer = new Timer();
+
+  private final MedianFilter elevatoFilter = new MedianFilter(5);
+  private final MedianFilter wristFilter = new MedianFilter(5);
+  private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
 
   protected double elevatorMeters;
   protected double wristRadians;
@@ -61,6 +66,7 @@ public class JustShootCommand extends CommandBase {
   public void initialize() {
     shootTimer.reset();
     isShooting = false;
+    readyToShootDebouncer.calculate(false);
   }
 
   @Override
@@ -68,20 +74,28 @@ public class JustShootCommand extends CommandBase {
     elevatorSubsystem.moveToPosition(elevatorMeters);
     wristSubsystem.moveToPosition(wristRadians);
 
-    var readyToShoot =
-        Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
-        && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
+    var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
+    var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
+    var readyToShoot = readyToShootDebouncer.calculate(
+        Math.abs(elevatorPosition - elevatorMeters) < ELEVATOR_TOLERANCE
+        && Math.abs(wristPosition - wristRadians) < WRIST_TOLERANCE);
 
     if (isShooting || readyToShoot) {
       shooterSubsystem.shootVelocity(shooterRPS);
       shootTimer.start();
+      if (!isShooting) {
+        System.out.println("Elevator: " + elevatorSubsystem.getElevatorPosition());
+        System.out.println("Wrist: " + wristSubsystem.getWristPosition());
+        System.out.println("Shooter: " + shooterSubsystem.getVelocity());
+      }
       isShooting = true;
     }
   }
 
   @Override
   public boolean isFinished() {
-    return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
+    return false;
+    // return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
   }
 
   @Override

@@ -1,9 +1,10 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.ConeShootingConstants.SHOOT_TIME;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -44,6 +45,10 @@ public class ShootCommand extends CommandBase {
   private final double wristRadians;
   private final double shooterRPS;
 
+  private final MedianFilter elevatoFilter = new MedianFilter(5);
+  private final MedianFilter wristFilter = new MedianFilter(5);
+  private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+
   private boolean isShooting = false;
 
   /**
@@ -82,6 +87,7 @@ public class ShootCommand extends CommandBase {
     distanceController.setSetpoint(TARGET_Y_SETPOINT);
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
+    readyToShootDebouncer.calculate(false);
   }
 
   @Override
@@ -105,9 +111,11 @@ public class ShootCommand extends CommandBase {
 
       drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0, rotationCorrection));
 
+      var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
+      var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
       var readyToShoot =
-          Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
-          && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE
+          Math.abs(elevatorPosition - elevatorMeters) < ELEVATOR_TOLERANCE
+          && Math.abs(wristPosition - wristRadians) < WRIST_TOLERANCE
           && Math.abs(targetX) < AIM_TOLERANCE
           && Math.abs(targetY - TARGET_Y_SETPOINT) < DISTANCE_TOLERANCE;
 
@@ -127,7 +135,8 @@ public class ShootCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
+    return false;
+    // return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
   }
 
   @Override

@@ -159,7 +159,7 @@ public class RobotContainer {
 
     // Intake
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
-        inchesToMeters(1.135), 0.018, -0.15, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(1.16), 0.024, -0.225, elevatorSubsystem, wristSubsystem, shooterSubsystem));
 
     // Shoot
     // controller.rightTrigger().whileTrue(new ShootCommand(

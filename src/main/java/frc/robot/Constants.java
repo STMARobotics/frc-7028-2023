@@ -156,7 +156,7 @@ public final class Constants {
      * Physical location of the shooter camera on the robot, relative to the center of the robot.
      */
     public static final Transform3d SHOOTER_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
+        new Transform3d(new Translation3d(-0.128, 0.0075, -1.002), new Rotation3d(0.0, degreesToRadians(7.06), 0.0));
     public static final Transform3d SHOOTER_ROBOT_TO_CAMERA = SHOOTER_CAMERA_TO_ROBOT.inverse();
 
     public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 

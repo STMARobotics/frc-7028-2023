@@ -33,8 +33,8 @@ public class LimelightRetroCalcs {
    * @return distance from the camera to the target
    */
   protected double getCameraToTargetDistance(LimelightRetroTarget retroResults) {
-    var cameraPitch = cameraToRobot.getRotation().getY();
-    var cameraHeight = cameraToRobot.getZ();
+    var cameraPitch = -cameraToRobot.getRotation().getY();
+    var cameraHeight = -cameraToRobot.getZ();
     return (targetHeight - cameraHeight)
         / Math.tan(cameraPitch + Units.degreesToRadians(retroResults.targetYDegrees));
   }

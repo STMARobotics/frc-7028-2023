@@ -1,8 +1,9 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.ConeShootingConstants.SHOOT_TIME;
-
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -41,6 +42,10 @@ public class InterpolateShootCommand extends CommandBase {
   private final Profile shooterProfile;
   private final LimelightRetroCalcs limelightCalcs;
 
+  private final MedianFilter elevatoFilter = new MedianFilter(5);
+  private final MedianFilter wristFilter = new MedianFilter(5);
+  private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+
   private boolean isShooting = false;
 
   /**
@@ -75,12 +80,13 @@ public class InterpolateShootCommand extends CommandBase {
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
+    readyToShootDebouncer.calculate(false);
   }
 
   @Override
   public void execute() {
     limelightSubsystem.getLatestRetroTarget().ifPresentOrElse((limelightRetroResults) -> {
-
+      
       // get the distance and angle of the target, relative to the robot
       var targetPose = limelightCalcs.getTargetPose(limelightRetroResults);
       var targetDistance = targetPose.getTranslation().getDistance(new Translation2d());
@@ -99,10 +105,13 @@ public class InterpolateShootCommand extends CommandBase {
 
       drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, rotationCorrection));
 
-      var readyToShoot =
-          Math.abs(elevatorSubsystem.getElevatorPosition() - shooterSettings.height) < ELEVATOR_TOLERANCE
-          && Math.abs(wristSubsystem.getWristPosition() - shooterSettings.angle) < WRIST_TOLERANCE
-          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE;
+      var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
+      var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
+
+      var readyToShoot = readyToShootDebouncer.calculate(
+          Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
+          && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
+          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE);
 
       if (isShooting || readyToShoot) {
         shooterSubsystem.shootVelocity(shooterSettings.velocity);
@@ -120,7 +129,8 @@ public class InterpolateShootCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
+    return false;
+    // return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
   }
 
   @Override

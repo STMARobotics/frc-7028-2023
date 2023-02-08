@@ -67,7 +67,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     pidController.setD(kD);
     pidController.setIZone(kIz);
     pidController.setFF(kFF);
-    pidController.setOutputRange(kMinOutput, kMaxOutput); 
+    pidController.setOutputRange(kMinOutput, kMaxOutput);
 
     pidController.setSmartMotionMaxVelocity(maxVel, SMART_MOTION_SLOT);
     pidController.setSmartMotionMinOutputVelocity(minVel, SMART_MOTION_SLOT);

@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,8 +37,8 @@ public class InterpolateShootCommand extends CommandBase {
   private final Timer shootTimer = new Timer();
 
   private final TrapezoidProfile.Constraints kThetaControllerConstraints = 
-      new TrapezoidProfile.Constraints(2 * Math.PI, 2 * Math.PI);
-  private final ProfiledPIDController aimController = new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
+      new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(0.02, 0, 0, kThetaControllerConstraints);
 
   private final Profile shooterProfile;
   private final LimelightRetroCalcs limelightCalcs;
@@ -45,6 +46,7 @@ public class InterpolateShootCommand extends CommandBase {
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
   private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+  private final LinearFilter distanceFilter = LinearFilter.movingAverage(20);
 
   private boolean isShooting = false;
 
@@ -68,7 +70,8 @@ public class InterpolateShootCommand extends CommandBase {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
 
-    this.limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    aimController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -81,6 +84,9 @@ public class InterpolateShootCommand extends CommandBase {
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
     readyToShootDebouncer.calculate(false);
+    elevatoFilter.reset();
+    wristFilter.reset();
+    distanceFilter.reset();
   }
 
   @Override
@@ -89,7 +95,7 @@ public class InterpolateShootCommand extends CommandBase {
       
       // get the distance and angle of the target, relative to the robot
       var targetPose = limelightCalcs.getTargetPose(limelightRetroResults);
-      var targetDistance = targetPose.getTranslation().getDistance(new Translation2d());
+      var targetDistance = distanceFilter.calculate(targetPose.getTranslation().getDistance(new Translation2d()));
       var targetAngle = new Rotation2d(targetPose.getX(), targetPose.getY());
 
       var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
@@ -101,9 +107,7 @@ public class InterpolateShootCommand extends CommandBase {
       
       aimController.setGoal(targetHeadingRadians);
       var rotationCorrection = 
-          Math.abs(targetAngle.getRadians()) > AIM_TOLERANCE ? aimController.calculate(drivetrainHeading.getRadians()) : 0;
-
-      drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, rotationCorrection));
+          Math.abs(targetAngle.getRadians()) > AIM_TOLERANCE ? -aimController.calculate(drivetrainHeading.getRadians()) : 0;
 
       var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
@@ -117,6 +121,9 @@ public class InterpolateShootCommand extends CommandBase {
         shooterSubsystem.shootVelocity(shooterSettings.velocity);
         shootTimer.start();
         isShooting = true;
+        drivetrainSubsystem.stop();
+      } else {
+        drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, rotationCorrection));
       }
     }, () -> {
       // No target

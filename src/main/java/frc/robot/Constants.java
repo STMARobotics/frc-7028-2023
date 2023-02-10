@@ -6,7 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
-import static frc.robot.commands.VelocityAngleInterpolator.ConeShooterSettings.shooterSettings;
+import static frc.robot.math.VelocityAngleInterpolator.ConeShooterSettings.shooterSettings;
 import static java.lang.Math.PI;
 import static java.lang.Math.toRadians;
 
@@ -18,7 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.commands.VelocityAngleInterpolator;
+import frc.robot.math.VelocityAngleInterpolator;
 import frc.robot.subsystems.LimelightConfig;
 import frc.robot.swerve.ModuleConfiguration;
 
@@ -198,11 +198,8 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-        shooterSettings(1.468, 34.5, 1.05, 0.4064),
-        shooterSettings(1.585, 36.5, 1.00, 0.4064),
-        shooterSettings(1.765, 38, 1.05, 0.4064),
-        shooterSettings(1.992, 43, 1.15, 0.4064),
-        shooterSettings(2.057, 49, 1.1, 0.445)
+      shooterSettings(0.5, 34.5, 1.05, 0.4064),    
+      shooterSettings(1.5, 34.5, 1.05, 0.4064)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

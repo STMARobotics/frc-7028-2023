@@ -35,8 +35,8 @@ public class LimelightRetroCalcsTest {
 
     var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
 
-    var targetPose = retroCalcs.getTargetPose(target);
-    var distance = targetPose.getTranslation().getDistance(new Translation2d());
+    var targetTranslation = retroCalcs.getTargetTranslation(target);
+    var distance = targetTranslation.getDistance(new Translation2d());
     assertEquals(73.4, distance, .11);
   }
 
@@ -48,7 +48,7 @@ public class LimelightRetroCalcsTest {
 
     var retroCalcs = new LimelightRetroCalcs(cameraToRobot, 53.4626);
 
-    var targetPose = retroCalcs.getTargetPose(target);
+    var targetPose = retroCalcs.getTargetTranslation(target);
     var angle = new Rotation2d(targetPose.getX(), targetPose.getY()).getDegrees();
     assertEquals(27.1, angle, .1);
   }

@@ -12,8 +12,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.MovingAverageFilter;
 import frc.robot.limelight.LimelightRetroCalcs;
+import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -102,9 +102,9 @@ public class InterpolateShootCommand extends CommandBase {
     limelightSubsystem.getLatestRetroTarget().ifPresentOrElse((limelightRetroResults) -> {
       
       // get the distance and angle of the target, relative to the robot
-      var targetPose = limelightCalcs.getTargetPose(limelightRetroResults);
-      var targetDistance = distanceFilter.calculate(targetPose.getTranslation().getDistance(new Translation2d()));
-      var targetAngle = new Rotation2d(targetPose.getX(), targetPose.getY());
+      var targetTranslation = limelightCalcs.getTargetTranslation(limelightRetroResults);
+      var targetDistance = distanceFilter.calculate(targetTranslation.getDistance(new Translation2d()));
+      var targetAngle = new Rotation2d(targetTranslation.getX(), targetTranslation.getY());
 
       var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
 

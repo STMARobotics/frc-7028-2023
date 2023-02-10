@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.math;
 
 import edu.wpi.first.util.CircularBuffer;
 

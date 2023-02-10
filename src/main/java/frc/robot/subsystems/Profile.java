@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ConeShootingConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.VelocityAngleInterpolator;
+import frc.robot.math.VelocityAngleInterpolator;
 
 /**
  * Shooter profiles enum

@@ -132,8 +132,8 @@ public final class Constants {
     public static final double Y_RATE_LIMIT = 6.0;
     public static final double ROTATION_RATE_LIMIT = 5.0 * PI;
 
-    public static final double HEADING_MAX_VELOCITY = PI * 2;
-    public static final double HEADING_MAX_ACCELERATION = PI * 2;
+    public static final double HEADING_MAX_VELOCITY = PI * 4;
+    public static final double HEADING_MAX_ACCELERATION = PI * 16;
     
     public static final double HEADING_kP = 2.0;
     public static final double HEADING_kI = 0.0;

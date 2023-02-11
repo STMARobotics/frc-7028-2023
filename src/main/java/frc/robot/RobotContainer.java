@@ -5,7 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
-import static edu.wpi.first.wpilibj2.command.Commands.print;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
@@ -16,16 +15,11 @@ import java.util.function.BooleanSupplier;
 
 import org.photonvision.PhotonCamera;
 
-import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -190,32 +184,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    var trajectory = PathPlanner.generatePath(new PathConstraints(1, 1), 
-      new PathPoint(new Translation2d(0, 0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)),
-      new PathPoint(new Translation2d(3, 0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90))
-    );
-
-    return print("Starting auto")
-        .andThen(runOnce(
-            () -> poseEstimator.setCurrentPose(new Pose2d(0, 0, new Rotation2d(0))), drivetrainSubsystem))
-        .andThen(drivetrainSubsystem
-            .createCommandForTrajectory(trajectory, poseEstimator::getCurrentPose, true))
-        .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
-        .andThen(print("Done with auto"));
-  }
-
-  public Command getPathPlannerCommand() {
-    var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
-
-    return print("Starting TestPath")
-        .andThen(runOnce(() -> poseEstimator.setCurrentPose(testPath.getInitialHolonomicPose())))
-        .andThen(drivetrainSubsystem
-            .createCommandForTrajectory(testPath, poseEstimator::getCurrentPose, true))
-        .andThen(runOnce(drivetrainSubsystem::stop, drivetrainSubsystem))
-        .andThen(print("Done with TestPath"));
-  }
-
-  public Command getPathPlannerAutoCommand() {
     var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
 
     var eventMap = new HashMap<String, Command>();

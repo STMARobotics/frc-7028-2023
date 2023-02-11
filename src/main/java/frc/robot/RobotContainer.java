@@ -30,13 +30,14 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.InterpolateShootCommand;
 import frc.robot.commands.JustPickupConeCommand;
 import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.TuneShootCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -55,7 +56,7 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private final PhotonCamera photonCamera = new PhotonCamera("LimeLight");
+  private final PhotonCamera photonCamera = null; //new PhotonCamera("LimeLight");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
@@ -81,8 +82,9 @@ public class RobotContainer {
       () -> -controller.getRightY(),
       () -> -controller.getRightX());
 
-  private final DefaultWristCommand defaultWristCommand = 
-      new DefaultWristCommand(wristSubsystem, shooterSubsystem::hasCone);
+  private final DefaultWristCommand defaultWristCommand = new DefaultWristCommand(wristSubsystem);
+  private final DefaultElevatorCommand defaultElevatorCommand =
+      new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone);
   private final DefaultShooterCommand defaultShooterCommand = new DefaultShooterCommand(shooterSubsystem);
 
   private final Timer reseedTimer = new Timer();
@@ -94,6 +96,7 @@ public class RobotContainer {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
     wristSubsystem.setDefaultCommand(defaultWristCommand);
+    elevatorSubsystem.setDefaultCommand(defaultElevatorCommand);
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
 
     // Configure the button bindings
@@ -153,22 +156,26 @@ public class RobotContainer {
 
     // Intake
     controller.leftTrigger().whileTrue(new JustPickupConeCommand(
-        inchesToMeters(1.16), 0.024, -0.1, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(1.0), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * .25,
+        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6));
 
     // Shoot
     // controller.rightTrigger().whileTrue(new ShootCommand(
     //     0.4064, 1.127, 34.5, Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
     //     shooterSubsystem, coneLimelightSubsystem));
     
-    controller.rightTrigger().whileTrue(
-        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
+    // controller.rightTrigger().whileTrue(
+    //     new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 
-    // controller.rightTrigger().whileTrue(new InterpolateShootCommand(
-    //     Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem));
+    controller.rightTrigger().whileTrue(new InterpolateShootCommand(
+        Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        shooterSubsystem, coneLimelightSubsystem));
     
     // TODO shoot low
     controller.povLeft().whileTrue(new JustShootCommand(
-        inchesToMeters(1.135), 1.25, 29, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+        inchesToMeters(1.135), 1.25, 150, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**

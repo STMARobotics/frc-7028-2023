@@ -41,7 +41,7 @@ public class LimelightRetroCalcs {
 
   /**
    * Gets the robot relative translation of the target
-   * @param targetHeight height to the center of the target
+   * @param retroResults limelight target data
    * @return robot relative translaction
    */
   public Translation2d getTargetTranslation(LimelightRetroTarget retroResults) {

@@ -26,7 +26,7 @@ public class ShootCommand extends CommandBase {
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double AIM_TOLERANCE = 1.0;
   private static final double DISTANCE_TOLERANCE = 0.15;
-  private static final double TARGET_Y_SETPOINT = 4.2; // degrees in the limelight top target
+  private static final double TARGET_Y_SETPOINT = 12.83; // degrees in the limelight top target
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
@@ -109,8 +109,6 @@ public class ShootCommand extends CommandBase {
       var distanceCorrection =
           Math.abs(targetY - TARGET_Y_SETPOINT) > DISTANCE_TOLERANCE ? distanceController.calculate(targetY) : 0;
 
-      drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0, rotationCorrection));
-
       var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
       var readyToShoot =
@@ -123,6 +121,9 @@ public class ShootCommand extends CommandBase {
         shooterSubsystem.shootVelocity(shooterRPS);
         shootTimer.start();
         isShooting = true;
+        drivetrainSubsystem.stop();
+      } else {
+        drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0, rotationCorrection));
       }
     }, () -> {
       // No target

@@ -1,6 +1,10 @@
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -13,25 +17,38 @@ public class JustPickupConeCommand extends CommandBase {
   private final double elevatorMeters;
   private final double wristRadians;
   private final double intakeDutyCycle;
+  private final double forwardSpeed;
+
+  private final DoubleSupplier ySupplier;
+  private final DoubleSupplier xSupplier;
+  private final DoubleSupplier rotationSupplier;
 
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
+  private final DrivetrainSubsystem drivetrainSubsystem;
 
   private boolean intaking = false;
 
   public JustPickupConeCommand(
-      double elevatorMeters, double wristRadians, double intakeDutyCycle, ElevatorSubsystem elevatorSubsystem,
-      WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem) {
+      double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
+      ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
+      ShooterSubsystem shooterSubsystem,  DoubleSupplier xSupplier, DoubleSupplier ySupplier,
+      DoubleSupplier rotationSupplier) {
 
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
     this.intakeDutyCycle = intakeDutyCycle;
+    this.forwardSpeed = forwardSpeed;
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
+    this.drivetrainSubsystem = drivetrainSubsystem;
     this.shooterSubsystem = shooterSubsystem;
+    this.xSupplier = xSupplier;
+    this.ySupplier = ySupplier;
+    this.rotationSupplier = rotationSupplier;
 
-    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem);
+    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, drivetrainSubsystem);
   }
 
   @Override
@@ -41,6 +58,15 @@ public class JustPickupConeCommand extends CommandBase {
   
   @Override
   public void execute() {
+    var strafeSpeed = ySupplier.getAsDouble();
+    var rotationSpeed = rotationSupplier.getAsDouble();
+
+    var xSpeed = xSupplier.getAsDouble();
+    if (xSpeed > 0) {
+      xSpeed = forwardSpeed;
+    }
+    drivetrainSubsystem.drive(new ChassisSpeeds(xSpeed, strafeSpeed, rotationSpeed));
+
     elevatorSubsystem.moveToPosition(elevatorMeters);
     wristSubsystem.moveToPosition(wristRadians);
 
@@ -61,6 +87,8 @@ public class JustPickupConeCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     shooterSubsystem.stop();
+    elevatorSubsystem.stop();
+    wristSubsystem.stop();
   }
 
 }

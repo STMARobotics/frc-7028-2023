@@ -63,7 +63,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Smart Motion Coefficients
     double maxVel = 1500; // rpm
-    double maxAcc = 1500;
+    double maxAcc = 1000;
     double minVel = 0;
 
     pidController.setP(kP);

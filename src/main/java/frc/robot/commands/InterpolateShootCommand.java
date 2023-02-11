@@ -10,8 +10,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightRetroCalcs;
+import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -27,6 +29,12 @@ public class InterpolateShootCommand extends CommandBase {
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double AIM_TOLERANCE = Units.degreesToRadians(1.0);
+  private static final double DISTANCE_TOLERANCE = 0.1;
+  private static final double DISTANCE_GOAL = 1.30d;
+
+  private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
+  private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =
+      new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI);
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
@@ -35,9 +43,8 @@ public class InterpolateShootCommand extends CommandBase {
   private final LimelightSubsystem limelightSubsystem;
   private final Timer shootTimer = new Timer();
 
-  private final TrapezoidProfile.Constraints kThetaControllerConstraints = 
-      new TrapezoidProfile.Constraints(2 * Math.PI, 2 * Math.PI);
-  private final ProfiledPIDController aimController = new ProfiledPIDController(2.0, 0, 0, kThetaControllerConstraints);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(1.2, 0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.0, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final Profile shooterProfile;
   private final LimelightRetroCalcs limelightCalcs;
@@ -45,7 +52,9 @@ public class InterpolateShootCommand extends CommandBase {
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
   private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+  private final MovingAverageFilter distanceFilter = new MovingAverageFilter(5);
 
+  private Translation2d lastTargetTranslation = null;
   private boolean isShooting = false;
 
   /**
@@ -68,7 +77,8 @@ public class InterpolateShootCommand extends CommandBase {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
 
-    this.limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    aimController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -76,34 +86,53 @@ public class InterpolateShootCommand extends CommandBase {
   @Override
   public void initialize() {
     shootTimer.reset();
+    lastTargetTranslation = null;
     isShooting = false;
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
+    aimController.setTolerance(AIM_TOLERANCE);
     limelightSubsystem.enable();
+    distanceController.setGoal(DISTANCE_GOAL);
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
     readyToShootDebouncer.calculate(false);
+    elevatoFilter.reset();
+    wristFilter.reset();
+    distanceFilter.reset();
   }
 
   @Override
   public void execute() {
-    limelightSubsystem.getLatestRetroTarget().ifPresentOrElse((limelightRetroResults) -> {
-      
-      // get the distance and angle of the target, relative to the robot
-      var targetPose = limelightCalcs.getTargetPose(limelightRetroResults);
-      var targetDistance = targetPose.getTranslation().getDistance(new Translation2d());
-      var targetAngle = new Rotation2d(targetPose.getX(), targetPose.getY());
+    var firstTarget = false;
+    // If the target is visible, get the new translation. If the target isn't visible we'll use the last known translation.
+    var limelightRetroResults = limelightSubsystem.getLatestRetroTarget();
+    if (limelightRetroResults.isPresent()) {
+      firstTarget = lastTargetTranslation == null;
+      lastTargetTranslation = limelightCalcs.getTargetTranslation(limelightRetroResults.get());
+    }
+
+    if (lastTargetTranslation == null) {
+      // We've never seen a target
+      elevatorSubsystem.stop();
+      wristSubsystem.stop();
+      shooterSubsystem.stop();
+      drivetrainSubsystem.stop();
+    } else {
+      var targetDistance = distanceFilter.calculate(lastTargetTranslation.getDistance(new Translation2d()));
+      var targetAngle = new Rotation2d(lastTargetTranslation.getX(), lastTargetTranslation.getY());
+
+      SmartDashboard.putNumber("Target Distance", targetDistance);
+      SmartDashboard.putNumber("Target Angle", targetAngle.getDegrees());
 
       var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
-      elevatorSubsystem.moveToPosition(shooterSettings.height);
-      wristSubsystem.moveToPosition(shooterSettings.angle);
 
       var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
       var targetHeadingRadians = drivetrainHeading.minus(targetAngle).getRadians();
       
+      if (firstTarget) {
+        distanceController.reset(targetDistance);
+      }
       aimController.setGoal(targetHeadingRadians);
-      var rotationCorrection = 
-          Math.abs(targetAngle.getRadians()) > AIM_TOLERANCE ? aimController.calculate(drivetrainHeading.getRadians()) : 0;
-
-      drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, rotationCorrection));
+      var rotationCorrection = -aimController.calculate(drivetrainHeading.getRadians());
+      var distanceCorrection = -distanceController.calculate(targetDistance);
 
       var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
@@ -111,20 +140,22 @@ public class InterpolateShootCommand extends CommandBase {
       var readyToShoot = readyToShootDebouncer.calculate(
           Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
           && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
-          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE);
+          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE
+          && Math.abs(targetDistance - DISTANCE_GOAL) < DISTANCE_TOLERANCE);
 
       if (isShooting || readyToShoot) {
         shooterSubsystem.shootVelocity(shooterSettings.velocity);
         shootTimer.start();
         isShooting = true;
+        drivetrainSubsystem.stop();
+      } else {
+        elevatorSubsystem.moveToPosition(shooterSettings.height);
+        wristSubsystem.moveToPosition(shooterSettings.angle);
+        var xySpeeds = new Translation2d(distanceCorrection, 0).rotateBy(targetAngle);
+        drivetrainSubsystem.drive(new ChassisSpeeds(xySpeeds.getX(), xySpeeds.getY(), rotationCorrection));
+        // drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0.0, rotationCorrection));
       }
-    }, () -> {
-      // No target
-      elevatorSubsystem.stop();
-      wristSubsystem.stop();
-      shooterSubsystem.stop();
-      drivetrainSubsystem.stop();
-    });
+    }
   }
 
   @Override

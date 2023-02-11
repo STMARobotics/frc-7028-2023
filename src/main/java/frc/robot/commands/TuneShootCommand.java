@@ -65,10 +65,10 @@ public class TuneShootCommand extends JustShootCommand {
     
     // Put some target info on the dashboard
     limelightSubsystem.getLatestRetroTarget().ifPresent((target) -> {
-      var targetPose = limelightCalcs.getTargetPose(target);
+      var targetTranslation = limelightCalcs.getTargetTranslation(target);
 
-      targetDistanceEntry.setDouble(targetPose.getTranslation().getDistance(new Translation2d()));
-      targetAngleEntry.setDouble(new Rotation2d(targetPose.getX(), targetPose.getY()).getDegrees());
+      targetDistanceEntry.setDouble(targetTranslation.getDistance(new Translation2d()));
+      targetAngleEntry.setDouble(new Rotation2d(targetTranslation.getX(), targetTranslation.getY()).getDegrees());
     });
 
     super.execute();

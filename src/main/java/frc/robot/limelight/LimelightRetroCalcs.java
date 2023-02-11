@@ -40,21 +40,21 @@ public class LimelightRetroCalcs {
   }
 
   /**
-   * Gets the robot relative pose of the target
-   * @param targetHeight height to the center of the target
-   * @return robot relative pose
+   * Gets the robot relative translation of the target
+   * @param retroResults limelight target data
+   * @return robot relative translaction
    */
-  public Pose2d getTargetPose(LimelightRetroTarget retroResults) {
+  public Translation2d getTargetTranslation(LimelightRetroTarget retroResults) {
     var targetOnCameraCoordinates = new Translation2d(
         getCameraToTargetDistance(retroResults),
         Rotation2d.fromDegrees(-retroResults.targetXDegrees));
     
     var targetPoseOnCameraCoordinates = new Pose2d(targetOnCameraCoordinates, new Rotation2d());
 
-    var cameraTranslation = new Transform2d(
+    var cameraTransform = new Transform2d(
         new Translation2d(robotToCamera.getX(), robotToCamera.getY()),
         new Rotation2d(robotToCamera.getRotation().getZ()));
-    return targetPoseOnCameraCoordinates.transformBy(cameraTranslation);
+    return targetPoseOnCameraCoordinates.transformBy(cameraTransform).getTranslation();
   }
 
 }

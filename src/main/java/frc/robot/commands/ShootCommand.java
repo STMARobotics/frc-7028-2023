@@ -24,7 +24,7 @@ import frc.robot.subsystems.WristSubsystem;
 /**
  * Command to drive within range, turn to target, position elevator and wrist, and then shoot
  */
-public class InterpolateShootCommand extends CommandBase {
+public class ShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
@@ -67,8 +67,8 @@ public class InterpolateShootCommand extends CommandBase {
    * @param limelightSubssystem limelight
    * @param cameraToRobot camera to robot transformation
    */
-  public InterpolateShootCommand(Profile shooterProfile,
-      DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
+  public ShootCommand(Profile shooterProfile, DrivetrainSubsystem drivetrainSubsystem,
+      ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
       ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem) {
     this.shooterProfile = shooterProfile;
     this.drivetrainSubsystem = drivetrainSubsystem;

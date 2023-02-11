@@ -162,10 +162,6 @@ public class RobotContainer {
         () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6));
 
     // Shoot
-    // controller.rightTrigger().whileTrue(new ShootCommand(
-    //     0.4064, 1.127, 34.5, Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-    //     shooterSubsystem, coneLimelightSubsystem));
-    
     // controller.rightTrigger().whileTrue(
     //     new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 

@@ -116,27 +116,36 @@ public class InterpolateShootCommand extends CommandBase {
       shooterSubsystem.stop();
       drivetrainSubsystem.stop();
     } else {
+      // Get the distance from the robot
       var targetDistance = distanceFilter.calculate(lastTargetTranslation.getDistance(new Translation2d()));
+      // Get the angle to the target from the robot
       var targetAngle = new Rotation2d(lastTargetTranslation.getX(), lastTargetTranslation.getY());
 
       SmartDashboard.putNumber("Target Distance", targetDistance);
       SmartDashboard.putNumber("Target Angle", targetAngle.getDegrees());
 
+      // Get shooter settings from lookup table
       var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
 
+      // Get the robot heading, and the robot-relative heading of the target
       var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
       var targetHeadingRadians = drivetrainHeading.minus(targetAngle).getRadians();
       
       if (firstTarget) {
+        // On the first iteration, reset the PID controller
         distanceController.reset(targetDistance);
       }
+
+      // Get corrections from PID controllers
       aimController.setGoal(targetHeadingRadians);
       var rotationCorrection = -aimController.calculate(drivetrainHeading.getRadians());
       var distanceCorrection = -distanceController.calculate(targetDistance);
 
+      // Filter the elevator and wrist positions, to prevent oscillation from mechanical shake
       var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
 
+      // Check if the elevator and wrist are in the right position, and if the distance and angle are right
       var readyToShoot = readyToShootDebouncer.calculate(
           Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
           && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
@@ -144,16 +153,19 @@ public class InterpolateShootCommand extends CommandBase {
           && Math.abs(targetDistance - DISTANCE_GOAL) < DISTANCE_TOLERANCE);
 
       if (isShooting || readyToShoot) {
+        // Shoot
         shooterSubsystem.shootVelocity(shooterSettings.velocity);
         shootTimer.start();
         isShooting = true;
         drivetrainSubsystem.stop();
       } else {
+        // Not ready to shoot, move the elevator, wrist, and drivetrain
         elevatorSubsystem.moveToPosition(shooterSettings.height);
         wristSubsystem.moveToPosition(shooterSettings.angle);
+
+        // Rotate the distance measurement so we drive toward the target in X and Y direction, not just robot forward
         var xySpeeds = new Translation2d(distanceCorrection, 0).rotateBy(targetAngle);
         drivetrainSubsystem.drive(new ChassisSpeeds(xySpeeds.getX(), xySpeeds.getY(), rotationCorrection));
-        // drivetrainSubsystem.drive(new ChassisSpeeds(distanceCorrection, 0.0, rotationCorrection));
       }
     }
   }

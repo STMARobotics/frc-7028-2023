@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +25,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final WPI_TalonFX shooterFollower;
 
   private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.0015732, 1.1092 / 9.0, 0.034441);
+  private final double VELOCITY_COEFFIENT = 1 / (5.0 * Math.PI * Units.inchesToMeters(4.0)); // gearing * wheel circumfrence
 
   public ShooterSubsystem() {
     var config = new TalonFXConfiguration();
@@ -59,6 +61,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Follower Speed Raw", shooterFollower.getSelectedSensorVelocity());
     SmartDashboard.putNumber("Leader Speed RPS", getVelocity());
     SmartDashboard.putNumber("Leader Position", shooterLeader.getSelectedSensorPosition());
+    SmartDashboard.putNumber("Leader Speed MPS", getVelocityInMetersPerSecond());
   }
 
   public void shootVelocity(double rps) {
@@ -97,6 +100,14 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public double getVelocity() {
     return edgesPerDecisecToRPS(shooterLeader.getSelectedSensorVelocity());
+  }
+
+  /**
+   * Get the surface velocity of the shooter wheels in meters per second.
+   * @return shooter surface velocity in meters per second
+   */
+  public double getVelocityInMetersPerSecond() {
+    return (getVelocity() * VELOCITY_COEFFIENT);
   }
 
   public boolean hasCone() {

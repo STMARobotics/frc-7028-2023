@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.AutoConstants;
@@ -181,9 +181,11 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
-
+    if (testPath == null) {
+      return Commands.print("********* Path failed to load. Not running auto *********");
+    }
     var eventMap = new HashMap<String, Command>();
-    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+    eventMap.put("marker1", Commands.print("Passed marker 1"));
 
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
         poseEstimator::getCurrentPose,

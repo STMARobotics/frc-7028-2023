@@ -1,9 +1,6 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_TO_ROBOT;
-
 import java.io.IOException;
-import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
 
@@ -14,8 +11,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -88,23 +83,23 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Update pose estimator with the best visible target
-    var pipelineResult = photonCamera.getLatestResult();
-    var resultTimestamp = pipelineResult.getTimestampSeconds();
-    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-      previousPipelineTimestamp = resultTimestamp;
-      var target = pipelineResult.getBestTarget();
-      var fiducialId = target.getFiducialId();
-      // Get the tag pose from field layout - consider that the layout will be null if it failed to load
-      Optional<Pose3d> tagPose = aprilTagFieldLayout == null ? Optional.empty() : aprilTagFieldLayout.getTagPose(fiducialId);
-      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
-        var targetPose = tagPose.get();
-        Transform3d camToTarget = target.getBestCameraToTarget();
-        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
+    // var pipelineResult = photonCamera.getLatestResult();
+    // var resultTimestamp = pipelineResult.getTimestampSeconds();
+    // if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
+    //   previousPipelineTimestamp = resultTimestamp;
+    //   var target = pipelineResult.getBestTarget();
+    //   var fiducialId = target.getFiducialId();
+    //   // Get the tag pose from field layout - consider that the layout will be null if it failed to load
+    //   Optional<Pose3d> tagPose = aprilTagFieldLayout == null ? Optional.empty() : aprilTagFieldLayout.getTagPose(fiducialId);
+    //   if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
+    //     var targetPose = tagPose.get();
+    //     Transform3d camToTarget = target.getBestCameraToTarget();
+    //     Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-        var visionMeasurement = camPose.transformBy(APRILTAG_CAMERA_TO_ROBOT);
-        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-      }
-    }
+    //     var visionMeasurement = camPose.transformBy(APRILTAG_CAMERA_TO_ROBOT);
+    //     poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+    //   }
+    // }
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
       drivetrainSubsystem.getGyroscopeRotation(),

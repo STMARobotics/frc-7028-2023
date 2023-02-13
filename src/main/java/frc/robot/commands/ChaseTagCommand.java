@@ -37,7 +37,7 @@ public class ChaseTagCommand extends CommandBase {
 
   private final ProfiledPIDController xController = new ProfiledPIDController(3, 0, 0, X_CONSTRAINTS);
   private final ProfiledPIDController yController = new ProfiledPIDController(3, 0, 0, Y_CONSTRAINTS);
-  private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController thetaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRAINTS);
 
   private PhotonTrackedTarget lastTarget;
 
@@ -51,8 +51,8 @@ public class ChaseTagCommand extends CommandBase {
 
     xController.setTolerance(0.2);
     yController.setTolerance(0.2);
-    omegaController.setTolerance(Units.degreesToRadians(3));
-    omegaController.enableContinuousInput(-Math.PI, Math.PI);
+    thetaController.setTolerance(Units.degreesToRadians(3));
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(drivetrainSubsystem);
   }
@@ -61,7 +61,7 @@ public class ChaseTagCommand extends CommandBase {
   public void initialize() {
     lastTarget = null;
     var robotPose = poseProvider.get();
-    omegaController.reset(robotPose.getRotation().getRadians());
+    thetaController.reset(robotPose.getRotation().getRadians());
     xController.reset(robotPose.getX());
     yController.reset(robotPose.getY());
   }
@@ -101,7 +101,7 @@ public class ChaseTagCommand extends CommandBase {
         // Drive
         xController.setGoal(goalPose.getX());
         yController.setGoal(goalPose.getY());
-        omegaController.setGoal(goalPose.getRotation().getRadians());
+        thetaController.setGoal(goalPose.getRotation().getRadians());
       }
     }
     
@@ -120,8 +120,8 @@ public class ChaseTagCommand extends CommandBase {
         ySpeed = 0;
       }
 
-      var omegaSpeed = omegaController.calculate(robotPose2d.getRotation().getRadians());
-      if (omegaController.atGoal()) {
+      var omegaSpeed = thetaController.calculate(robotPose2d.getRotation().getRadians());
+      if (thetaController.atGoal()) {
         omegaSpeed = 0;
       }
 

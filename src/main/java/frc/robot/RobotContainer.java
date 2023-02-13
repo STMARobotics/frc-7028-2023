@@ -37,7 +37,7 @@ import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustPickupConeCommand;
 import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.ShootCommand;
+import frc.robot.commands.ShootCubeCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -165,7 +165,7 @@ public class RobotContainer {
     // controller.rightTrigger().whileTrue(
     //     new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 
-    controller.rightTrigger().whileTrue(new ShootCommand(
+    controller.rightTrigger().whileTrue(new ShootCubeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, coneLimelightSubsystem));
     

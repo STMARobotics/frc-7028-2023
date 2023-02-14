@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -212,6 +213,14 @@ public class RobotContainer {
     if (reseedTimer.advanceIfElapsed(1.0)) {
       drivetrainSubsystem.reseedSteerMotorOffsets();
     }
+  }
+
+  /**
+   * Called when the alliance reported by the driverstation/FMS changes.
+   * @param alliance new alliance value
+   */
+  public void onAllianceChanged(Alliance alliance) {
+    poseEstimator.setAlliance(alliance);
   }
 
   private static double modifyAxis(double value) {

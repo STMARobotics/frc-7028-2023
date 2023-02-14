@@ -155,6 +155,9 @@ public final class Constants {
 
     public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
         new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);
+    
+    public static final double FIELD_LENGTH_METERS = 16.54175;
+    public static final double FIELD_WIDTH_METERS = 8.0137;
   }
 
   public static class AutoConstants {

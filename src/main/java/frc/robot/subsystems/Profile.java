@@ -12,7 +12,7 @@ import frc.robot.math.VelocityAngleInterpolator;
 public enum Profile {
 
   /** Middle of the Top cone vision target */
-  TOP(1, Units.inchesToMeters(44.0), ConeShootingConstants.TOP_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT),
+  TOP(0, Units.inchesToMeters(44.0), ConeShootingConstants.TOP_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT),
 
   /** Middle of the Middle cone vision target */
   MIDDLE(0, Units.inchesToMeters(24.125), ConeShootingConstants.MIDDLE_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT);

@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -39,6 +41,7 @@ import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootConeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
+import frc.robot.limelight.LimelightRetroCalcs;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -107,6 +110,18 @@ public class RobotContainer {
   }
 
   private void configureDashboard() {
+    // Shooting tab
+    final var limelightCalcs =
+        new LimelightRetroCalcs(VisionConstants.SHOOTER_CAMERA_TO_ROBOT, Profile.TOP.targetHeight);
+    final var shootingTab = Shuffleboard.getTab("Shooting");
+    final var targetLayout = shootingTab.getLayout("Target", BuiltInLayouts.kList);
+    targetLayout.addDouble("Top Target Distance", () -> {
+        var optResults = coneLimelightSubsystem.getLatestRetroTarget();
+        if (optResults.isPresent()) {
+          return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+        }
+        return 0;
+    });
 
   }
 

@@ -57,4 +57,16 @@ public class LimelightRetroCalcs {
     return targetPoseOnCameraCoordinates.transformBy(cameraTransform).getTranslation();
   }
 
+  /**
+   * Gets target info, relative to the robot.
+   * @param retroTarget limelight target data
+   * @return robot relative target
+   */
+  public RetroTargetInfo getRobotRelativeTargetInfo(LimelightRetroTarget retroTarget) {
+    var translation = getTargetTranslation(retroTarget);
+    var distance = translation.getDistance(new Translation2d());
+    var angle = new Rotation2d(translation.getX(), translation.getY());
+    return new RetroTargetInfo(null, distance, angle);
+  }
+
 }

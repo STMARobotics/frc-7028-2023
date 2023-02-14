@@ -4,15 +4,14 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightRetroCalcs;
+import frc.robot.limelight.RetroTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -54,7 +53,7 @@ public class ShootConeCommand extends CommandBase {
   private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(5);
 
-  private Translation2d lastTargetTranslation = null;
+  private RetroTargetInfo lastTargetInfo = null;
   private boolean isShooting = false;
 
   /**
@@ -86,7 +85,7 @@ public class ShootConeCommand extends CommandBase {
   @Override
   public void initialize() {
     shootTimer.reset();
-    lastTargetTranslation = null;
+    lastTargetInfo = null;
     isShooting = false;
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
     aimController.setTolerance(AIM_TOLERANCE);
@@ -105,41 +104,33 @@ public class ShootConeCommand extends CommandBase {
     // If the target is visible, get the new translation. If the target isn't visible we'll use the last known translation.
     var limelightRetroResults = limelightSubsystem.getLatestRetroTarget();
     if (limelightRetroResults.isPresent()) {
-      firstTarget = lastTargetTranslation == null;
-      lastTargetTranslation = limelightCalcs.getTargetTranslation(limelightRetroResults.get());
+      firstTarget = lastTargetInfo == null;
+      lastTargetInfo = limelightCalcs.getRobotRelativeTargetInfo(limelightRetroResults.get());
     }
 
-    if (lastTargetTranslation == null) {
+    if (lastTargetInfo == null) {
       // We've never seen a target
       elevatorSubsystem.stop();
       wristSubsystem.stop();
       shooterSubsystem.stop();
       drivetrainSubsystem.stop();
     } else {
-      // Get the distance from the robot
-      var targetDistance = distanceFilter.calculate(lastTargetTranslation.getDistance(new Translation2d()));
-      // Get the angle to the target from the robot
-      var targetAngle = new Rotation2d(lastTargetTranslation.getX(), lastTargetTranslation.getY());
-
-      SmartDashboard.putNumber("Target Distance", targetDistance);
-      SmartDashboard.putNumber("Target Angle", targetAngle.getDegrees());
-
       // Get shooter settings from lookup table
-      var shooterSettings = shooterProfile.lookupTable.calculate(targetDistance);
+      var shooterSettings = shooterProfile.lookupTable.calculate(lastTargetInfo.distance);
 
       // Get the robot heading, and the robot-relative heading of the target
       var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
-      var targetHeadingRadians = drivetrainHeading.minus(targetAngle).getRadians();
+      var targetHeadingRadians = drivetrainHeading.minus(lastTargetInfo.angle).getRadians();
       
       if (firstTarget) {
         // On the first iteration, reset the PID controller
-        distanceController.reset(targetDistance);
+        distanceController.reset(lastTargetInfo.distance);
       }
 
       // Get corrections from PID controllers
       aimController.setGoal(targetHeadingRadians);
       var rotationCorrection = -aimController.calculate(drivetrainHeading.getRadians());
-      var distanceCorrection = -distanceController.calculate(targetDistance);
+      var distanceCorrection = -distanceController.calculate(lastTargetInfo.distance);
 
       // Filter the elevator and wrist positions, to prevent oscillation from mechanical shake
       var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
@@ -149,8 +140,8 @@ public class ShootConeCommand extends CommandBase {
       var readyToShoot = readyToShootDebouncer.calculate(
           Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
           && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
-          && Math.abs(targetAngle.getRadians()) < AIM_TOLERANCE
-          && Math.abs(targetDistance - DISTANCE_GOAL) < DISTANCE_TOLERANCE);
+          && Math.abs(lastTargetInfo.angle.getRadians()) < AIM_TOLERANCE
+          && Math.abs(lastTargetInfo.distance - DISTANCE_GOAL) < DISTANCE_TOLERANCE);
 
       if (isShooting || readyToShoot) {
         // Shoot
@@ -164,7 +155,7 @@ public class ShootConeCommand extends CommandBase {
         wristSubsystem.moveToPosition(shooterSettings.angle);
 
         // Rotate the distance measurement so we drive toward the target in X and Y direction, not just robot forward
-        var xySpeeds = new Translation2d(distanceCorrection, 0).rotateBy(targetAngle);
+        var xySpeeds = new Translation2d(distanceCorrection, 0).rotateBy(lastTargetInfo.angle);
         drivetrainSubsystem.drive(new ChassisSpeeds(xySpeeds.getX(), xySpeeds.getY(), rotationCorrection));
       }
     }

@@ -87,7 +87,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Configure limit switches, or lack thereof
     elevatorLeader.getForwardLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(false);
-    elevatorLeader.getReverseLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(true);
+    elevatorLeader.getReverseLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(false);
 
     elevatorFollower.follow(elevatorLeader, true);
 

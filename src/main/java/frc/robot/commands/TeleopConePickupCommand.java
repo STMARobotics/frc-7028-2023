@@ -9,7 +9,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
-public class JustPickupConeCommand extends CommandBase {
+public class TeleopConePickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
@@ -30,7 +30,7 @@ public class JustPickupConeCommand extends CommandBase {
 
   private boolean intaking = false;
 
-  public JustPickupConeCommand(
+  public TeleopConePickupCommand(
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
       ShooterSubsystem shooterSubsystem,  DoubleSupplier xSupplier, DoubleSupplier ySupplier,
@@ -77,11 +77,6 @@ public class JustPickupConeCommand extends CommandBase {
     if (intaking || readyToIntake) {
       shooterSubsystem.shootDutyCycle(intakeDutyCycle);
     }
-  }
-  
-  @Override
-  public boolean isFinished() {
-    return shooterSubsystem.hasCone();
   }
 
   @Override

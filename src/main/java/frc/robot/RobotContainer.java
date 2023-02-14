@@ -35,9 +35,9 @@ import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
-import frc.robot.commands.JustPickupConeCommand;
 import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.ShootCubeCommand;
+import frc.robot.commands.ShootConeCommand;
+import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -56,7 +56,7 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private final PhotonCamera photonCamera = null; //new PhotonCamera("LimeLight");
+  private final PhotonCamera photonCamera = new PhotonCamera("OV9281");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
@@ -155,7 +155,7 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
     // Intake
-    controller.leftTrigger().whileTrue(new JustPickupConeCommand(
+    controller.leftTrigger().whileTrue(new TeleopConePickupCommand(
         inchesToMeters(1.0), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
@@ -165,9 +165,14 @@ public class RobotContainer {
     // controller.rightTrigger().whileTrue(
     //     new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 
-    controller.rightTrigger().whileTrue(new ShootCubeCommand(
+    controller.rightTrigger().whileTrue(new ShootConeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, coneLimelightSubsystem));
+
+    // Drive to cone node to the left of tag 1, then just shoot
+    // controller.rightTrigger().whileTrue(new DriveToPoseCommand(
+    //     drivetrainSubsystem, poseEstimator::getCurrentPose, new Pose2d(14.59, 1.67, Rotation2d.fromDegrees(0.0)))
+    //         .andThen(new JustShootCommand(0.4064, 1.05, 34.5, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     // TODO shoot low
     controller.povLeft().whileTrue(new JustShootCommand(

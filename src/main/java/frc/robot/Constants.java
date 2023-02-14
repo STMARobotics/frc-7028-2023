@@ -145,19 +145,13 @@ public final class Constants {
 
   public static class VisionConstants {
 
-    /**
-     * Physical location of the apriltag camera on the robot, relative to the center of the robot.
-     */
+    /** Physical location of the apriltag camera on the robot, relative to the center of the robot. */
     public static final Transform3d APRILTAG_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(-0.3425, 0.0, -0.233), new Rotation3d());
-    public static final Transform3d APRILTAG_ROBOT_TO_CAMERA = APRILTAG_CAMERA_TO_ROBOT.inverse();
+        new Transform3d(new Translation3d(0.0, -0.1375, -.90), new Rotation3d(0.0, 0.0, -0.10));
 
-    /**
-     * Physical location of the shooter camera on the robot, relative to the center of the robot.
-     */
+    /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
     public static final Transform3d SHOOTER_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(-0.128, 0.0075, -1.002), new Rotation3d(0.0, degreesToRadians(7.06), 0.0));
-    public static final Transform3d SHOOTER_ROBOT_TO_CAMERA = SHOOTER_CAMERA_TO_ROBOT.inverse();
+        new Transform3d(new Translation3d(-0.0875, 0.2275, -0.51), new Rotation3d(0.0, degreesToRadians(-13.0), 0.0));
 
     public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
         new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);

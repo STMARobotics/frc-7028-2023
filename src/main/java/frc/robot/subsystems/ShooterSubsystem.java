@@ -116,6 +116,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void stop() {
     shooterLeader.stopMotor();
+    shooterFollower.stopMotor();
   }
 
   public static double edgesPerDecisecToRPS(double edgesPerDecisec) {

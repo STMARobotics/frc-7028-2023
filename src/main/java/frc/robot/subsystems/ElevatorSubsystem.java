@@ -1,15 +1,13 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMax.SoftLimitDirection;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxAnalogSensor;
-import com.revrobotics.SparkMaxLimitSwitch.Type;
-import com.revrobotics.SparkMaxPIDController;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -19,92 +17,98 @@ import frc.robot.Constants.ElevatorConstants;
  */
 public class ElevatorSubsystem extends SubsystemBase {
 
-  private static final int SMART_MOTION_SLOT = 0;
-  private static final double LIMIT_BOTTOM = 0.646978;
-  private static final double LIMIT_TOP = 2.38377;
-  // Elevator height, in meters
-  private static final double ELEVATOR_HEIGHT = Units.inchesToMeters(16.875);
-  // Coefficient in meters per sensor value
-  private static final double SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (LIMIT_TOP - LIMIT_BOTTOM);
-  // Offset to add to sensor value - offset from elevator bottom to sensor bottom
-  private static final double SENSOR_OFFSET = -LIMIT_BOTTOM * SENSOR_COEFFICIENT;
+  // Elevator travel distance, in meters
+  private static final double ELEVATOR_HEIGHT = 1.0;
 
-  private final CANSparkMax elevatorLeader;
-  private final CANSparkMax elevatorFollower;
-  private final SparkMaxAnalogSensor analogSensor;
-  private final SparkMaxPIDController pidController;
+  // Motor's encoder limits, in encoder ticks
+  private static final double MOTOR_BOTTOM = 0;
+  private static final double MOTOR_TOP = 100000;
+
+  // Mutiply by sensor position to get meters
+  private static final double MOTOR_ENCODER_POSITION_COEFFICIENT = ELEVATOR_HEIGHT / (MOTOR_TOP - MOTOR_BOTTOM);
+  // Mutiply by sensor velocity to get meters per second
+  private static final double MOTOR_ENCODER_VELOCITY_COEFFICIENT = MOTOR_ENCODER_POSITION_COEFFICIENT * 10;
+
+  private static final double ANALOG_BOTTOM = 0.646978;
+  private static final double ANALOG_TOP = 2.38377;
+
+  // Coefficient in meters per sensor value
+  private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);
+  // Offset to add to sensor value - offset from elevator bottom to sensor bottom
+  private static final double ANALOG_SENSOR_OFFSET = -MOTOR_BOTTOM * ANALOG_SENSOR_COEFFICIENT;
+
+  private final WPI_TalonFX elevatorLeader;
+  private final WPI_TalonFX elevatorFollower;
+  private final AnalogInput analogSensor;
 
   public ElevatorSubsystem() {
-    elevatorLeader = new CANSparkMax(ElevatorConstants.ELEVATOR_LEADER_ID, MotorType.kBrushless);
-    elevatorFollower = new CANSparkMax(ElevatorConstants.ELEVATOR_FOLLOWER_ID, MotorType.kBrushless);
+    elevatorLeader = new WPI_TalonFX(ElevatorConstants.ELEVATOR_LEADER_ID);
+    elevatorFollower = new WPI_TalonFX(ElevatorConstants.ELEVATOR_FOLLOWER_ID);
     
-    elevatorLeader.restoreFactoryDefaults();
-    elevatorFollower.restoreFactoryDefaults();
-
     // Configure potentiometer
-    analogSensor = elevatorLeader.getAnalog(SparkMaxAnalogSensor.Mode.kAbsolute);
-    analogSensor.setInverted(true);
-    pidController = elevatorLeader.getPIDController();
-    pidController.setFeedbackDevice(analogSensor);
+    analogSensor = new AnalogInput(ElevatorConstants.ANALOG_SENSOR_CHANNEL);
 
     // Configure closed-loop control
     double kP = .00004; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0;
-    double kFF = 0.008;
-    double kMaxOutput = 1;
-    double kMinOutput = -1;
+    double kF = 0.008;
+    double kMaxOutput = .5;
+    double kMinOutput = -.5;
     double allowedErr = 0.004;
 
-    // Smart Motion Coefficients
-    double maxVel = 6500; // rpm
+    // Magic Motion Coefficients
+    double maxVel = 6500; // rpm // TODO convert to sensor units per 100ms
     double maxAcc = 1500;
-    double minVel = 0;
 
-    pidController.setP(kP);
-    pidController.setI(kI);
-    pidController.setD(kD);
-    pidController.setIZone(kIz);
-    pidController.setFF(kFF);
-    pidController.setOutputRange(kMinOutput, kMaxOutput);
-
-    pidController.setSmartMotionMaxVelocity(maxVel, SMART_MOTION_SLOT);
-    pidController.setSmartMotionMinOutputVelocity(minVel, SMART_MOTION_SLOT);
-    pidController.setSmartMotionMaxAccel(maxAcc, SMART_MOTION_SLOT);
-    pidController.setSmartMotionAllowedClosedLoopError(allowedErr, SMART_MOTION_SLOT);
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.slot0.kP = kP;
+    config.slot0.kI = kI;
+    config.slot0.kD = kD;
+    config.slot0.integralZone = kIz;
+    config.slot0.kF = kF;
+    config.slot0.allowableClosedloopError = allowedErr;
+    
+    config.motionCruiseVelocity = maxVel;
+    config.motionAcceleration = maxAcc;
 
     // Voltage compensation and current limits
-    elevatorLeader.enableVoltageCompensation(12);
-    elevatorLeader.setSmartCurrentLimit(20);
-    elevatorFollower.setSmartCurrentLimit(20);
+    config.voltageCompSaturation = 12;
+    // config.supplyCurrLimit = new SupplyCurrentLimitConfiguration(); // TODO research this
 
     // Configure soft limits
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kForward, (float) LIMIT_TOP);
-    elevatorLeader.setSoftLimit(SoftLimitDirection.kReverse, 0.67f); // Didn't use constant to avoid crashing into limit switch
-    elevatorLeader.enableSoftLimit(SoftLimitDirection.kForward, true);
-    elevatorLeader.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    config.forwardSoftLimitEnable = true;
+    config.forwardSoftLimitThreshold = MOTOR_TOP;
+    config.reverseSoftLimitEnable = true;
+    config.reverseSoftLimitThreshold = MOTOR_BOTTOM;
 
-    // Configure limit switches, or lack thereof
-    elevatorLeader.getForwardLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(false);
-    elevatorLeader.getReverseLimitSwitch(Type.kNormallyClosed).enableLimitSwitch(false);
+    // Configure limit switches
+    config.forwardLimitSwitchNormal = LimitSwitchNormal.NormallyClosed;
+    config.reverseLimitSwitchNormal = LimitSwitchNormal.NormallyClosed;
 
-    elevatorFollower.follow(elevatorLeader, true);
+    elevatorLeader.configAllSettings(config);
+    elevatorFollower.configAllSettings(config);
+
+    elevatorLeader.configPeakOutputForward(kMaxOutput);
+    elevatorLeader.configPeakOutputReverse(kMinOutput);
+    elevatorLeader.enableVoltageCompensation(true);
+
+    elevatorFollower.follow(elevatorLeader);
 
     // Brake mode helps hold the elevator in place
-    elevatorLeader.setIdleMode(IdleMode.kBrake);
-    elevatorFollower.setIdleMode(IdleMode.kBrake);
+    elevatorLeader.setNeutralMode(NeutralMode.Brake);
+    elevatorFollower.setNeutralMode(NeutralMode.Brake);
 
-    // Save settings to motor flash, so they persist between power cycle
-    elevatorLeader.burnFlash();
-    elevatorFollower.burnFlash();
-    
+    // Read the absolute analog sensor and seed the talon position
+    elevatorLeader.setSelectedSensorPosition(metersToMotorPosition(getElevatorAnalogPositionMeters()));
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Elevator Position Raw", analogSensor.getPosition());
-    SmartDashboard.putNumber("Elevator Position Inches",  Units.metersToInches(getElevatorPosition()));
+    SmartDashboard.putNumber("Elevator Analog Position Raw", getElevatorAnalogRawPosition());
+    SmartDashboard.putNumber("Elevator Analog Position Meters", getElevatorAnalogPositionMeters());
+    SmartDashboard.putNumber("Elevator Motor Position Meters", getElevatorPosition());
   }
 
   /**
@@ -120,7 +124,8 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param meters position in meters
    */
   public void moveToPosition(double meters) {
-    pidController.setReference(metersToAnalogPosition(meters), ControlType.kSmartMotion);
+    // TODO should feed forward go in here, or use kF?
+    elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters));
   }
   
   /**
@@ -128,7 +133,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @return position in meters
    */
   public double getElevatorPosition() {
-    return analogPositionToMeters(analogSensor.getPosition());
+    return motorPositionToMeters(elevatorLeader.getSelectedSensorPosition());
   }
 
   /**
@@ -138,12 +143,28 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeader.stopMotor();
   }
 
+  private double getElevatorAnalogRawPosition() {
+    return analogSensor.getVoltage() / RobotController.getCurrent5V();
+  }
+
+  private double getElevatorAnalogPositionMeters() {
+    return analogPositionToMeters(getElevatorAnalogRawPosition());
+  }
+
   static double analogPositionToMeters(double analogPosition) {
-    return (analogPosition * SENSOR_COEFFICIENT) + SENSOR_OFFSET;
+    return (analogPosition * ANALOG_SENSOR_COEFFICIENT) + ANALOG_SENSOR_OFFSET;
   }
 
   static double metersToAnalogPosition(double positionMeters) {
-    return (positionMeters / SENSOR_COEFFICIENT) - (SENSOR_OFFSET / SENSOR_COEFFICIENT);
+    return (positionMeters / ANALOG_SENSOR_COEFFICIENT) - (ANALOG_SENSOR_OFFSET / ANALOG_SENSOR_COEFFICIENT);
+  }
+
+  static double motorPositionToMeters(double motorPosition) {
+    return (motorPosition * MOTOR_ENCODER_POSITION_COEFFICIENT);
+  }
+
+  static double metersToMotorPosition(double positionMeters) {
+    return (positionMeters / MOTOR_ENCODER_POSITION_COEFFICIENT);
   }
   
 }

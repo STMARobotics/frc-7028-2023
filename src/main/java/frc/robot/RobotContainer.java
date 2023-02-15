@@ -172,10 +172,11 @@ public class RobotContainer {
 
     // Intake
     controller.leftTrigger().whileTrue(new TeleopConePickupCommand(
-        inchesToMeters(1.0), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        inchesToMeters(1.3), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
-        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0));
+        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
+        .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
 
     // Shoot
     // controller.rightTrigger().whileTrue(

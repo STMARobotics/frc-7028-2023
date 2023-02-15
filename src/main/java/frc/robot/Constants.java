@@ -58,22 +58,22 @@ public final class Constants {
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 3;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 13;
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 23;
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(296.103515625);
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(295.576171875);
 
     public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 2;
     public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 12;
     public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 22;
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(203.291015625);
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(202.939453125);
 
     public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 1;
     public static final int BACK_LEFT_MODULE_STEER_MOTOR = 11;
     public static final int BACK_LEFT_MODULE_STEER_ENCODER = 21;
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(316.318359375);
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(317.724609375);
 
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 0;
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 10;
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 20;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(109.6875);
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(109.775390625);
     
     public static final int PIGEON_ID = 30;
 
@@ -150,8 +150,9 @@ public final class Constants {
         new Transform3d(new Translation3d(0.0, -0.1375, -.90), new Rotation3d(0.0, 0.0, -0.10));
 
     /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
-    public static final Transform3d SHOOTER_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(-0.0875, 0.2275, -0.51), new Rotation3d(0.0, degreesToRadians(-13.0), 0.0));
+    public static final Transform3d SHOOTER_CAMERA_TO_ROBOT = new Transform3d(
+        new Translation3d(-0.0875, 0.2275, -0.51),
+        new Rotation3d(0.0, degreesToRadians(-10.0), degreesToRadians(-1.0)));
 
     public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
         new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);
@@ -199,8 +200,8 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.5, 34.5, 1.05, 0.4064),    
-      shooterSettings(1.5, 34.5, 1.05, 0.4064)
+      shooterSettings(0.5, 34.5, 1.05, 0.45),    
+      shooterSettings(1.5, 34.5, 1.05, 0.45)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

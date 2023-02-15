@@ -80,6 +80,11 @@ public class TeleopConePickupCommand extends CommandBase {
   }
 
   @Override
+  public boolean isFinished() {
+    return shooterSubsystem.hasCone();
+  }
+
+  @Override
   public void end(boolean interrupted) {
     shooterSubsystem.stop();
     elevatorSubsystem.stop();

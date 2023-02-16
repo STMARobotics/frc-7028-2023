@@ -83,8 +83,8 @@ public final class Constants {
      * This is a measure of how fast the robot should be able to drive in a straight line.
      */
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-        ModuleConfiguration.MK4I_L1.getDriveReduction() *
-        ModuleConfiguration.MK4I_L1.getWheelDiameter() * PI;
+        ModuleConfiguration.MK4I_L2.getDriveReduction() *
+        ModuleConfiguration.MK4I_L2.getWheelDiameter() * PI;
 
      /**
      * The maximum angular velocity of the robot in radians per second.

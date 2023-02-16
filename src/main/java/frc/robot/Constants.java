@@ -58,22 +58,22 @@ public final class Constants {
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 3;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 13;
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 23;
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(295.576171875);
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(286.787109375);
 
     public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 2;
     public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 12;
     public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 22;
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(202.939453125);
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(41.66015625);
 
     public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 1;
     public static final int BACK_LEFT_MODULE_STEER_MOTOR = 11;
     public static final int BACK_LEFT_MODULE_STEER_ENCODER = 21;
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(317.724609375);
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(68.5546875);
 
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 0;
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 10;
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 20;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(109.775390625);
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(66.09375);
     
     public static final int PIGEON_ID = 30;
 
@@ -83,8 +83,8 @@ public final class Constants {
      * This is a measure of how fast the robot should be able to drive in a straight line.
      */
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-        ModuleConfiguration.MK4I_L1.getDriveReduction() *
-        ModuleConfiguration.MK4I_L1.getWheelDiameter() * PI;
+        ModuleConfiguration.MK4I_L2.getDriveReduction() *
+        ModuleConfiguration.MK4I_L2.getWheelDiameter() * PI;
 
      /**
      * The maximum angular velocity of the robot in radians per second.

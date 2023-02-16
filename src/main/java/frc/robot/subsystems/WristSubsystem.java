@@ -14,6 +14,8 @@ import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,21 +26,23 @@ import frc.robot.Constants.WristConstants;
  */
 public class WristSubsystem extends SubsystemBase {
 
-  private static final int SMART_MOTION_SLOT = 0;
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
   private static final double ENCODER_OFFSET = -0.58342d;
-  private static final double GRAVITY_FF = 0.01;
+  
   private static final float LIMIT_BOTTOM = 0.5804f;
   private static final float LIMIT_TOP = 0.8995f;
+  // Profile constraints, in radians per second
+  private static final TrapezoidProfile.Constraints PROFILE_CONSTRAINTS = new TrapezoidProfile.Constraints(150, 100);
+  private static final ArmFeedforward FEEDFORWARD = new ArmFeedforward(0, 0, 0, 0);
 
   private final CANSparkMax wristLeader;
   private final CANSparkMax wristFollower;
 
   private final SparkMaxPIDController pidController;
   private final SparkMaxAbsoluteEncoder wristEncoder;
-
-  private Double targetPosition = null;
-
+  
+  private TrapezoidProfile.State goal = null;
+  
   public WristSubsystem() {
     wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
     wristFollower = new CANSparkMax(WristConstants.WRIST_FOLLOWER_ID, MotorType.kBrushless);
@@ -59,12 +63,6 @@ public class WristSubsystem extends SubsystemBase {
     double kFF = 0;
     double kMaxOutput = .3;
     double kMinOutput = -.3;
-    double allowedErr = 0.002; // Error in rotations, not radians
-
-    // Smart Motion Coefficients
-    double maxVel = 1500; // rpm
-    double maxAcc = 1000;
-    double minVel = 0;
 
     pidController.setP(kP);
     pidController.setI(kI);
@@ -72,11 +70,6 @@ public class WristSubsystem extends SubsystemBase {
     pidController.setIZone(kIz);
     pidController.setFF(kFF);
     pidController.setOutputRange(kMinOutput, kMaxOutput); 
-
-    pidController.setSmartMotionMaxVelocity(maxVel, SMART_MOTION_SLOT);
-    pidController.setSmartMotionMinOutputVelocity(minVel, SMART_MOTION_SLOT);
-    pidController.setSmartMotionMaxAccel(maxAcc, SMART_MOTION_SLOT);
-    pidController.setSmartMotionAllowedClosedLoopError(allowedErr, SMART_MOTION_SLOT);
 
     // Voltage compensation and current limits
     wristLeader.enableVoltageCompensation(12);
@@ -107,12 +100,17 @@ public class WristSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (targetPosition != null) {
-      // Calculate feed forward based on angle to counteract gravity
-      double cosineScalar = Math.cos(getWristPosition());
-      double feedForward = GRAVITY_FF * cosineScalar;
-      pidController.setReference(armRadiansToEncoderRotations(targetPosition), 
-          ControlType.kSmartMotion, 0, feedForward, ArbFFUnits.kPercentOut);
+    if (goal != null) {
+      var currentState = new TrapezoidProfile.State(getWristPosition(), getWristVelocity());
+      var targetState = new TrapezoidProfile(PROFILE_CONSTRAINTS, goal, currentState).calculate(0.02);
+      double feedForward = FEEDFORWARD.calculate(targetState.position, targetState.velocity);
+
+      pidController.setReference(
+          armRadiansToEncoderRotations(targetState.position),
+          ControlType.kPosition,
+          0,
+          feedForward,
+          ArbFFUnits.kVoltage);
     }
 
     SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
@@ -125,7 +123,7 @@ public class WristSubsystem extends SubsystemBase {
    * @param speed duty cycle [-1,1]
    */
   public void moveWrist(double speed){
-    targetPosition = null;
+    goal = null;
     wristLeader.set(speed);
   }
 
@@ -136,7 +134,7 @@ public class WristSubsystem extends SubsystemBase {
    */
   public void moveToPosition(double radians) {
     // Set the target position, but move in execute() so feed forward keeps updating
-    targetPosition = radians;
+    goal = new TrapezoidProfile.State(radians, 0.0);
   }
 
   /**
@@ -145,6 +143,14 @@ public class WristSubsystem extends SubsystemBase {
    */
   public double getWristPosition() {
     return Units.rotationsToRadians(wristEncoder.getPosition() + ENCODER_OFFSET);
+  }
+
+  /**
+   * Gets the wrist velocity in radians per second
+   * @return wrist velocity in radians per second
+   */
+  public double getWristVelocity() {
+    return Units.rotationsToDegrees(wristEncoder.getVelocity());
   }
 
   /**
@@ -160,7 +166,7 @@ public class WristSubsystem extends SubsystemBase {
    * Stop the elevator
    */
   public void stop() {
-    targetPosition = null;
+    goal = null;
     wristLeader.stopMotor();
   }
 

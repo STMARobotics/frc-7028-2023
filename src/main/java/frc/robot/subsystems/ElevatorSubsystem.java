@@ -1,13 +1,11 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -29,8 +27,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   // Mutiply by sensor velocity to get meters per second
   private static final double MOTOR_ENCODER_VELOCITY_COEFFICIENT = MOTOR_ENCODER_POSITION_COEFFICIENT * 10;
 
-  private static final double ANALOG_BOTTOM = 0.646978;
-  private static final double ANALOG_TOP = 2.38377;
+  private static final int ANALOG_BOTTOM = 5;
+  private static final int ANALOG_TOP = 3000;
 
   // Coefficient in meters per sensor value
   private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);
@@ -82,10 +80,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     config.forwardSoftLimitThreshold = MOTOR_TOP;
     config.reverseSoftLimitEnable = true;
     config.reverseSoftLimitThreshold = MOTOR_BOTTOM;
-
-    // Configure limit switches
-    config.forwardLimitSwitchNormal = LimitSwitchNormal.NormallyClosed;
-    config.reverseLimitSwitchNormal = LimitSwitchNormal.NormallyClosed;
 
     elevatorLeader.configAllSettings(config);
     elevatorFollower.configAllSettings(config);
@@ -144,7 +138,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   private double getElevatorAnalogRawPosition() {
-    return analogSensor.getVoltage() / RobotController.getCurrent5V();
+    return analogSensor.getValue();
   }
 
   private double getElevatorAnalogPositionMeters() {

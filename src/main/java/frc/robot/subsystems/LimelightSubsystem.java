@@ -59,7 +59,6 @@ public class LimelightSubsystem extends SubsystemBase {
         var wrapper = mapper.readValue(json, LimelightResultsWrapper.class);
         latestLimelightResults = wrapper.targetingResults;
       } catch (JsonProcessingException e) {
-        System.err.println("lljson error: " + e.getMessage());
       }
     }
     return latestLimelightResults;

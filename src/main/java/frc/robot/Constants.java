@@ -182,8 +182,8 @@ public final class Constants {
   }
   
   public static class ElevatorConstants {
-    public static int ELEVATOR_LEADER_ID = 1;
-    public static int ELEVATOR_FOLLOWER_ID = 2;
+    public static int ELEVATOR_LEADER_ID = 40;
+    public static int ELEVATOR_FOLLOWER_ID = 41;
     public static int ANALOG_SENSOR_CHANNEL = 0;
   }
 

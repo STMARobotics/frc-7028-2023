@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -16,24 +16,22 @@ import frc.robot.Constants.ElevatorConstants;
 public class ElevatorSubsystem extends SubsystemBase {
 
   // Elevator travel distance, in meters
-  private static final double ELEVATOR_HEIGHT = 1.0;
+  private static final double ELEVATOR_HEIGHT = 1.105 - 0.102;
 
   // Motor's encoder limits, in encoder ticks
   private static final double MOTOR_BOTTOM = 0;
-  private static final double MOTOR_TOP = 100000;
+  private static final double MOTOR_TOP = 40012;
 
   // Mutiply by sensor position to get meters
   private static final double MOTOR_ENCODER_POSITION_COEFFICIENT = ELEVATOR_HEIGHT / (MOTOR_TOP - MOTOR_BOTTOM);
   // Mutiply by sensor velocity to get meters per second
   private static final double MOTOR_ENCODER_VELOCITY_COEFFICIENT = MOTOR_ENCODER_POSITION_COEFFICIENT * 10;
 
-  private static final int ANALOG_BOTTOM = 5;
-  private static final int ANALOG_TOP = 3000;
+  private static final int ANALOG_BOTTOM = 758;
+  private static final int ANALOG_TOP = 1796;
 
-  // Coefficient in meters per sensor value
+  // Mutiply by sensor position to get meters
   private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);
-  // Offset to add to sensor value - offset from elevator bottom to sensor bottom
-  private static final double ANALOG_SENSOR_OFFSET = -MOTOR_BOTTOM * ANALOG_SENSOR_COEFFICIENT;
 
   private final WPI_TalonFX elevatorLeader;
   private final WPI_TalonFX elevatorFollower;
@@ -77,9 +75,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Configure soft limits
     config.forwardSoftLimitEnable = true;
-    config.forwardSoftLimitThreshold = MOTOR_TOP;
+    config.forwardSoftLimitThreshold = MOTOR_TOP - metersToMotorPosition(0.02);
     config.reverseSoftLimitEnable = true;
-    config.reverseSoftLimitThreshold = MOTOR_BOTTOM;
+    config.reverseSoftLimitThreshold = MOTOR_BOTTOM + metersToMotorPosition(0.02);
+    config.forwardLimitSwitchNormal = LimitSwitchNormal.NormallyOpen;
+    config.reverseLimitSwitchNormal = LimitSwitchNormal.NormallyOpen;
 
     elevatorLeader.configAllSettings(config);
     elevatorFollower.configAllSettings(config);
@@ -87,6 +87,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorLeader.configPeakOutputForward(kMaxOutput);
     elevatorLeader.configPeakOutputReverse(kMinOutput);
     elevatorLeader.enableVoltageCompensation(true);
+
+    elevatorLeader.setInverted(true);
+    elevatorFollower.setInverted(true);
 
     elevatorFollower.follow(elevatorLeader);
 
@@ -102,6 +105,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Elevator Analog Position Raw", getElevatorAnalogRawPosition());
     SmartDashboard.putNumber("Elevator Analog Position Meters", getElevatorAnalogPositionMeters());
+    SmartDashboard.putNumber("Elevator Motor Position Raw", elevatorLeader.getSelectedSensorPosition());
     SmartDashboard.putNumber("Elevator Motor Position Meters", getElevatorPosition());
   }
 
@@ -119,7 +123,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public void moveToPosition(double meters) {
     // TODO should feed forward go in here, or use kF?
-    elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters));
+    // elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters));
   }
   
   /**
@@ -138,19 +142,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   private double getElevatorAnalogRawPosition() {
-    return analogSensor.getValue();
+    return 4096 - analogSensor.getValue(); // Invert sensor so up is positive
   }
 
   private double getElevatorAnalogPositionMeters() {
-    return analogPositionToMeters(getElevatorAnalogRawPosition());
-  }
-
-  static double analogPositionToMeters(double analogPosition) {
-    return (analogPosition * ANALOG_SENSOR_COEFFICIENT) + ANALOG_SENSOR_OFFSET;
-  }
-
-  static double metersToAnalogPosition(double positionMeters) {
-    return (positionMeters / ANALOG_SENSOR_COEFFICIENT) - (ANALOG_SENSOR_OFFSET / ANALOG_SENSOR_COEFFICIENT);
+    return (getElevatorAnalogRawPosition() - ANALOG_BOTTOM) * ANALOG_SENSOR_COEFFICIENT;
   }
 
   static double motorPositionToMeters(double motorPosition) {

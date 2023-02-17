@@ -54,6 +54,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private double previousPipelineTimestamp = 0;
   private OriginPosition originPosition = OriginPosition.kBlueAllianceWallRightSide;
+  private boolean sawTag = false;
 
   public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
     this.drivetrainSubsystem = drivetrainSubsystem;
@@ -104,9 +105,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       default:
         // No valid alliance data. Nothing we can do about it
     }
-    if (allianceChanged) {
+    if (allianceChanged && sawTag) {
       // The alliance changed, which changes the coordinate system.
-      // Since a tag may have been seen and the tags are all relative to the coordinate system, the estimated pose
+      // Since a tag was seen, and the tags are all relative to the coordinate system, the estimated pose
       // needs to be transformed to the new coordinate system.
       var newPose = flipAlliance(poseEstimator.getEstimatedPosition());
       setCurrentPose(newPose);
@@ -123,6 +124,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     if (photonPoseEstimator != null) {
       // Update pose estimator with the best visible target
       photonPoseEstimator.update().ifPresent(estimatedRobotPose -> {
+        sawTag = true;
         var estimatedPose = estimatedRobotPose.estimatedPose;
         // Make sure we have a new measurement, and that it's on the field
         if (estimatedRobotPose.timestampSeconds != previousPipelineTimestamp

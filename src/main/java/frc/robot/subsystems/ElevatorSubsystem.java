@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -24,11 +26,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   // Mutiply by sensor position to get meters
   private static final double MOTOR_ENCODER_POSITION_COEFFICIENT = ELEVATOR_HEIGHT / (MOTOR_TOP - MOTOR_BOTTOM);
-  // Mutiply by sensor velocity to get meters per second
-  private static final double MOTOR_ENCODER_VELOCITY_COEFFICIENT = MOTOR_ENCODER_POSITION_COEFFICIENT * 10;
 
   private static final int ANALOG_BOTTOM = 758;
   private static final int ANALOG_TOP = 1796;
+
+  private static final double GRAVITY_FEED_FORWARD = 0.05;
 
   // Mutiply by sensor position to get meters
   private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);
@@ -45,18 +47,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     analogSensor = new AnalogInput(ElevatorConstants.ANALOG_SENSOR_CHANNEL);
 
     // Configure closed-loop control
-    double kP = .00004; 
+    double kP = .09; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0;
-    double kF = 0.008;
-    double kMaxOutput = .5;
-    double kMinOutput = -.5;
-    double allowedErr = 0.004;
+    double kF = 0.00;
+    double kMaxOutput = 0.5;
+    double kMinOutput = -.05;
+    double allowedErr = 1;
 
     // Magic Motion Coefficients
-    double maxVel = 6500; // rpm // TODO convert to sensor units per 100ms
-    double maxAcc = 1500;
+    double maxVel = 6000;
+    double maxAcc = 15000;
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.slot0.kP = kP;
@@ -80,6 +82,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     config.reverseSoftLimitThreshold = MOTOR_BOTTOM + metersToMotorPosition(0.02);
     config.forwardLimitSwitchNormal = LimitSwitchNormal.NormallyOpen;
     config.reverseLimitSwitchNormal = LimitSwitchNormal.NormallyOpen;
+    config.neutralDeadband = .02;
 
     elevatorLeader.configAllSettings(config);
     elevatorFollower.configAllSettings(config);
@@ -104,7 +107,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Elevator Analog Position Raw", getElevatorAnalogRawPosition());
-    SmartDashboard.putNumber("Elevator Analog Position Meters", getElevatorAnalogPositionMeters());
     SmartDashboard.putNumber("Elevator Motor Position Raw", elevatorLeader.getSelectedSensorPosition());
     SmartDashboard.putNumber("Elevator Motor Position Meters", getElevatorPosition());
   }
@@ -122,8 +124,8 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param meters position in meters
    */
   public void moveToPosition(double meters) {
-    // TODO should feed forward go in here, or use kF?
-    // elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters));
+    elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters),
+        DemandType.ArbitraryFeedForward, GRAVITY_FEED_FORWARD);
   }
   
   /**

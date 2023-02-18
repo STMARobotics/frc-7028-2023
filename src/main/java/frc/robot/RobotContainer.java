@@ -5,9 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
-import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
-import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
 import java.util.HashMap;
@@ -29,17 +27,21 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AutoIntakeCommand;
+import frc.robot.commands.AutoShootConeCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustShootCommand;
+import frc.robot.commands.PickupPosition;
 import frc.robot.commands.ShootConeCommand;
+import frc.robot.commands.ShootCubeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.limelight.LimelightRetroCalcs;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -58,7 +60,9 @@ import frc.robot.subsystems.WristSubsystem;
  */
 public class RobotContainer {
 
-  private final CommandXboxController controller = new CommandXboxController(0);
+  //private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandJoystick leftJoystick = new CommandJoystick(0);
+  private final CommandJoystick rightJoystick = new CommandJoystick(1);
 
   private final PhotonCamera photonCamera = new PhotonCamera("OV9281");
 
@@ -73,18 +77,18 @@ public class RobotContainer {
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
       drivetrainSubsystem,
       () -> poseEstimator.getCurrentPose().getRotation(),
-      () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-      () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-      () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
+      () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(leftJoystick.getX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(rightJoystick.getX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2
   );
 
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand = new FieldHeadingDriveCommand(
       drivetrainSubsystem,
       () -> poseEstimator.getCurrentPose().getRotation(),
-      () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
-      () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND, 
-      () -> -controller.getRightY(),
-      () -> -controller.getRightX());
+      () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      () -> -modifyAxis(leftJoystick.getX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND, 
+      () -> -rightJoystick.getY(),
+      () -> -rightJoystick.getX());
 
   private final DefaultWristCommand defaultWristCommand = new DefaultWristCommand(wristSubsystem);
   private final DefaultElevatorCommand defaultElevatorCommand =
@@ -133,56 +137,56 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button resets the robot pose
-    controller.back().onTrue(runOnce(poseEstimator::resetFieldPosition));
+    leftJoystick.button(1).onTrue(runOnce(poseEstimator::resetFieldPosition));
     // Start button reseeds the steer motors to fix dead wheel
-    controller.start().onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
+    leftJoystick.button(2).onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
 
     // POV up for field oriented drive
-    controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
+    leftJoystick.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
         .andThen(new ScheduleCommand(fieldOrientedDriveCommand)));
     // POV down for field heading drive
-    controller.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
+    leftJoystick.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
         .andThen(new ScheduleCommand(fieldHeadingDriveCommand)));
 
     // POV Right to put the wheels in an X until the driver tries to drive
     BooleanSupplier driverDriving = 
-        () -> modifyAxis(controller.getLeftY()) != 0.0 
-            || modifyAxis(controller.getLeftX()) != 0.0
-            || modifyAxis(controller.getRightY()) != 0.0
-            || modifyAxis(controller.getRightX()) != 0.0;
-    controller.povRight().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
+        () -> modifyAxis(leftJoystick.getY()) != 0.0 
+            || modifyAxis(leftJoystick.getX()) != 0.0
+            || modifyAxis(rightJoystick.getY()) != 0.0
+            || modifyAxis(rightJoystick.getX()) != 0.0;
+    leftJoystick.povRight().onTrue(run(drivetrainSubsystem::setWheelsToX, drivetrainSubsystem).until(driverDriving));
 
     // Elevator
-    controller.y().whileTrue(
+    rightJoystick.povUp().whileTrue(
         startEnd(() -> elevatorSubsystem.moveElevator(0.8), elevatorSubsystem::stop, elevatorSubsystem));
-    controller.b().whileTrue(
+    rightJoystick.povDown().whileTrue(
         startEnd(() -> elevatorSubsystem.moveElevator(-0.95), elevatorSubsystem::stop, elevatorSubsystem));
 
     // Wrist
-    controller.x().whileTrue(
+    rightJoystick.povLeft().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(.3), wristSubsystem::stop, wristSubsystem));
-    controller.a().whileTrue(
+    rightJoystick.povRight().whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
 
     // Shooter
-    controller.rightBumper().whileTrue(startEnd(
+    rightJoystick.button(1).whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem));
-    controller.leftBumper().whileTrue(startEnd(
+    rightJoystick.button(2).whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
 
     // Intake
-    controller.leftTrigger().whileTrue(new TeleopConePickupCommand(
+    leftJoystick.trigger().whileTrue(new TeleopConePickupCommand(
         inchesToMeters(1.3), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
-        () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
-        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
+        () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(leftJoystick.getX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(rightJoystick.getX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
 
     // Shoot
     // controller.rightTrigger().whileTrue(
     //     new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP));
 
-    controller.rightTrigger().whileTrue(new ShootConeCommand(
+    rightJoystick.trigger().whileTrue(new ShootConeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, coneLimelightSubsystem));
 
@@ -192,8 +196,12 @@ public class RobotContainer {
     //         .andThen(new JustShootCommand(0.4064, 1.05, 34.5, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     // TODO shoot low
-    controller.povLeft().whileTrue(new JustShootCommand(
-        inchesToMeters(1.135), 1.25, 150, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+    //controller.povLeft().whileTrue(new JustShootCommand(
+      //  inchesToMeters(1.135), 1.25, 150, elevatorSubsystem, wristSubsystem, shooterSubsystem));
+
+
+    leftJoystick.povLeft().whileTrue(new ShootCubeCommand(
+      inchesToMeters(17), 1, 60, elevatorSubsystem, wristSubsystem, shooterSubsystem));
   }
 
   /**
@@ -202,12 +210,25 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    var testPath = PathPlanner.loadPath("TestPath", PathPlanner.getConstraintsFromPath("TestPath"));
-    if (testPath == null) {
+    var twoConePath = PathPlanner.loadPathGroup("twoCone", PathPlanner.getConstraintsFromPath("twoCone"));
+    if (twoConePath == null) {
       return Commands.print("********* Path failed to load. Not running auto *********");
     }
     var eventMap = new HashMap<String, Command>();
-    eventMap.put("marker1", Commands.print("Passed marker 1"));
+    eventMap.put("shootCone1", new JustShootCommand(inchesToMeters(1.3), 0.2, 25, elevatorSubsystem, wristSubsystem, shooterSubsystem)
+    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
+
+    eventMap.put("intakeDown", new PickupPosition(inchesToMeters(1.3), 0.024, elevatorSubsystem, wristSubsystem));
+
+    eventMap.put("startIntake1", new AutoIntakeCommand(inchesToMeters(1.3), 0.024, -0.1, elevatorSubsystem, wristSubsystem, shooterSubsystem)
+    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
+
+    eventMap.put("shootCone2", new AutoShootConeCommand(
+      Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+      shooterSubsystem, coneLimelightSubsystem));
+
+    eventMap.put("startIntake2", new AutoIntakeCommand(inchesToMeters(1.3), 0.024, -0.1, elevatorSubsystem, wristSubsystem, shooterSubsystem)
+    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
 
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
         poseEstimator::getCurrentPose,
@@ -221,7 +242,7 @@ public class RobotContainer {
         drivetrainSubsystem
     );
 
-    return autoBuilder.fullAuto(testPath);
+    return autoBuilder.fullAuto(twoConePath);
   }
 
   public void disabledPeriodic() {

@@ -9,11 +9,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
-/**
- * Basic command to position elevator and wrist, and then shoot
- */
-public class JustShootCommand extends CommandBase {
-  
+public class ShootCubeCommand extends CommandBase {
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
 
@@ -41,7 +37,7 @@ public class JustShootCommand extends CommandBase {
    * @param wristSubsystem wrist
    * @param shooterSubsystem shooter
    */
-  public JustShootCommand(double elevatorMeters, double wristRadians, double shooterRPS, ElevatorSubsystem elevatorSubsystem,
+  public ShootCubeCommand(double elevatorMeters, double wristRadians, double shooterRPS, ElevatorSubsystem elevatorSubsystem,
       WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem) {
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
@@ -53,7 +49,7 @@ public class JustShootCommand extends CommandBase {
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem);
   }
 
-  protected JustShootCommand(ElevatorSubsystem elevatorSubsystem,
+  protected ShootCubeCommand(ElevatorSubsystem elevatorSubsystem,
       WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
@@ -67,12 +63,12 @@ public class JustShootCommand extends CommandBase {
     shootTimer.reset();
     isShooting = false;
     readyToShootDebouncer.calculate(false);
-    wristSubsystem.moveToPosition(wristRadians);
   }
 
   @Override
   public void execute() {
     elevatorSubsystem.moveToPosition(elevatorMeters);
+    wristSubsystem.moveToPosition(wristRadians);
 
     var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
     var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
@@ -95,7 +91,7 @@ public class JustShootCommand extends CommandBase {
   @Override
   public boolean isFinished() {
     //return false;
-    return isShooting && shootTimer.hasElapsed(0.5) || shootTimer.hasElapsed(5);
+    return isShooting && shootTimer.hasElapsed(3);
   }
 
   @Override
@@ -104,5 +100,4 @@ public class JustShootCommand extends CommandBase {
     wristSubsystem.stop();
     shooterSubsystem.stop();
   }
-
 }

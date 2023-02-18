@@ -201,7 +201,7 @@ public final class Constants {
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
       shooterSettings(0.5, 34.5, 1.0, 0.6),    
-      shooterSettings(2.0, 34.5, 1.0, 0.6)
+      shooterSettings(2.0, 34.0, 1.0, 0.6)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

@@ -181,19 +181,18 @@ public class RobotContainer {
 
     // Intake
     leftJoystick.trigger().whileTrue(new TeleopConePickupCommand(
-        0.043, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(leftJoystick.getX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(rightJoystick.getX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem)));
 
-        //37.25
-    // leftJoystick.povUp().whileTrue(new TeleopConePickupCommand(
-    //     0.95, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-    //     () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
-    //     () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
-    //     () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
-    //     .andThen(new DefaultWristCommand(wristSubsystem)));
+    leftJoystick.povUp().whileTrue(new TeleopConePickupCommand(
+        1.0, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(leftJoystick.getX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(rightJoystick.getX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
+        .andThen(new DefaultWristCommand(wristSubsystem)));
     
 
     // Shoot

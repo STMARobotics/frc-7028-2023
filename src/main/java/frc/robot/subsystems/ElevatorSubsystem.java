@@ -113,10 +113,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Elevator Motor Position Meters", getElevatorPosition());
 
     // Handle elevator limit switches
-    if (!bottomLimitSwitch.get()) {
+    if (isAtBottomLimit()) {
       elevatorLeader.setSelectedSensorPosition(MOTOR_BOTTOM);
-    }
-    if (!topLimitSwitch.get()) {
+    } else if (isAtTopLimit()) {
       elevatorLeader.setSelectedSensorPosition(MOTOR_TOP);
     }
   }
@@ -151,6 +150,14 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public void stop() {
     elevatorLeader.stopMotor();
+  }
+
+  public boolean isAtBottomLimit() {
+    return !bottomLimitSwitch.get();
+  }
+
+  public boolean isAtTopLimit() {
+    return !topLimitSwitch.get();
   }
 
   private double getElevatorAnalogRawPosition() {

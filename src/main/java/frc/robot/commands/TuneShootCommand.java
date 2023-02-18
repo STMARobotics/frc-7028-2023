@@ -42,7 +42,7 @@ public class TuneShootCommand extends JustShootCommand {
 
     var shuffleboardTab = Shuffleboard.getTab("Shoot");
     wristEntry = shuffleboardTab.add("Wrist Angle", 1.127).getEntry();
-    elevatorEntry = shuffleboardTab.add("Elevator Height", 0.4064).getEntry();
+    elevatorEntry = shuffleboardTab.add("Elevator Height", 0.6).getEntry();
     shooterEntry = shuffleboardTab.add("Shooter Velocity", 34.5).getEntry();
 
     targetDistanceEntry = shuffleboardTab.add("Target Distance", 0.0).getEntry();
@@ -53,16 +53,15 @@ public class TuneShootCommand extends JustShootCommand {
   public void initialize() {
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
+    // read shoot settings from the dashboard
+    wristRadians = wristEntry.getDouble(0.0);
+    elevatorMeters = elevatorEntry.getDouble(0.0);
+    shooterRPS = shooterEntry.getDouble(0.0);
     super.initialize();
   }
 
   @Override
   public void execute() {
-    // read shoot settings from the dashboard
-    wristRadians = wristEntry.getDouble(0.0);
-    elevatorMeters = elevatorEntry.getDouble(0.0);
-    shooterRPS = shooterEntry.getDouble(0.0);
-    
     // Put some target info on the dashboard
     limelightSubsystem.getLatestRetroTarget().ifPresent((target) -> {
       var targetTranslation = limelightCalcs.getTargetTranslation(target);

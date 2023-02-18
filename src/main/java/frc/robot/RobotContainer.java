@@ -33,7 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.DefaultElevatorCommand;
+import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
@@ -44,6 +44,7 @@ import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.limelight.LimelightRetroCalcs;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.Profile;
@@ -60,7 +61,7 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private final PhotonCamera photonCamera = new PhotonCamera("OV9281");
+  private final PhotonCamera photonCamera = null;//new PhotonCamera("OV9281");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
@@ -69,6 +70,7 @@ public class RobotContainer {
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final LimelightSubsystem coneLimelightSubsystem =
       new LimelightSubsystem(VisionConstants.SHOOTER_LIMELIGHT_CONFIG.getNetworkTableName());
+  private final LEDSubsystem ledSubsystem = new LEDSubsystem();
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
       drivetrainSubsystem,
@@ -87,8 +89,6 @@ public class RobotContainer {
       () -> -controller.getRightX());
 
   private final DefaultWristCommand defaultWristCommand = new DefaultWristCommand(wristSubsystem);
-  private final DefaultElevatorCommand defaultElevatorCommand =
-      new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone);
   private final DefaultShooterCommand defaultShooterCommand = new DefaultShooterCommand(shooterSubsystem);
 
   private final Timer reseedTimer = new Timer();
@@ -100,8 +100,8 @@ public class RobotContainer {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
     wristSubsystem.setDefaultCommand(defaultWristCommand);
-    elevatorSubsystem.setDefaultCommand(defaultElevatorCommand);
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
+    ledSubsystem.setDefaultCommand(new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -154,15 +154,15 @@ public class RobotContainer {
 
     // Elevator
     controller.y().whileTrue(
-        startEnd(() -> elevatorSubsystem.moveElevator(0.8), elevatorSubsystem::stop, elevatorSubsystem));
+        startEnd(() -> elevatorSubsystem.moveElevator(0.1), elevatorSubsystem::stop, elevatorSubsystem));
     controller.b().whileTrue(
-        startEnd(() -> elevatorSubsystem.moveElevator(-0.95), elevatorSubsystem::stop, elevatorSubsystem));
+        startEnd(() -> elevatorSubsystem.moveElevator(-0.05), elevatorSubsystem::stop, elevatorSubsystem));
 
     // Wrist
     controller.x().whileTrue(
-        startEnd(() -> wristSubsystem.moveWrist(.3), wristSubsystem::stop, wristSubsystem));
+        startEnd(() -> wristSubsystem.moveWrist(.2), wristSubsystem::stop, wristSubsystem));
     controller.a().whileTrue(
-        startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
+        startEnd(() -> wristSubsystem.moveWrist(-.1), wristSubsystem::stop, wristSubsystem));
 
     // Shooter
     controller.rightBumper().whileTrue(startEnd(
@@ -172,11 +172,11 @@ public class RobotContainer {
 
     // Intake
     controller.leftTrigger().whileTrue(new TeleopConePickupCommand(
-        inchesToMeters(1.3), 0.024, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        0.045, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
-        .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
+        .andThen(new DefaultWristCommand(wristSubsystem)));
 
     // Shoot
     // controller.rightTrigger().whileTrue(

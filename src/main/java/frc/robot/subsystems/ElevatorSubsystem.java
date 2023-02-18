@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -38,6 +39,10 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final WPI_TalonFX elevatorLeader;
   private final WPI_TalonFX elevatorFollower;
   private final AnalogInput analogSensor;
+
+  // Limit switches - FALSE means at limit
+  private final DigitalInput topLimitSwitch = new DigitalInput(8);
+  private final DigitalInput bottomLimitSwitch = new DigitalInput(9);
 
   public ElevatorSubsystem() {
     elevatorLeader = new WPI_TalonFX(ElevatorConstants.ELEVATOR_LEADER_ID);
@@ -99,9 +104,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Brake mode helps hold the elevator in place
     elevatorLeader.setNeutralMode(NeutralMode.Brake);
     elevatorFollower.setNeutralMode(NeutralMode.Brake);
-
-    // Read the absolute analog sensor and seed the talon position
-    elevatorLeader.setSelectedSensorPosition(metersToMotorPosition(getElevatorAnalogPositionMeters()));
   }
 
   @Override
@@ -109,6 +111,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Elevator Analog Position Raw", getElevatorAnalogRawPosition());
     SmartDashboard.putNumber("Elevator Motor Position Raw", elevatorLeader.getSelectedSensorPosition());
     SmartDashboard.putNumber("Elevator Motor Position Meters", getElevatorPosition());
+
+    // Handle elevator limit switches
+    if (!bottomLimitSwitch.get()) {
+      elevatorLeader.setSelectedSensorPosition(MOTOR_BOTTOM);
+    }
+    if (!topLimitSwitch.get()) {
+      elevatorLeader.setSelectedSensorPosition(MOTOR_TOP);
+    }
   }
 
   /**

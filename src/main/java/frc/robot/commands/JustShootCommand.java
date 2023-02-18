@@ -67,12 +67,12 @@ public class JustShootCommand extends CommandBase {
     shootTimer.reset();
     isShooting = false;
     readyToShootDebouncer.calculate(false);
+    wristSubsystem.moveToPosition(wristRadians);
   }
 
   @Override
   public void execute() {
     elevatorSubsystem.moveToPosition(elevatorMeters);
-    wristSubsystem.moveToPosition(wristRadians);
 
     var elevatorPosition = elevatoFilter.calculate(elevatorSubsystem.getElevatorPosition());
     var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());

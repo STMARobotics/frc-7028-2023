@@ -16,12 +16,8 @@ public class DefaultWristCommand extends CommandBase {
   }
 
   @Override
-  public void execute() {
+  public void initialize() {
     wristSubsystem.moveToPosition(Math.PI/2);
   }
-  
-  @Override
-  public void end(boolean interrupted) {
-    wristSubsystem.stop();
-  }
+
 }

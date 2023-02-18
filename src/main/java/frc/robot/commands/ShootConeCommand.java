@@ -29,7 +29,7 @@ public class ShootConeCommand extends CommandBase {
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double AIM_TOLERANCE = Units.degreesToRadians(1.0);
   private static final double DISTANCE_TOLERANCE = 0.1;
-  private static final double DISTANCE_GOAL = 1.45d;
+  private static final double DISTANCE_GOAL = 1.47d;
 
   private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =
@@ -42,8 +42,8 @@ public class ShootConeCommand extends CommandBase {
   private final LimelightSubsystem limelightSubsystem;
   private final Timer shootTimer = new Timer();
 
-  private final ProfiledPIDController aimController = new ProfiledPIDController(1.3, 0.002, 0, OMEGA_CONSTRAINTS);
-  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.0, 0, 0, DISTANCE_CONSTRAINTS);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(1.0, 0.002, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(0.9, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final Profile shooterProfile;
   private final LimelightRetroCalcs limelightCalcs;

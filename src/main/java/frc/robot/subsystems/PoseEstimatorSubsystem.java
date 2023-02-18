@@ -58,12 +58,14 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
     this.drivetrainSubsystem = drivetrainSubsystem;
-    PhotonPoseEstimator photonPoseEstimator;
+    PhotonPoseEstimator photonPoseEstimator = null;
     try {
       var layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
       layout.setOrigin(originPosition);
-      photonPoseEstimator =
-          new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP, photonCamera, APRILTAG_CAMERA_TO_ROBOT);
+      if (photonCamera != null) {
+        photonPoseEstimator =
+            new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP, photonCamera, APRILTAG_CAMERA_TO_ROBOT);
+      }
     } catch(IOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       photonPoseEstimator = null;
@@ -89,21 +91,21 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param alliance alliance
    */
   public void setAlliance(Alliance alliance) {
-    var fieldTags = photonPoseEstimator.getFieldTags();
     boolean allianceChanged = false;
     switch(alliance) {
       case Blue:
-        fieldTags.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
         allianceChanged = (originPosition == OriginPosition.kRedAllianceWallRightSide);
         originPosition = OriginPosition.kBlueAllianceWallRightSide;
         break;
       case Red:
-        fieldTags.setOrigin(OriginPosition.kRedAllianceWallRightSide);
         allianceChanged = (originPosition == OriginPosition.kBlueAllianceWallRightSide);
         originPosition = OriginPosition.kRedAllianceWallRightSide;
         break;
       default:
         // No valid alliance data. Nothing we can do about it
+    }
+    if (photonPoseEstimator != null) {
+      photonPoseEstimator.getFieldTags().setOrigin(originPosition);
     }
     if (allianceChanged && sawTag) {
       // The alliance changed, which changes the coordinate system.

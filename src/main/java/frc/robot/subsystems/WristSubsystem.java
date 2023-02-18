@@ -6,6 +6,8 @@ import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
 import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
 import static edu.wpi.first.math.util.Units.radiansToRotations;
 
+import java.util.Objects;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -14,7 +16,6 @@ import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,16 +28,15 @@ import frc.robot.Constants.WristConstants;
 public class WristSubsystem extends SubsystemBase {
 
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
-  private static final double ENCODER_OFFSET = -0.58342d;
+  private static final double ENCODER_OFFSET = -0.373663187026978d;
   
-  private static final float LIMIT_BOTTOM = 0.5804f;
-  private static final float LIMIT_TOP = 0.8995f;
+  private static final float LIMIT_BOTTOM = 0.369f;
+  private static final float LIMIT_TOP = 0.633f;
   // Profile constraints, in radians per second
-  private static final TrapezoidProfile.Constraints PROFILE_CONSTRAINTS = new TrapezoidProfile.Constraints(150, 100);
-  private static final ArmFeedforward FEEDFORWARD = new ArmFeedforward(0, 0, 0, 0);
+  private static final TrapezoidProfile.Constraints PROFILE_CONSTRAINTS = new TrapezoidProfile.Constraints(40, 15);
+  private static final double GRAVITY_FEED_FORWARD = 0.027;
 
   private final CANSparkMax wristLeader;
-  private final CANSparkMax wristFollower;
 
   private final SparkMaxPIDController pidController;
   private final SparkMaxAbsoluteEncoder wristEncoder;
@@ -45,23 +45,23 @@ public class WristSubsystem extends SubsystemBase {
   
   public WristSubsystem() {
     wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
-    wristFollower = new CANSparkMax(WristConstants.WRIST_FOLLOWER_ID, MotorType.kBrushless);
 
     wristLeader.restoreFactoryDefaults();
-    wristFollower.restoreFactoryDefaults();
     
     // Get the through-bore-encoder absolute encoder
     wristEncoder = wristLeader.getAbsoluteEncoder(kDutyCycle);
+    wristEncoder.setInverted(true);
+    wristEncoder.setAverageDepth(64);
     pidController = wristLeader.getPIDController();
     pidController.setFeedbackDevice(wristEncoder);
 
     // Configure closed-loop control
-    double kP = .0025; 
+    double kP = 3.0; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0; 
     double kFF = 0;
-    double kMaxOutput = .3;
+    double kMaxOutput = .4;
     double kMinOutput = -.3;
 
     pidController.setP(kP);
@@ -73,8 +73,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Voltage compensation and current limits
     wristLeader.enableVoltageCompensation(12);
-    wristLeader.setSmartCurrentLimit(20);
-    wristFollower.setSmartCurrentLimit(20);
+    wristLeader.setSmartCurrentLimit(30);
 
     // Configure soft limits
     wristLeader.setSoftLimit(kForward, LIMIT_TOP);
@@ -86,35 +85,38 @@ public class WristSubsystem extends SubsystemBase {
     wristLeader.getForwardLimitSwitch(kNormallyOpen).enableLimitSwitch(false);
     wristLeader.getReverseLimitSwitch(kNormallyOpen).enableLimitSwitch(false);
     
-    wristFollower.follow(wristLeader, true);
-
     // Brake mode helps hold wrist in place
     wristLeader.setIdleMode(IdleMode.kBrake);
-    wristFollower.setIdleMode(IdleMode.kBrake);
+
+    wristLeader.setInverted(true);
 
     // Save settings to motor flash, so they persist between power cycles
     wristLeader.burnFlash();
-    wristFollower.burnFlash();
     
   }
-
+  TrapezoidProfile trapezoidProfile;
+  double time = 0.0;
   @Override
   public void periodic() {
     if (goal != null) {
-      var currentState = new TrapezoidProfile.State(getWristPosition(), getWristVelocity());
-      var targetState = new TrapezoidProfile(PROFILE_CONSTRAINTS, goal, currentState).calculate(0.02);
-      double feedForward = FEEDFORWARD.calculate(targetState.position, targetState.velocity);
+      var targetState = trapezoidProfile.calculate(time += 0.02);
+      double cosineScalar = Math.cos(getWristPosition());
+      double feedForward = GRAVITY_FEED_FORWARD * cosineScalar;;
 
       pidController.setReference(
           armRadiansToEncoderRotations(targetState.position),
           ControlType.kPosition,
           0,
           feedForward,
-          ArbFFUnits.kVoltage);
+          ArbFFUnits.kPercentOut);
+      SmartDashboard.putNumber("Wrist Target", goal.position);
+      SmartDashboard.putNumber("Wrist Target State", targetState.position);
     }
 
     SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
     SmartDashboard.putNumber("Wrist Position Raw", wristEncoder.getPosition());
+    SmartDashboard.putNumber("Wrist Velocity", getWristVelocity());
+    SmartDashboard.putNumber("Wrist Power", wristLeader.get());
   }
 
   /**
@@ -134,7 +136,13 @@ public class WristSubsystem extends SubsystemBase {
    */
   public void moveToPosition(double radians) {
     // Set the target position, but move in execute() so feed forward keeps updating
-    goal = new TrapezoidProfile.State(radians, 0.0);
+    var newGoal = new TrapezoidProfile.State(radians, 0.0);
+    if (!Objects.equals(newGoal, goal)) {
+      var currentState = new TrapezoidProfile.State(getWristPosition(), 0);
+      trapezoidProfile = new TrapezoidProfile(PROFILE_CONSTRAINTS, newGoal, currentState);
+      time = 0;
+    }
+    goal = newGoal;
   }
 
   /**

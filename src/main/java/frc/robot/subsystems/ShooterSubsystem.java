@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_FOLLOWER_ID;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_LEADER_ID;
 
@@ -24,7 +23,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final WPI_TalonFX shooterLeader;
   private final WPI_TalonFX shooterFollower;
 
-  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.0015732, 1.1092 / 9.0, 0.034441);
+  private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.21411, 1.1101 / 10.0, 0.022082);
   private final double VELOCITY_COEFFIENT = 1 / (5.0 * Math.PI * Units.inchesToMeters(4.0)); // gearing * wheel circumfrence
 
   public ShooterSubsystem() {
@@ -39,8 +38,8 @@ public class ShooterSubsystem extends SubsystemBase {
     config.neutralDeadband = 0;
     config.voltageCompSaturation = 12;
 
-    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID, CANIVORE_BUS_NAME);
-    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID, CANIVORE_BUS_NAME);
+    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID);
+    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID);
 
     shooterLeader.configAllSettings(config);
     shooterFollower.configAllSettings(config);

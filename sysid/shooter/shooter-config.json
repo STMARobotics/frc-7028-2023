@@ -1,10 +1,16 @@
 {
-  "counts per rotation": 2048.0,
+  "canivore names": [
+    "rio",
+    "rio"
+  ],
+  "counts per rotation": 4096.0,
+  "encoder canivore name": "rio",
   "encoder type": "Built-in",
   "encoding": false,
   "gearing denominator": 1.0,
   "gearing numerator": 5.0,
   "gyro": "Analog Gyro",
+  "gyro canivore name": "rio",
   "gyro ctor": "0",
   "is drivetrain": false,
   "motor controllers": [
@@ -38,5 +44,5 @@
     false,
     false
   ],
-  "velocity measurement period": 100
+  "velocity measurement period": 5
 }

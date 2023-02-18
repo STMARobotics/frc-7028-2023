@@ -28,8 +28,6 @@ public class TeleopConePickupCommand extends CommandBase {
   private final ShooterSubsystem shooterSubsystem;
   private final DrivetrainSubsystem drivetrainSubsystem;
 
-  private boolean intaking = false;
-
   public TeleopConePickupCommand(
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
@@ -53,7 +51,7 @@ public class TeleopConePickupCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    intaking = false;
+    wristSubsystem.moveToPosition(wristRadians);
   }
   
   @Override
@@ -68,13 +66,12 @@ public class TeleopConePickupCommand extends CommandBase {
     drivetrainSubsystem.drive(new ChassisSpeeds(xSpeed, strafeSpeed, rotationSpeed));
 
     elevatorSubsystem.moveToPosition(elevatorMeters);
-    wristSubsystem.moveToPosition(wristRadians);
 
     var readyToIntake =
         Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
         && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
 
-    if (intaking || readyToIntake) {
+    if (readyToIntake) {
       shooterSubsystem.shootDutyCycle(intakeDutyCycle);
     }
   }
@@ -87,8 +84,6 @@ public class TeleopConePickupCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     shooterSubsystem.stop();
-    elevatorSubsystem.stop();
-    wristSubsystem.stop();
   }
 
 }

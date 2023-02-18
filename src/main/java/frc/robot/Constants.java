@@ -152,7 +152,7 @@ public final class Constants {
     /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
     public static final Transform3d SHOOTER_CAMERA_TO_ROBOT = new Transform3d(
         new Translation3d(-0.083, 0.254, -0.537),
-        new Rotation3d(0.0, degreesToRadians(-7.62), degreesToRadians(-1.0)));
+        new Rotation3d(0.0, degreesToRadians(-9.8), degreesToRadians(-1.0)));
 
     public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
         new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);
@@ -200,8 +200,8 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.5, 33.5, 1.0, 0.6),    
-      shooterSettings(2.0, 33.5, 1.0, 0.6)
+      shooterSettings(0.5, 34.5, 1.0, 0.6),    
+      shooterSettings(2.0, 34.5, 1.0, 0.6)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
@@ -102,6 +103,8 @@ public class RobotContainer {
     wristSubsystem.setDefaultCommand(defaultWristCommand);
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
     ledSubsystem.setDefaultCommand(new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone));
+    elevatorSubsystem.setDefaultCommand(
+        new DefaultElevatorCommand(elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - Math.PI/2) < .2));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -138,8 +141,8 @@ public class RobotContainer {
     controller.start().onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
 
     // POV up for field oriented drive
-    controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
-        .andThen(new ScheduleCommand(fieldOrientedDriveCommand)));
+    // controller.povUp().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand))
+    //     .andThen(new ScheduleCommand(fieldOrientedDriveCommand)));
     // POV down for field heading drive
     controller.povDown().onTrue(runOnce(() -> drivetrainSubsystem.setDefaultCommand(fieldHeadingDriveCommand))
         .andThen(new ScheduleCommand(fieldHeadingDriveCommand)));
@@ -172,11 +175,20 @@ public class RobotContainer {
 
     // Intake
     controller.leftTrigger().whileTrue(new TeleopConePickupCommand(
-        0.045, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        0.043, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
         () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem)));
+
+        //37.25
+    controller.povUp().whileTrue(new TeleopConePickupCommand(
+        0.95, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        () -> -modifyAxis(controller.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(controller.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND * 0.25,
+        () -> -modifyAxis(controller.getRightX()) * DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0)
+        .andThen(new DefaultWristCommand(wristSubsystem)));
+    
 
     // Shoot
     // controller.rightTrigger().whileTrue(

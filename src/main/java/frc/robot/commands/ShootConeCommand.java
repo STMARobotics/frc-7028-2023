@@ -42,8 +42,8 @@ public class ShootConeCommand extends CommandBase {
   private final LimelightSubsystem limelightSubsystem;
   private final Timer shootTimer = new Timer();
 
-  private final ProfiledPIDController aimController = new ProfiledPIDController(1.0, 0.002, 0, OMEGA_CONSTRAINTS);
-  private final ProfiledPIDController distanceController = new ProfiledPIDController(0.9, 0, 0, DISTANCE_CONSTRAINTS);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(0.8, 0.0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(0.8, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final Profile shooterProfile;
   private final LimelightRetroCalcs limelightCalcs;

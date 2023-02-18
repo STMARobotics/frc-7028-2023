@@ -139,7 +139,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button resets the robot pose
-    leftJoystick.button(1).onTrue(runOnce(poseEstimator::resetFieldPosition));
+    leftJoystick.button(3).onTrue(runOnce(poseEstimator::resetFieldPosition));
     // Start button reseeds the steer motors to fix dead wheel
     leftJoystick.button(2).onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets));
 
@@ -171,7 +171,7 @@ public class RobotContainer {
         startEnd(() -> wristSubsystem.moveWrist(-.3), wristSubsystem::stop, wristSubsystem));
 
     // Shooter
-    rightJoystick.button(1).whileTrue(startEnd(
+    rightJoystick.button(3).whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem));
     rightJoystick.button(2).whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem));
@@ -244,7 +244,7 @@ public class RobotContainer {
         drivetrainSubsystem
     );
 
-    return autoBuilder.fullAuto(twoConePath);
+    return autoBuilder.fullAuto(twoConePath); 
   }
 
   public void disabledPeriodic() {

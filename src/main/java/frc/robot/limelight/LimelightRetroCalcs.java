@@ -66,7 +66,7 @@ public class LimelightRetroCalcs {
     var translation = getTargetTranslation(retroTarget);
     var distance = translation.getDistance(new Translation2d());
     var angle = new Rotation2d(translation.getX(), translation.getY());
-    return new RetroTargetInfo(null, distance, angle);
+    return new RetroTargetInfo(translation, distance, angle);
   }
 
 }

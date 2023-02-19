@@ -29,7 +29,8 @@ public class ShootConeCommand extends CommandBase {
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double AIM_TOLERANCE = Units.degreesToRadians(1.0);
   private static final double DISTANCE_TOLERANCE = 0.1;
-  private static final double DISTANCE_GOAL = 1.47d;
+  private static final double DISTANCE_GOAL = 1.47;
+  private static final double SHOOT_TIME = 5.0;
 
   private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =
@@ -163,8 +164,7 @@ public class ShootConeCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return false;
-    // return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
+    return isShooting && shootTimer.hasElapsed(SHOOT_TIME);
   }
 
   @Override

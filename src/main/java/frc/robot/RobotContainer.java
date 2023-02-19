@@ -10,14 +10,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 
-import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
 import org.photonvision.PhotonCamera;
-
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -27,22 +22,16 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.AutoIntakeCommand;
-import frc.robot.commands.AutoShootConeCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
-import frc.robot.commands.JustShootCommand;
-import frc.robot.commands.PickupPosition;
 import frc.robot.commands.ShootConeCommand;
 import frc.robot.commands.ShootCubeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
@@ -100,6 +89,9 @@ public class RobotContainer {
 
   private final Timer reseedTimer = new Timer();
 
+  private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
+      ledSubsystem, shooterSubsystem, wristSubsystem, coneLimelightSubsystem, poseEstimator);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -119,6 +111,8 @@ public class RobotContainer {
   }
 
   private void configureDashboard() {
+    autoBuilder.addDashboardWidgets(Dashboard.driverTab);
+
     // Shooting tab
     final var limelightCalcs =
         new LimelightRetroCalcs(VisionConstants.SHOOTER_CAMERA_TO_ROBOT, Profile.TOP.targetHeight);
@@ -223,39 +217,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    var twoConePath = PathPlanner.loadPathGroup("twoCone", PathPlanner.getConstraintsFromPath("twoCone"));
-    if (twoConePath == null) {
-      return Commands.print("********* Path failed to load. Not running auto *********");
-    }
-    var eventMap = new HashMap<String, Command>();
-    eventMap.put("shootCone1", new JustShootCommand(inchesToMeters(1.3), 0.2, 25, elevatorSubsystem, wristSubsystem, shooterSubsystem)
-    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
-
-    eventMap.put("intakeDown", new PickupPosition(inchesToMeters(1.3), 0.024, elevatorSubsystem, wristSubsystem));
-
-    eventMap.put("startIntake1", new AutoIntakeCommand(inchesToMeters(1.3), 0.024, -0.1, elevatorSubsystem, wristSubsystem, shooterSubsystem)
-    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
-
-    eventMap.put("shootCone2", new AutoShootConeCommand(
-      Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-      shooterSubsystem, coneLimelightSubsystem));
-
-    eventMap.put("startIntake2", new AutoIntakeCommand(inchesToMeters(1.3), 0.024, -0.1, elevatorSubsystem, wristSubsystem, shooterSubsystem)
-    .andThen(new DefaultWristCommand(wristSubsystem).alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone))));
-
-    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-        poseEstimator::getCurrentPose,
-        poseEstimator::setCurrentPose,
-        DrivetrainConstants.KINEMATICS,
-        new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
-        new PIDConstants(AutoConstants.ROTATION_kP, AutoConstants.ROTATION_kI, AutoConstants.ROTATION_kD),
-        drivetrainSubsystem::setModuleStates,
-        eventMap,
-        true,
-        drivetrainSubsystem
-    );
-
-    return autoBuilder.fullAuto(twoConePath); 
+    return autoBuilder.getAutonomousCommand();
   }
 
   public void disabledPeriodic() {

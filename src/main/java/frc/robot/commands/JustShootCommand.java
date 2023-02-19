@@ -95,7 +95,7 @@ public class JustShootCommand extends CommandBase {
   @Override
   public boolean isFinished() {
     //return false;
-    return isShooting && shootTimer.hasElapsed(0.5) || shootTimer.hasElapsed(5);
+    return isShooting && shootTimer.hasElapsed(0.5);
   }
 
   @Override

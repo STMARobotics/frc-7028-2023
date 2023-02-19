@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -18,8 +17,6 @@ public class AutoIntakeCommand extends CommandBase {
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   
-  private final Timer pickupTimer = new Timer();
-
   private boolean intaking = false;
 
   public AutoIntakeCommand(
@@ -39,13 +36,11 @@ public class AutoIntakeCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    pickupTimer.reset();
     intaking = false;
   }
   
   @Override
   public void execute() {
-    pickupTimer.start();
     elevatorSubsystem.moveToPosition(elevatorMeters);
     wristSubsystem.moveToPosition(wristRadians);
 
@@ -60,7 +55,7 @@ public class AutoIntakeCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return shooterSubsystem.hasCone() || pickupTimer.hasElapsed(5);
+    return shooterSubsystem.hasCone();
   }
 
   @Override

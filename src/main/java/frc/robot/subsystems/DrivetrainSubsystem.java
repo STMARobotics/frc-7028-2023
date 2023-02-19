@@ -62,7 +62,6 @@ import frc.robot.swerve.SwerveSteerController;
 public class DrivetrainSubsystem extends SubsystemBase {
 
   private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(PIGEON_ID, CANIVORE_BUS_NAME);
-  // private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
   private final SwerveModule[] swerveModules;
 
   private ChassisSpeeds desiredChassisSpeeds;
@@ -167,9 +166,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public Rotation2d getGyroscopeRotation() {
     return pigeon.getRotation2d();
-
-    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
-    // return Rotation2d.fromDegrees(360.0 - navx.getYaw());
   }
 
   /**

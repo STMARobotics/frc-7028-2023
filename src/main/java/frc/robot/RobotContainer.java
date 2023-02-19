@@ -195,7 +195,7 @@ public class RobotContainer {
 
     rightJoystick.trigger().whileTrue(new ShootConeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-        shooterSubsystem, coneLimelightSubsystem));
+        shooterSubsystem, coneLimelightSubsystem, poseEstimator::getCurrentPose));
 
     // Drive to cone node to the left of tag 1, then just shoot
     // controller.rightTrigger().whileTrue(new DriveToPoseCommand(

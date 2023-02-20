@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ConeShootingConstants.MIDDLE_TABLE;
+import static frc.robot.Constants.ConeShootingConstants.TOP_TABLE;
+import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
+import static frc.robot.Constants.VisionConstants.LOW_LIMELIGHT_TO_ROBOT;
+
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants.ConeShootingConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.math.VelocityAngleInterpolator;
 
 /**
@@ -12,10 +15,10 @@ import frc.robot.math.VelocityAngleInterpolator;
 public enum Profile {
 
   /** Middle of the Top cone vision target */
-  TOP(0, Units.inchesToMeters(44.0), ConeShootingConstants.TOP_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT),
+  TOP(0, Units.inchesToMeters(44.0), TOP_TABLE, LOW_LIMELIGHT_TO_ROBOT, false),
 
   /** Middle of the Middle cone vision target */
-  MIDDLE(0, Units.inchesToMeters(24.125), ConeShootingConstants.MIDDLE_TABLE, VisionConstants.SHOOTER_CAMERA_TO_ROBOT);
+  MIDDLE(0, Units.inchesToMeters(24.125), MIDDLE_TABLE, HIGH_LIMELIGHT_TO_ROBOT, true);
 
   /** ID for the Limelight profile */
   public final int pipelineId;
@@ -29,17 +32,22 @@ public enum Profile {
   /** Camera to robot transform for the targeting camera */
   public final Transform3d cameraToRobot;
 
+  /** Indicates if this camera moves up and down with the elevator */
+  public final boolean cameraOnElevator;
+
   /**
    * Create a limelight profile
    * @param pipelineId pipeline ID
    * @param targetHeight
    */
   private Profile(
-      int pipelineId, double targetHeight, VelocityAngleInterpolator lookupTable,  Transform3d cameraToRobot) {
+      int pipelineId, double targetHeight, VelocityAngleInterpolator lookupTable,  Transform3d cameraToRobot,
+      boolean cameraOnElevator) {
     this.pipelineId = pipelineId;
     this.targetHeight = targetHeight;
     this.lookupTable = lookupTable;
     this.cameraToRobot = cameraToRobot;
+    this.cameraOnElevator = cameraOnElevator;
   }
 
 }

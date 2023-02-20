@@ -57,8 +57,8 @@ public class RobotContainer {
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final WristSubsystem wristSubsystem = new WristSubsystem();
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-  private final LimelightSubsystem coneLimelightSubsystem =
-      new LimelightSubsystem(VisionConstants.SHOOTER_LIMELIGHT_CONFIG.getNetworkTableName());
+  private final LimelightSubsystem lowLimelightSubsystem = new LimelightSubsystem(VisionConstants.LOW_LIMELIGHT_NAME);
+  private final LimelightSubsystem highLimelightSubsystem = new LimelightSubsystem(VisionConstants.HIGH_LIMELIGHT_NAME);
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand;
@@ -70,7 +70,7 @@ public class RobotContainer {
   private final Timer reseedTimer = new Timer();
 
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
-      ledSubsystem, shooterSubsystem, wristSubsystem, coneLimelightSubsystem, poseEstimator);
+      ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, poseEstimator);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -111,16 +111,40 @@ public class RobotContainer {
     autoBuilder.addDashboardWidgets(Dashboard.driverTab);
 
     // Shooting tab
-    final var limelightCalcs =
-        new LimelightCalcs(VisionConstants.SHOOTER_CAMERA_TO_ROBOT, Profile.TOP.targetHeight);
+    final var topLimelightCalcs = new LimelightCalcs(VisionConstants.LOW_LIMELIGHT_TO_ROBOT, Profile.TOP.targetHeight);
     final var shootingTab = Shuffleboard.getTab("Shooting");
-    final var targetLayout = shootingTab.getLayout("Target", BuiltInLayouts.kList);
-    targetLayout.addDouble("Top Target Distance", () -> {
-        var optResults = coneLimelightSubsystem.getLatestRetroTarget();
+    final var topTargetLayout = shootingTab.getLayout("Top Target", BuiltInLayouts.kList);
+    topTargetLayout.addDouble("Distance", () -> {
+        var optResults = lowLimelightSubsystem.getLatestRetroTarget();
         if (optResults.isPresent()) {
-          return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+          return topLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
         }
         return 0;
+    });
+    topTargetLayout.addDouble("Angle", () -> {
+      var optResults = lowLimelightSubsystem.getLatestRetroTarget();
+      if (optResults.isPresent()) {
+        return topLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
+      }
+      return 0;
+    });
+
+    final var midLimelightCalcs = new LimelightCalcs(
+        VisionConstants.HIGH_LIMELIGHT_TO_ROBOT, Profile.MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
+    final var midTargetLayout = shootingTab.getLayout("Mid Target", BuiltInLayouts.kList);
+    midTargetLayout.addDouble("Distance", () -> {
+        var optResults = highLimelightSubsystem.getLatestRetroTarget();
+        if (optResults.isPresent()) {
+          return midLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+        }
+        return 0;
+    });
+    midTargetLayout.addDouble("Angle", () -> {
+      var optResults = highLimelightSubsystem.getLatestRetroTarget();
+      if (optResults.isPresent()) {
+        return midLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
+      }
+      return 0;
     });
 
   }
@@ -175,11 +199,15 @@ public class RobotContainer {
 
     // Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
-        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, coneLimelightSubsystem, Profile.TOP)));
+        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
 
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-        shooterSubsystem, coneLimelightSubsystem, poseEstimator::getCurrentPose, ledSubsystem)));
+        shooterSubsystem, lowLimelightSubsystem, poseEstimator::getCurrentPose, ledSubsystem)));
+
+    controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
+      Profile.MIDDLE, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+      shooterSubsystem, highLimelightSubsystem, poseEstimator::getCurrentPose, ledSubsystem)));
 
     // Drive to cone node to the left of tag 1, then just shoot
     // controller.rightTrigger().whileTrue(new DriveToPoseCommand(

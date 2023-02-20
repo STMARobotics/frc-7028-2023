@@ -1,5 +1,7 @@
 package frc.robot.limelight;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -15,16 +17,29 @@ public class LimelightCalcs {
   private final Transform3d cameraToRobot;
   private final Transform3d robotToCamera;
   private final double targetHeight;
+  private final DoubleSupplier cameraHeightOffsetSupplier;
+
+  /**
+   * Constructor
+   * @param cameraToRobot transform from the camera to the robot
+   * @param targetHeight height of the target
+   * @param cameraHeightOffsetSupplier supplier for an offset to add to the camera height. Useful for cameras
+   *            mounted on things that move up and down, like elevators.
+   */
+  public LimelightCalcs(Transform3d cameraToRobot, double targetHeight, DoubleSupplier cameraHeightOffsetSupplier) {
+    this.cameraToRobot = cameraToRobot;
+    this.robotToCamera = cameraToRobot.inverse();
+    this.targetHeight = targetHeight;
+    this.cameraHeightOffsetSupplier = cameraHeightOffsetSupplier;
+  }
 
   /**
    * Constructor
    * @param cameraToRobot transform from the camera to the robot
    * @param targetHeight height of the target
    */
-  public LimelightCalcs(Transform3d cameraToRobot, double targetHeight) {
-    this.cameraToRobot = cameraToRobot;
-    this.robotToCamera = cameraToRobot.inverse();
-    this.targetHeight = targetHeight;
+  public LimelightCalcs(Transform3d cameraToRobot, double targetHeigt) {
+    this(cameraToRobot, targetHeigt, () -> 0);
   }
 
   /**
@@ -34,7 +49,7 @@ public class LimelightCalcs {
    */
   protected double getCameraToTargetDistance(double targetYDegrees) {
     var cameraPitch = -cameraToRobot.getRotation().getY();
-    var cameraHeight = -cameraToRobot.getZ();
+    var cameraHeight = -cameraToRobot.getZ() + cameraHeightOffsetSupplier.getAsDouble();
     return (targetHeight - cameraHeight)
         / Math.tan(cameraPitch + Units.degreesToRadians(targetYDegrees));
   }

@@ -65,5 +65,18 @@ public class LimelightCalcsTest {
     var targetDistance = limelightCalcs.getCameraToTargetDistance(-36.87);
     assertEquals(4, targetDistance, .01);
   }
+
+  @Test
+  public void testCameraOffset() {
+    // Camera that's 2' off the floor, then we'll add in 1' offset (for simple 3,4,5 triangle)
+    Transform3d highCameraToRobot = new Transform3d(new Translation3d(0.0, 0.0, -2.0), new Rotation3d());
+
+    // Target height of zero, it's on the floor
+    var limelightCalcs = new LimelightCalcs(highCameraToRobot, 0, () -> 1.0);
+
+    // Downward 36.87-degrees, for 3,4,5 triangle
+    var targetDistance = limelightCalcs.getCameraToTargetDistance(-36.87);
+    assertEquals(4, targetDistance, .01);
+  }
   
 }

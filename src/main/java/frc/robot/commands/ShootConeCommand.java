@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -73,9 +74,12 @@ public class ShootConeCommand extends DriveToPoseCommand {
     this.robotPoseSupplier = robotPoseSupplier;
     this.ledSubsystem = ledSubsystem;
 
-    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    DoubleSupplier cameraHeightOffset = 
+        shooterProfile.cameraOnElevator ? elevatorSubsystem::getElevatorPosition : () -> 0.0;
+    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight, cameraHeightOffset);
 
-    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
+
+    addRequirements(drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem, ledSubsystem);
   }
 
   @Override

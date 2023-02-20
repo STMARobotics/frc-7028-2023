@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.math.VelocityAngleInterpolator;
-import frc.robot.subsystems.LimelightConfig;
 import frc.robot.swerve.ModuleConfiguration;
 
 /**
@@ -151,12 +150,18 @@ public final class Constants {
         new Transform3d(new Translation3d(0.0, -0.1375, -.90), new Rotation3d(0.0, 0.0, -0.10));
 
     /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
-    public static final Transform3d SHOOTER_CAMERA_TO_ROBOT = new Transform3d(
+    public static final Transform3d LOW_LIMELIGHT_TO_ROBOT = new Transform3d(
         new Translation3d(-0.083, 0.254, -0.537),
         new Rotation3d(0.0, degreesToRadians(-9.8), degreesToRadians(-1.0)));
 
-    public static final LimelightConfig SHOOTER_LIMELIGHT_CONFIG = 
-        new LimelightConfig("limelight", SHOOTER_CAMERA_TO_ROBOT);
+    public static final String LOW_LIMELIGHT_NAME = "limelight";
+    
+    /** Physical location of the high camera on the robot, relative to the center of the robot. */
+    public static final Transform3d HIGH_LIMELIGHT_TO_ROBOT = new Transform3d(
+        new Translation3d(-0.083, 0.254, -0.537),
+        new Rotation3d(0.0, degreesToRadians(-9.8), degreesToRadians(0.0)));
+
+    public static final String HIGH_LIMELIGHT_NAME = "limelight-high";
     
     public static final double FIELD_LENGTH_METERS = 16.54175;
     public static final double FIELD_WIDTH_METERS = 8.0137;

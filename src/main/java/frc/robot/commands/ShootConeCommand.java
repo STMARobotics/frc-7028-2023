@@ -15,6 +15,8 @@ import frc.robot.limelight.RetroTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -41,6 +43,7 @@ public class ShootConeCommand extends CommandBase {
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final LimelightSubsystem limelightSubsystem;
+  private final LEDSubsystem ledSubsystem;
   private final Timer shootTimer = new Timer();
 
   private final ProfiledPIDController aimController = new ProfiledPIDController(0.8, 0.0, 0, OMEGA_CONSTRAINTS);
@@ -69,13 +72,14 @@ public class ShootConeCommand extends CommandBase {
    */
   public ShootConeCommand(Profile shooterProfile, DrivetrainSubsystem drivetrainSubsystem,
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
-      ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem) {
+      ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem, LEDSubsystem ledSubsystem) {
     this.shooterProfile = shooterProfile;
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
+    this.ledSubsystem = ledSubsystem;
 
     limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
     aimController.enableContinuousInput(-Math.PI, Math.PI);
@@ -115,7 +119,9 @@ public class ShootConeCommand extends CommandBase {
       wristSubsystem.stop();
       shooterSubsystem.stop();
       drivetrainSubsystem.stop();
+      ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
     } else {
+      ledSubsystem.setMode(Mode.SHOOTING_HAS_TARGET);
       // Get shooter settings from lookup table
       var shooterSettings = shooterProfile.lookupTable.calculate(lastTargetInfo.distance);
 

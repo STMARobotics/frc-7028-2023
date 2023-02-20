@@ -179,7 +179,7 @@ public class RobotContainer {
 
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
         Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-        shooterSubsystem, coneLimelightSubsystem)));
+        shooterSubsystem, coneLimelightSubsystem, ledSubsystem)));
 
     // Drive to cone node to the left of tag 1, then just shoot
     // controller.rightTrigger().whileTrue(new DriveToPoseCommand(

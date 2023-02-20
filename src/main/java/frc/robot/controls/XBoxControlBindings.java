@@ -138,7 +138,8 @@ public class XBoxControlBindings implements ControlBindings {
     return () -> {
       final var thetaX = -modifyAxis(driverController.getLeftY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
       final var thetaY = -modifyAxis(driverController.getLeftX()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
-      final var centered = MathUtil.applyDeadband(thetaX, XBOX_CONTROLLER_DEADBAND) == 0 && MathUtil.applyDeadband(thetaY, XBOX_CONTROLLER_DEADBAND) == 0;
+      final var centered = MathUtil.applyDeadband(thetaX, XBOX_CONTROLLER_DEADBAND) == 0
+          && MathUtil.applyDeadband(thetaY, XBOX_CONTROLLER_DEADBAND) == 0;
   
       if (centered) {
         // Hold heading when stick is centered

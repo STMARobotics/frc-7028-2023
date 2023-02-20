@@ -23,7 +23,7 @@ public class DefaultLEDCommand extends CommandBase {
   @Override
   public void execute() {
     if (hasCone.getAsBoolean()) {
-      ledSubsystem.setMode(Mode.YELLOW);
+      ledSubsystem.setMode(Mode.HAS_CONE);
     } else {
       ledSubsystem.setMode(Mode.BLUE_GOLD);
     }

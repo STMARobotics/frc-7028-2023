@@ -30,7 +30,7 @@ import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
-import frc.robot.limelight.LimelightRetroCalcs;
+import frc.robot.limelight.LimelightCalcs;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -112,7 +112,7 @@ public class RobotContainer {
 
     // Shooting tab
     final var limelightCalcs =
-        new LimelightRetroCalcs(VisionConstants.SHOOTER_CAMERA_TO_ROBOT, Profile.TOP.targetHeight);
+        new LimelightCalcs(VisionConstants.SHOOTER_CAMERA_TO_ROBOT, Profile.TOP.targetHeight);
     final var shootingTab = Shuffleboard.getTab("Shooting");
     final var targetLayout = shootingTab.getLayout("Target", BuiltInLayouts.kList);
     targetLayout.addDouble("Top Target Distance", () -> {

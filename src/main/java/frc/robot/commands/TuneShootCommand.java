@@ -1,10 +1,8 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import frc.robot.limelight.LimelightRetroCalcs;
+import frc.robot.limelight.LimelightCalcs;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Profile;
@@ -20,7 +18,7 @@ public class TuneShootCommand extends JustShootCommand {
   private final GenericEntry shooterEntry;
   private final GenericEntry targetDistanceEntry;
   private final GenericEntry targetAngleEntry;
-  private final LimelightRetroCalcs limelightCalcs;
+  private final LimelightCalcs limelightCalcs;
 
   /**
    * Command that reads angle, height, and velocity from the dashboard. Does not aim, just shoots with the settings.
@@ -38,7 +36,7 @@ public class TuneShootCommand extends JustShootCommand {
 
     this.limelightSubsystem = limelightSubsystem;
     this.shooterProfile = shooterProfile;
-    limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
 
     var shuffleboardTab = Shuffleboard.getTab("Shoot");
     wristEntry = shuffleboardTab.add("Wrist Angle", 1.127).getEntry();
@@ -64,10 +62,10 @@ public class TuneShootCommand extends JustShootCommand {
   public void execute() {
     // Put some target info on the dashboard
     limelightSubsystem.getLatestRetroTarget().ifPresent((target) -> {
-      var targetTranslation = limelightCalcs.getTargetTranslation(target);
+      var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(target);
 
-      targetDistanceEntry.setDouble(targetTranslation.getDistance(new Translation2d()));
-      targetAngleEntry.setDouble(new Rotation2d(targetTranslation.getX(), targetTranslation.getY()).getDegrees());
+      targetDistanceEntry.setDouble(targetInfo.distance);
+      targetAngleEntry.setDouble(targetInfo.angle.getDegrees());
     });
 
     super.execute();

@@ -10,8 +10,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.limelight.LimelightRetroCalcs;
-import frc.robot.limelight.RetroTargetInfo;
+import frc.robot.limelight.LimelightCalcs;
+import frc.robot.limelight.VisionTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -50,14 +50,14 @@ public class ShootConeCommand extends CommandBase {
   private final ProfiledPIDController distanceController = new ProfiledPIDController(0.8, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final Profile shooterProfile;
-  private final LimelightRetroCalcs limelightCalcs;
+  private final LimelightCalcs limelightCalcs;
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
   private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(5);
 
-  private RetroTargetInfo lastTargetInfo = null;
+  private VisionTargetInfo lastTargetInfo = null;
   private boolean isShooting = false;
 
   /**
@@ -81,7 +81,7 @@ public class ShootConeCommand extends CommandBase {
     this.limelightSubsystem = limelightSubsystem;
     this.ledSubsystem = ledSubsystem;
 
-    limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
     aimController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);

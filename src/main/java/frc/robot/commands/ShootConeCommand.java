@@ -8,11 +8,13 @@ import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.limelight.LimelightRetroCalcs;
-import frc.robot.limelight.RetroTargetInfo;
+import frc.robot.limelight.LimelightCalcs;
+import frc.robot.limelight.VisionTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -33,17 +35,18 @@ public class ShootConeCommand extends DriveToPoseCommand {
   private final ShooterSubsystem shooterSubsystem;
   private final LimelightSubsystem limelightSubsystem;
   private final Supplier<Pose2d> robotPoseSupplier;
+  private final LEDSubsystem ledSubsystem;
   private final Timer shootTimer = new Timer();
 
   private final Profile shooterProfile;
-  private final LimelightRetroCalcs limelightCalcs;
+  private final LimelightCalcs limelightCalcs;
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
   private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(5);
 
-  private RetroTargetInfo lastTargetInfo = null;
+  private VisionTargetInfo lastTargetInfo = null;
   private boolean isShooting = false;
 
   /**
@@ -58,7 +61,8 @@ public class ShootConeCommand extends DriveToPoseCommand {
    */
   public ShootConeCommand(Profile shooterProfile, DrivetrainSubsystem drivetrainSubsystem,
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
-      ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem, Supplier<Pose2d> robotPoseSupplier) {
+      ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem, Supplier<Pose2d> robotPoseSupplier,
+      LEDSubsystem ledSubsystem) {
     super(drivetrainSubsystem, robotPoseSupplier, null);
 
     this.shooterProfile = shooterProfile;
@@ -67,8 +71,9 @@ public class ShootConeCommand extends DriveToPoseCommand {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.robotPoseSupplier = robotPoseSupplier;
+    this.ledSubsystem = ledSubsystem;
 
-    limelightCalcs = new LimelightRetroCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -101,7 +106,9 @@ public class ShootConeCommand extends DriveToPoseCommand {
       wristSubsystem.stop();
       shooterSubsystem.stop();
       setGoalPose(null);
+      ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
     } else {
+      ledSubsystem.setMode(Mode.SHOOTING_HAS_TARGET);
       // Get shooter settings from lookup table
       var shooterSettings = shooterProfile.lookupTable.calculate(lastTargetInfo.distance);
 

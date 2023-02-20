@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -9,7 +10,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class LEDSubsystem extends SubsystemBase {
   
+  private static final int STRIP_COUNT = 4;
   private static final int LED_COUNT = 128;
+  private static final int STRIP_SIZE = LED_COUNT / STRIP_COUNT;
 
   /**
    * Lighting mode
@@ -18,11 +21,26 @@ public class LEDSubsystem extends SubsystemBase {
     /** Alternating blue/gold */
     BLUE_GOLD,
 
-    /** All blue */
-    BLUE,
+    /** Robot has a cube */
+    HAS_CUBE,
 
-    /** All yellow */
-    YELLOW
+    /** Robot has a cone */
+    HAS_CONE,
+
+    /** Robot is shooting but sees no target */
+    SHOOTING_NO_TARGET,
+
+    /** Robot is shooting and sees a target */
+    SHOOTING_HAS_TARGET,
+
+    /** Robot is shooting in a position that doesn't need a target */
+    SHOOTING_WITHOUT_TARGET,
+
+    /** Robot going to human player stations to get a cone */
+    WANT_CONE,
+
+    /** Robot going to human player station to get a cube */
+    WANT_CUBE
   }
 
   private final AddressableLED leds = new AddressableLED(0);
@@ -42,11 +60,26 @@ public class LEDSubsystem extends SubsystemBase {
       case BLUE_GOLD:
         blueGold();
         break;
-      case BLUE:
+      case HAS_CUBE:
         blue();
         break;
-      case YELLOW:
+      case HAS_CONE:
         yellow();
+        break;
+      case SHOOTING_NO_TARGET:
+        shootingNoTarget();
+        break;
+      case SHOOTING_HAS_TARGET:
+        shootingHasTarget();
+        break;
+      case SHOOTING_WITHOUT_TARGET:
+        shootingWithoutTarget();
+        break;
+      case WANT_CONE:
+        wantCone();
+        break;
+      case WANT_CUBE:
+        wantCube();
         break;
     }
     leds.setData(buffer);
@@ -57,11 +90,28 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private void blueGold() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      if (i % 2 == ((System.currentTimeMillis() / 1000) % 2)) {
-        buffer.setRGB(i, 234, 255, 3);
+    alternate(Color.kBlue, Color.kGold, 1000);
+  }
+
+  private void alternate(Color color1, Color color2, int interval) {
+    long currentTime = System.currentTimeMillis();
+    for (var strip = 0; strip < STRIP_COUNT; strip++) {
+      int offset = strip * STRIP_SIZE;
+      Color evenColor;
+      Color oddColor;
+      if (strip % 2 == 1) {
+        evenColor = color1;
+        oddColor = color2;
       } else {
-        buffer.setRGB(i, 0, 0, 255);
+        evenColor = color2;
+        oddColor = color1;
+      }
+      for (var i = 0; i < STRIP_SIZE; i++) {
+        if (i % 2 == ((currentTime / interval) % 2)) {
+          buffer.setLED(i + offset, evenColor);
+        } else {
+          buffer.setLED(i + offset, oddColor);
+        }
       }
     }
   }
@@ -74,7 +124,35 @@ public class LEDSubsystem extends SubsystemBase {
 
   private void yellow() {
     for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setRGB(i, 234, 255, 3);
+      buffer.setLED(i, Color.kYellow);
+    }
+  }
+
+  private void shootingHasTarget() {
+    alternate(Color.kYellow, Color.kRed, 500);
+  }
+
+  private void shootingNoTarget() {
+    for (var i = 0; i < LED_COUNT; i++) {
+      buffer.setLED(i, Color.kRed);
+    }
+  }
+
+  private void shootingWithoutTarget() {
+    for (var i = 0; i < LED_COUNT; i++) {
+      buffer.setLED(i, Color.kBlack);
+    }
+  }
+
+  private void wantCone() {
+    for (var i = 0; i < LED_COUNT; i++) {
+      buffer.setLED(i, Color.kBlack);
+    }
+  }
+
+  private void wantCube() {
+    for (var i = 0; i < LED_COUNT; i++) {
+      buffer.setLED(i, Color.kBlack);
     }
   }
 

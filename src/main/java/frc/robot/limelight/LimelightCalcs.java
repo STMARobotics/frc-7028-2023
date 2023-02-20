@@ -8,9 +8,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 /**
- * Class to perform calculations from a limelight retroreflective target
+ * Class to perform calculations from a limelight target
  */
-public class LimelightRetroCalcs {
+public class LimelightCalcs {
 
   private final Transform3d cameraToRobot;
   private final Transform3d robotToCamera;
@@ -21,7 +21,7 @@ public class LimelightRetroCalcs {
    * @param cameraToRobot transform from the camera to the robot
    * @param targetHeight height of the target
    */
-  public LimelightRetroCalcs(Transform3d cameraToRobot, double targetHeight) {
+  public LimelightCalcs(Transform3d cameraToRobot, double targetHeight) {
     this.cameraToRobot = cameraToRobot;
     this.robotToCamera = cameraToRobot.inverse();
     this.targetHeight = targetHeight;
@@ -29,25 +29,26 @@ public class LimelightRetroCalcs {
 
   /**
    * Get distance from camera to target, along the floor
-   * @param retroResults limelight target data
+   * @param targetYDegrees Y coordinate of the target in degrees
    * @return distance from the camera to the target
    */
-  protected double getCameraToTargetDistance(LimelightRetroTarget retroResults) {
+  protected double getCameraToTargetDistance(double targetYDegrees) {
     var cameraPitch = -cameraToRobot.getRotation().getY();
     var cameraHeight = -cameraToRobot.getZ();
     return (targetHeight - cameraHeight)
-        / Math.tan(cameraPitch + Units.degreesToRadians(retroResults.targetYDegrees));
+        / Math.tan(cameraPitch + Units.degreesToRadians(targetYDegrees));
   }
 
   /**
    * Gets the robot relative translation of the target
-   * @param retroResults limelight target data
+   * @param targetYDegrees Y coordinate of the target in degrees
+   * @param targetXDegrees X coordinate of the target in degrees
    * @return robot relative translaction
    */
-  public Translation2d getTargetTranslation(LimelightRetroTarget retroResults) {
+  public Translation2d getTargetTranslation(double targetYDegrees, double targetXDegrees) {
     var targetOnCameraCoordinates = new Translation2d(
-        getCameraToTargetDistance(retroResults),
-        Rotation2d.fromDegrees(-retroResults.targetXDegrees));
+        getCameraToTargetDistance(targetYDegrees),
+        Rotation2d.fromDegrees(-targetXDegrees));
     
     var targetPoseOnCameraCoordinates = new Pose2d(targetOnCameraCoordinates, new Rotation2d());
 
@@ -59,14 +60,33 @@ public class LimelightRetroCalcs {
 
   /**
    * Gets target info, relative to the robot.
+   * @param targetYDegrees Y coordinate of the target in degrees
+   * @param targetXDegrees X coordinate of the target in degrees
+   * @return robot relative target
+   */
+  public VisionTargetInfo getRobotRelativeTargetInfo(double targetYDegrees, double targetXDegrees) {
+    var translation = getTargetTranslation(targetYDegrees, targetXDegrees);
+    var distance = translation.getDistance(new Translation2d());
+    var angle = new Rotation2d(translation.getX(), translation.getY());
+    return new VisionTargetInfo(translation, distance, angle);
+  }
+
+  /**
+   * Gets target info, relative to the robot.
    * @param retroTarget limelight target data
    * @return robot relative target
    */
-  public RetroTargetInfo getRobotRelativeTargetInfo(LimelightRetroTarget retroTarget) {
-    var translation = getTargetTranslation(retroTarget);
-    var distance = translation.getDistance(new Translation2d());
-    var angle = new Rotation2d(translation.getX(), translation.getY());
-    return new RetroTargetInfo(translation, distance, angle);
+  public VisionTargetInfo getRobotRelativeTargetInfo(LimelightRetroTarget retroTarget) {
+    return getRobotRelativeTargetInfo(retroTarget.targetYDegrees, retroTarget.targetYDegrees);
+  }
+
+  /**
+   * Gets target info, relative to the robot.
+   * @param detectorTarget limelight target data
+   * @return robot relative target
+   */
+  public VisionTargetInfo getRobotRelativeTargetInfo(LimelightDetectorTarget detectorTarget) {
+    return getRobotRelativeTargetInfo(detectorTarget.targetYDegrees, detectorTarget.targetYDegrees);
   }
 
 }

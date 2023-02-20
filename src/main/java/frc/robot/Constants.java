@@ -126,7 +126,8 @@ public final class Constants {
 
   public static final class TeleopDriveConstants {
 
-    public static final double DEADBAND = 0.1;
+    public static final double XBOX_CONTROLLER_DEADBAND = 0.1;
+    public static final double JOYSTICK_DEADBAND = 0.1;
 
     public static final double X_RATE_LIMIT = 6.0;
     public static final double Y_RATE_LIMIT = 6.0;

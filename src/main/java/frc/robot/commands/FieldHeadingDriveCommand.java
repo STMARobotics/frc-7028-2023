@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.TeleopDriveConstants.DEADBAND;
 import static frc.robot.Constants.TeleopDriveConstants.HEADING_MAX_ACCELERATION;
 import static frc.robot.Constants.TeleopDriveConstants.HEADING_MAX_VELOCITY;
 import static frc.robot.Constants.TeleopDriveConstants.HEADING_TOLERANCE;
@@ -11,10 +10,10 @@ import static frc.robot.Constants.TeleopDriveConstants.X_RATE_LIMIT;
 import static frc.robot.Constants.TeleopDriveConstants.Y_RATE_LIMIT;
 import static java.lang.Math.PI;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,8 +39,7 @@ public class FieldHeadingDriveCommand extends CommandBase {
   private final Supplier<Rotation2d> robotAngleSupplier;
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
-  private final DoubleSupplier thetaXSupplier;
-  private final DoubleSupplier thetaYSupplier;
+  private final Supplier<Optional<Rotation2d>> thetaSupplier;
 
   private final SlewRateLimiter translateXRateLimiter = new SlewRateLimiter(X_RATE_LIMIT);
   private final SlewRateLimiter translateYRateLimiter = new SlewRateLimiter(Y_RATE_LIMIT);
@@ -55,23 +53,20 @@ public class FieldHeadingDriveCommand extends CommandBase {
    * @param robotAngleSupplier supplier for the robot's current heading
    * @param translationXSupplier supplier for field-oriented X velocity in meters/sec
    * @param translationYSupplier supplier for field-oriented Y velocity in meters/sec
-   * @param thetaXSupplier X supplier for heading
-   * @param thetaYSupplier Y supplier for heading
+   * @param thetaSupplier supplier for heading
    */
   public FieldHeadingDriveCommand(
       DrivetrainSubsystem drivetrainSubsystem,
       Supplier<Rotation2d> robotAngleSupplier,
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      DoubleSupplier thetaXSupplier,
-      DoubleSupplier thetaYSupplier) {
+      Supplier<Optional<Rotation2d>> thetaSupplier) {
 
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.robotAngleSupplier = robotAngleSupplier;
     this.xSupplier = translationXSupplier;
     this.ySupplier = translationYSupplier;
-    this.thetaXSupplier = thetaXSupplier;
-    this.thetaYSupplier = thetaYSupplier;
+    this.thetaSupplier = thetaSupplier;
 
     addRequirements(drivetrainSubsystem);
 
@@ -103,22 +98,17 @@ public class FieldHeadingDriveCommand extends CommandBase {
 
   @Override
   public void execute() {
-    final var thetaX = thetaXSupplier.getAsDouble();
-    final var thetaY = thetaYSupplier.getAsDouble();
-    final var centered = MathUtil.applyDeadband(thetaX, DEADBAND) == 0 && MathUtil.applyDeadband(thetaY, DEADBAND) == 0;
+    final var theta = thetaSupplier.get();
 
-    Rotation2d heading;
-    if (centered) {
-      // Hold heading when stick is centered
-      heading = robotAngleSupplier.get();
+    double omega;
+    if (theta.isPresent()) {
+      // Calculate the angular rate for the robot to turn
+      omega = thetaController.calculate(robotAngleSupplier.get().getRadians(), theta.get().getRadians());
+      if (thetaController.atGoal()) {
+        omega = 0;
+      }
     } else {
-      // Calculate heading from Y-Axis to X, Y coordinates
-      heading = new Rotation2d(thetaX, thetaY);
-    }
-
-    // Calculate the angular rate for the robot to turn
-    var omega = thetaController.calculate(robotAngleSupplier.get().getRadians(), heading.getRadians());
-    if (thetaController.atGoal() || centered) {
+      // Keep current heading when nothing new was supplied
       omega = 0;
     }
 

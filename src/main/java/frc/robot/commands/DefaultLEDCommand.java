@@ -16,6 +16,8 @@ public class DefaultLEDCommand extends CommandBase {
   public DefaultLEDCommand(LEDSubsystem ledSubsystem, BooleanSupplier hasCone) {
     this.ledSubsystem = ledSubsystem;
     this.hasCone = hasCone;
+    
+    ignoringDisable(true);
 
     addRequirements(ledSubsystem);
   }

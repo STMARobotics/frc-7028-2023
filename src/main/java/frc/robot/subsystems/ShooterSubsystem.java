@@ -48,7 +48,7 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterLeader.enableVoltageCompensation(true);
     shooterFollower.enableVoltageCompensation(true);
 
-    shooterLeader.setInverted(true);
+    shooterFollower.setInverted(true);
 
     shooterLeader.setNeutralMode(NeutralMode.Brake);
     shooterFollower.setNeutralMode(NeutralMode.Brake);

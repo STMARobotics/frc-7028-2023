@@ -125,7 +125,7 @@ public class AutonomousBuilder {
 
   private Command shootCone2Event() {
     return new ShootConeCommand(
-        Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        Profile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, coneLimelightSubsystem, ledSubsystem).withTimeout(5.0);
   }
 

@@ -111,7 +111,7 @@ public class RobotContainer {
     autoBuilder.addDashboardWidgets(Dashboard.driverTab);
 
     // Shooting tab
-    final var topLimelightCalcs = new LimelightCalcs(VisionConstants.LOW_LIMELIGHT_TO_ROBOT, Profile.TOP.targetHeight);
+    final var topLimelightCalcs = new LimelightCalcs(VisionConstants.LOW_LIMELIGHT_TO_ROBOT, Profile.SCORE_CONE_TOP.targetHeight);
     final var shootingTab = Shuffleboard.getTab("Shooting");
     final var topTargetLayout = shootingTab.getLayout("Top Target", BuiltInLayouts.kList);
     topTargetLayout.addDouble("Distance", () -> {
@@ -130,7 +130,7 @@ public class RobotContainer {
     });
 
     final var midLimelightCalcs = new LimelightCalcs(
-        VisionConstants.HIGH_LIMELIGHT_TO_ROBOT, Profile.MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
+        VisionConstants.HIGH_LIMELIGHT_TO_ROBOT, Profile.SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
     final var midTargetLayout = shootingTab.getLayout("Mid Target", BuiltInLayouts.kList);
     midTargetLayout.addDouble("Distance", () -> {
         var optResults = highLimelightSubsystem.getLatestRetroTarget();
@@ -202,11 +202,11 @@ public class RobotContainer {
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
 
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-        Profile.TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        Profile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
 
     controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-      Profile.MIDDLE, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+      Profile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
       shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
 
     // Drive to cone node to the left of tag 1, then just shoot

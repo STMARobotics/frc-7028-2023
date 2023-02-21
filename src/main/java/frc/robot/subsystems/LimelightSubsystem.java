@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.limelight.LimelightDetectorTarget;
 import frc.robot.limelight.LimelightResults;
 import frc.robot.limelight.LimelightResultsWrapper;
 import frc.robot.limelight.LimelightRetroTarget;
@@ -68,6 +69,14 @@ public class LimelightSubsystem extends SubsystemBase {
     var results = getLatestResults();
     if (results != null && results.valid && results.RetroreflectiveTargets.length > 0) {
       return Optional.of(results.RetroreflectiveTargets[0]);
+    }
+    return Optional.empty();
+  }
+
+  public Optional<LimelightDetectorTarget> getLatestDetectorTarget() {
+    var results = getLatestResults();
+    if (results != null && results.valid && results.detectorTargets.length > 0) {
+      return Optional.of(results.detectorTargets[0]);
     }
     return Optional.empty();
   }

@@ -15,10 +15,13 @@ import frc.robot.math.VelocityAngleInterpolator;
 public enum Profile {
 
   /** Middle of the Top cone vision target */
-  TOP(0, Units.inchesToMeters(44.0), TOP_TABLE, LOW_LIMELIGHT_TO_ROBOT, false),
+  SCORE_CONE_TOP(0, Units.inchesToMeters(44.0), TOP_TABLE, LOW_LIMELIGHT_TO_ROBOT, false),
 
   /** Middle of the Middle cone vision target */
-  MIDDLE(0, Units.inchesToMeters(24.125), MIDDLE_TABLE, HIGH_LIMELIGHT_TO_ROBOT, true);
+  SCORE_CONE_MIDDLE(0, Units.inchesToMeters(24.125), MIDDLE_TABLE, HIGH_LIMELIGHT_TO_ROBOT, true),
+
+  /** Gamepiece on the floor */
+  PICKUP_GAMEPIECE_FLOOR(1, 0.0, null, HIGH_LIMELIGHT_TO_ROBOT, true);
 
   /** ID for the Limelight profile */
   public final int pipelineId;

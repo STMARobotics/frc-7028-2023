@@ -75,11 +75,11 @@ public class LimelightCalcs {
 
   /**
    * Gets target info, relative to the robot.
-   * @param targetYDegrees Y coordinate of the target in degrees
    * @param targetXDegrees X coordinate of the target in degrees
+   * @param targetYDegrees Y coordinate of the target in degrees
    * @return robot relative target
    */
-  public VisionTargetInfo getRobotRelativeTargetInfo(double targetYDegrees, double targetXDegrees) {
+  public VisionTargetInfo getRobotRelativeTargetInfo(double targetXDegrees, double targetYDegrees) {
     var translation = getTargetTranslation(targetYDegrees, targetXDegrees);
     var distance = translation.getDistance(new Translation2d());
     var angle = new Rotation2d(translation.getX(), translation.getY());
@@ -92,7 +92,7 @@ public class LimelightCalcs {
    * @return robot relative target
    */
   public VisionTargetInfo getRobotRelativeTargetInfo(LimelightRetroTarget retroTarget) {
-    return getRobotRelativeTargetInfo(retroTarget.targetYDegrees, retroTarget.targetYDegrees);
+    return getRobotRelativeTargetInfo(retroTarget.targetXDegrees, retroTarget.targetYDegrees);
   }
 
   /**
@@ -101,7 +101,7 @@ public class LimelightCalcs {
    * @return robot relative target
    */
   public VisionTargetInfo getRobotRelativeTargetInfo(LimelightDetectorTarget detectorTarget) {
-    return getRobotRelativeTargetInfo(detectorTarget.targetYDegrees, detectorTarget.targetYDegrees);
+    return getRobotRelativeTargetInfo(detectorTarget.targetXDegrees, detectorTarget.targetYDegrees);
   }
 
 }

@@ -90,7 +90,7 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private void blueGold() {
-    alternate(Color.kBlue, Color.kGold, 1000);
+    alternate(Color.kBlue, Color.kOrange, 1000);
   }
 
   private void alternate(Color color1, Color color2, int interval) {
@@ -124,12 +124,12 @@ public class LEDSubsystem extends SubsystemBase {
 
   private void yellow() {
     for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kYellow);
+      buffer.setLED(i, Color.kOrange);
     }
   }
 
   private void shootingHasTarget() {
-    alternate(Color.kYellow, Color.kRed, 500);
+    alternate(Color.kOrange, Color.kRed, 500);
   }
 
   private void shootingNoTarget() {

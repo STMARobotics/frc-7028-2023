@@ -40,8 +40,13 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> intakeCone() {
+  public Optional<Trigger> teleopIntakeCone() {
     return Optional.of(driverController.leftTrigger());
+  }
+
+  @Override
+  public Optional<Trigger> intakeCone() {
+    return Optional.empty();
   }
 
   @Override

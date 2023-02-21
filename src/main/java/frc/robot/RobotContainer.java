@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
@@ -190,12 +191,22 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem)));
 
     // Intake
-    controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
+    controlBindings.teleopIntakeCone().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
         0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> controlBindings.translationX().getAsDouble() * 0.25,
         () -> controlBindings.translationY().getAsDouble() * 0.25,
         () -> controlBindings.omega().getAsDouble() / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem))));
+
+    controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+      0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+      poseEstimator::getCurrentPose, highLimelightSubsystem, Profile.PICKUP_GAMEPIECE_FLOOR,
+      shooterSubsystem::hasCone)));
+
+    controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+      0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+      poseEstimator::getCurrentPose, highLimelightSubsystem, Profile.PICKUP_GAMEPIECE_FLOOR,
+      shooterSubsystem::hasCube)));
 
     // Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(

@@ -20,6 +20,7 @@ public interface ControlBindings {
   Optional<Trigger> wristDown();
   Optional<Trigger> shooterIn();
   Optional<Trigger> shooterOut();
+  Optional<Trigger> teleopIntakeCone();
   Optional<Trigger> intakeCone();
   Optional<Trigger> intakeCube();
   Optional<Trigger> tuneShoot();

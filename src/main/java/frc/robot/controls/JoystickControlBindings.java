@@ -41,8 +41,13 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> intakeCone() {
+  public Optional<Trigger> teleopIntakeCone() {
     return Optional.of(leftJoystick.trigger());
+  }
+
+  @Override
+  public Optional<Trigger> intakeCone() {
+    return Optional.empty();
   }
 
   @Override

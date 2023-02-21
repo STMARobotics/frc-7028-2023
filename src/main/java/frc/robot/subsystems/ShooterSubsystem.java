@@ -20,8 +20,8 @@ public class ShooterSubsystem extends SubsystemBase {
   
   private static final double ENCODER_CPR = 2048;
 
-  private final WPI_TalonFX shooterLeader;
-  private final WPI_TalonFX shooterFollower;
+  private final WPI_TalonFX shooterRight;
+  private final WPI_TalonFX shooterLeft;
 
   private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.21411, 1.1101 / 10.0, 0.022082);
   private final double VELOCITY_COEFFIENT = 1 / (5.0 * Math.PI * Units.inchesToMeters(4.0)); // gearing * wheel circumfrence
@@ -38,43 +38,44 @@ public class ShooterSubsystem extends SubsystemBase {
     config.neutralDeadband = 0;
     config.voltageCompSaturation = 12;
 
-    shooterLeader = new WPI_TalonFX(SHOOTER_LEADER_ID);
-    shooterFollower = new WPI_TalonFX(SHOOTER_FOLLOWER_ID);
+    shooterRight = new WPI_TalonFX(SHOOTER_LEADER_ID);
+    shooterLeft = new WPI_TalonFX(SHOOTER_FOLLOWER_ID);
 
-    shooterLeader.configAllSettings(config);
-    shooterFollower.configAllSettings(config);
-    shooterLeader.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    shooterRight.configAllSettings(config);
+    shooterLeft.configAllSettings(config);
+    shooterRight.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    shooterLeft.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
-    shooterLeader.enableVoltageCompensation(true);
-    shooterFollower.enableVoltageCompensation(true);
+    shooterRight.enableVoltageCompensation(true);
+    shooterLeft.enableVoltageCompensation(true);
 
-    shooterFollower.setInverted(true);
+    shooterLeft.setInverted(true);
 
-    shooterLeader.setNeutralMode(NeutralMode.Brake);
-    shooterFollower.setNeutralMode(NeutralMode.Brake);
+    shooterRight.setNeutralMode(NeutralMode.Brake);
+    shooterLeft.setNeutralMode(NeutralMode.Brake);
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Leader Speed Raw", shooterLeader.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("Follower Speed Raw", shooterFollower.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Leader Speed Raw", shooterRight.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("Follower Speed Raw", shooterLeft.getSelectedSensorVelocity());
     SmartDashboard.putNumber("Leader Speed RPS", getVelocity());
-    SmartDashboard.putNumber("Leader Position", shooterLeader.getSelectedSensorPosition());
+    SmartDashboard.putNumber("Leader Position", shooterRight.getSelectedSensorPosition());
     SmartDashboard.putNumber("Leader Speed MPS", getVelocityInMetersPerSecond());
   }
 
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
 
-    shooterLeader.selectProfileSlot(0, 0);
-    shooterLeader.set(
+    shooterRight.selectProfileSlot(0, 0);
+    shooterRight.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
 
-    shooterFollower.selectProfileSlot(0, 0);
-    shooterFollower.set(
+    shooterLeft.selectProfileSlot(0, 0);
+    shooterLeft.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
@@ -82,15 +83,15 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void activeStop() {
-    shooterLeader.selectProfileSlot(1, 0);
-    shooterLeader.set(ControlMode.Position, shooterLeader.getSelectedSensorPosition());
-    shooterFollower.selectProfileSlot(1, 0);
-    shooterFollower.set(ControlMode.Position, shooterFollower.getSelectedSensorPosition());
+    shooterRight.selectProfileSlot(1, 0);
+    shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition());
+    shooterLeft.selectProfileSlot(1, 0);
+    shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition());
   }
 
   public void shootDutyCycle(double speed) {
-    shooterLeader.set(speed);
-    shooterFollower.set(speed);
+    shooterRight.set(speed);
+    shooterLeft.set(speed);
   }
 
   /**
@@ -98,7 +99,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * @return velocity in RPS
    */
   public double getVelocity() {
-    return edgesPerDecisecToRPS(shooterLeader.getSelectedSensorVelocity());
+    return edgesPerDecisecToRPS(shooterRight.getSelectedSensorVelocity());
   }
 
   /**
@@ -110,12 +111,16 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean hasCone() {
-    return shooterLeader.isRevLimitSwitchClosed() == 1;
+    return shooterRight.isRevLimitSwitchClosed() == 1;
+  }
+
+  public boolean hasCube() {
+    return shooterLeft.isRevLimitSwitchClosed() == 1;
   }
 
   public void stop() {
-    shooterLeader.stopMotor();
-    shooterFollower.stopMotor();
+    shooterRight.stopMotor();
+    shooterLeft.stopMotor();
   }
 
   public static double edgesPerDecisecToRPS(double edgesPerDecisec) {

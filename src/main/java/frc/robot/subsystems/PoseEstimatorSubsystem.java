@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -72,8 +71,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     }
     this.photonPoseEstimator = photonPoseEstimator;
 
-    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
-
     poseEstimator =  new SwerveDrivePoseEstimator(
         DrivetrainConstants.KINEMATICS,
         drivetrainSubsystem.getGyroscopeRotation(),
@@ -81,7 +78,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         new Pose2d(),
         stateStdDevs,
         visionMeasurementStdDevs);
-    
+  }
+
+  public void addDashboardWidgets(ShuffleboardTab tab) {
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }

@@ -8,6 +8,11 @@ import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
+import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
+import static frc.robot.Constants.VisionConstants.LOW_LIMELIGHT_TO_ROBOT;
+import static frc.robot.subsystems.Profile.PICKUP_GAMEPIECE_FLOOR;
+import static frc.robot.subsystems.Profile.SCORE_CONE_MIDDLE;
+import static frc.robot.subsystems.Profile.SCORE_CONE_TOP;
 
 import org.photonvision.PhotonCamera;
 
@@ -109,44 +114,38 @@ public class RobotContainer {
   }
 
   private void configureDashboard() {
-    autoBuilder.addDashboardWidgets(Dashboard.driverTab);
+    /**** Vision tab ****/
+    var driverTab = Shuffleboard.getTab("Driver");
+    autoBuilder.addDashboardWidgets(driverTab);
 
-    // Shooting tab
-    final var topLimelightCalcs = new LimelightCalcs(VisionConstants.LOW_LIMELIGHT_TO_ROBOT, Profile.SCORE_CONE_TOP.targetHeight);
-    final var shootingTab = Shuffleboard.getTab("Shooting");
-    final var topTargetLayout = shootingTab.getLayout("Top Target", BuiltInLayouts.kList);
-    topTargetLayout.addDouble("Distance", () -> {
-        var optResults = lowLimelightSubsystem.getLatestRetroTarget();
-        if (optResults.isPresent()) {
-          return topLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
-        }
-        return 0;
-    });
-    topTargetLayout.addDouble("Angle", () -> {
-      var optResults = lowLimelightSubsystem.getLatestRetroTarget();
-      if (optResults.isPresent()) {
-        return topLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
-      }
-      return 0;
-    });
+    /**** Vision tab ****/
+    final var visionTab = Shuffleboard.getTab("Vision");
 
+    // Pose estimation
+    poseEstimator.addDashboardWidgets(visionTab);
+
+    // Top target
+    final var topLimelightCalcs = new LimelightCalcs(LOW_LIMELIGHT_TO_ROBOT, SCORE_CONE_TOP.targetHeight);
+    final var topTargetLayout = visionTab.getLayout("Top Target", BuiltInLayouts.kList);
+    lowLimelightSubsystem.addTargetDashboardWidgets(topTargetLayout, topLimelightCalcs);
+
+    // Mid target
     final var midLimelightCalcs = new LimelightCalcs(
-        VisionConstants.HIGH_LIMELIGHT_TO_ROBOT, Profile.SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
-    final var midTargetLayout = shootingTab.getLayout("Mid Target", BuiltInLayouts.kList);
-    midTargetLayout.addDouble("Distance", () -> {
-        var optResults = highLimelightSubsystem.getLatestRetroTarget();
-        if (optResults.isPresent()) {
-          return midLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
-        }
-        return 0;
-    });
-    midTargetLayout.addDouble("Angle", () -> {
-      var optResults = highLimelightSubsystem.getLatestRetroTarget();
-      if (optResults.isPresent()) {
-        return midLimelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
-      }
-      return 0;
-    });
+        HIGH_LIMELIGHT_TO_ROBOT, SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
+    final var midTargetLayout = visionTab.getLayout("Mid Target", BuiltInLayouts.kList);
+    highLimelightSubsystem.addTargetDashboardWidgets(midTargetLayout, midLimelightCalcs);
+    
+    // Pickup game piece
+    final var pickupLimelightCalcs = new LimelightCalcs(
+        HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight,  elevatorSubsystem::getElevatorPosition);
+    final var pickupLayout = visionTab.getLayout("Pickup", BuiltInLayouts.kList);
+    highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
+
+    /**** Subsystems tab ****/
+    final var subsystemsTab = Shuffleboard.getTab("Subsystems");
+    shooterSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList));
+    wristSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Wrist", BuiltInLayouts.kList));
+    elevatorSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Elevator", BuiltInLayouts.kList));
 
   }
 
@@ -200,12 +199,12 @@ public class RobotContainer {
 
     controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
       0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-      poseEstimator::getCurrentPose, highLimelightSubsystem, Profile.PICKUP_GAMEPIECE_FLOOR,
+      poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
       shooterSubsystem::hasCone)));
 
     controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
       0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-      poseEstimator::getCurrentPose, highLimelightSubsystem, Profile.PICKUP_GAMEPIECE_FLOOR,
+      poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
       shooterSubsystem::hasCube)));
 
     // Shoot
@@ -213,7 +212,7 @@ public class RobotContainer {
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
 
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-        Profile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
 
     controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(

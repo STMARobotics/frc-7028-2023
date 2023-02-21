@@ -9,9 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightDetectorTarget;
 import frc.robot.limelight.LimelightResults;
 import frc.robot.limelight.LimelightResultsWrapper;
@@ -44,6 +46,49 @@ public class LimelightSubsystem extends SubsystemBase {
     new Trigger(RobotState::isEnabled)
         .onTrue(Commands.runOnce(this::enable))
         .onFalse(Commands.runOnce(this::disable, this).ignoringDisable(true));
+  }
+
+  public void addTargetDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {
+    layout.addBoolean("Target", () -> getLatestRetroTarget().isPresent());
+    layout.addDouble("Distance", () -> {
+        var optResults = getLatestRetroTarget();
+        if (optResults.isPresent()) {
+          return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+        }
+        return 0;
+    });
+    layout.addDouble("Angle", () -> {
+      var optResults = getLatestRetroTarget();
+      if (optResults.isPresent()) {
+        return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
+      }
+      return 0;
+    });
+  }
+
+  public void addDetectorDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {
+    layout.addBoolean("Target", () -> getLatestDetectorTarget().isPresent());
+    layout.addDouble("Distance", () -> {
+        var optResults = getLatestDetectorTarget();
+        if (optResults.isPresent()) {
+          return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+        }
+        return 0;
+    });
+    layout.addDouble("Angle", () -> {
+      var optResults = getLatestDetectorTarget();
+      if (optResults.isPresent()) {
+        return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
+      }
+      return 0;
+    });
+    layout.addString("Class", () -> {
+      var optResults = getLatestDetectorTarget();
+      if (optResults.isPresent()) {
+        return optResults.get().className;
+      }
+      return "";
+    });
   }
 
   /**

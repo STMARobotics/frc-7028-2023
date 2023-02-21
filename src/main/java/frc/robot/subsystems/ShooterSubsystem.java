@@ -13,7 +13,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -55,13 +55,12 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterLeft.setNeutralMode(NeutralMode.Brake);
   }
 
-  @Override
-  public void periodic() {
-    SmartDashboard.putNumber("Leader Speed Raw", shooterRight.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("Follower Speed Raw", shooterLeft.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("Leader Speed RPS", getVelocity());
-    SmartDashboard.putNumber("Leader Position", shooterRight.getSelectedSensorPosition());
-    SmartDashboard.putNumber("Leader Speed MPS", getVelocityInMetersPerSecond());
+  public void addDashboardWidgets(ShuffleboardLayout layout) {
+    layout.addNumber("Right Velocity Raw", shooterRight::getSelectedSensorVelocity);
+    layout.addNumber("Left Velocity Raw", shooterLeft::getSelectedSensorVelocity);
+    layout.addNumber("Velocity RPS", this::getVelocity);
+    layout.addBoolean("Has Cone", this::hasCone);
+    layout.addBoolean("Has Cube", this::hasCube);
   }
 
   public void shootVelocity(double rps) {

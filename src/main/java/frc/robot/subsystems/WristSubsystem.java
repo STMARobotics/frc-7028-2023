@@ -18,7 +18,7 @@ import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
 
@@ -42,6 +42,8 @@ public class WristSubsystem extends SubsystemBase {
   private final SparkMaxAbsoluteEncoder wristEncoder;
   
   private TrapezoidProfile.State goal = null;
+  private TrapezoidProfile trapezoidProfile;
+  private double profileTime = 0.0;
   
   public WristSubsystem() {
     wristLeader = new CANSparkMax(WristConstants.WRIST_LEADER_ID, MotorType.kBrushless);
@@ -94,12 +96,17 @@ public class WristSubsystem extends SubsystemBase {
     wristLeader.burnFlash();
     
   }
-  TrapezoidProfile trapezoidProfile;
-  double time = 0.0;
+
+  public void addDashboardWidgets(ShuffleboardLayout layout) {
+    layout.addNumber("Target Position", this::getGoalPosition);
+    layout.addNumber("Position Radians", this::getWristPosition);
+    layout.addNumber("Position Raw", wristEncoder::getPosition);
+  }
+  
   @Override
   public void periodic() {
     if (goal != null) {
-      var targetState = trapezoidProfile.calculate(time += 0.02);
+      var targetState = trapezoidProfile.calculate(profileTime += 0.02);
       double cosineScalar = Math.cos(getWristPosition());
       double feedForward = GRAVITY_FEED_FORWARD * cosineScalar;;
 
@@ -109,14 +116,11 @@ public class WristSubsystem extends SubsystemBase {
           0,
           feedForward,
           ArbFFUnits.kPercentOut);
-      SmartDashboard.putNumber("Wrist Target", goal.position);
-      SmartDashboard.putNumber("Wrist Target State", targetState.position);
     }
+  }
 
-    SmartDashboard.putNumber("Wrist Position Radians", getWristPosition());
-    SmartDashboard.putNumber("Wrist Position Raw", wristEncoder.getPosition());
-    SmartDashboard.putNumber("Wrist Velocity", getWristVelocity());
-    SmartDashboard.putNumber("Wrist Power", wristLeader.get());
+  private double getGoalPosition() {
+    return goal == null ? 0 : goal.position;
   }
 
   /**
@@ -140,7 +144,7 @@ public class WristSubsystem extends SubsystemBase {
     if (!Objects.equals(newGoal, goal)) {
       var currentState = new TrapezoidProfile.State(getWristPosition(), 0);
       trapezoidProfile = new TrapezoidProfile(PROFILE_CONSTRAINTS, newGoal, currentState);
-      time = 0;
+      profileTime = 0;
     }
     goal = newGoal;
   }

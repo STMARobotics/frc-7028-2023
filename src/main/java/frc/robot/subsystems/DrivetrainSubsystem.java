@@ -42,6 +42,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -63,6 +65,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(PIGEON_ID, CANIVORE_BUS_NAME);
   private final SwerveModule[] swerveModules;
+
+  private static final NetworkTable moduleStatesTable = NetworkTableInstance.getDefault().getTable("SwerveStates");
 
   private ChassisSpeeds desiredChassisSpeeds;
 
@@ -231,6 +235,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
       SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND);
       setModuleStates(desiredStates);
     }
+    // Module states for Advantage Scope
+    if (DrivetrainConstants.ADD_TO_DASHBOARD) {
+      double[] moduleStateArray = new double[swerveModules.length * 2];
+      for (int i = 0; i < swerveModules.length; i ++) {
+        var module = swerveModules[i];
+        moduleStateArray[i * 2] = module.getSteerAngle().getDegrees();
+        moduleStateArray[(i * 2) + 1] = module.getDriveVelocity();
+      }
+      moduleStatesTable.getEntry("Measured").setDoubleArray(moduleStateArray);
+      moduleStatesTable.getEntry("Rotation").setDouble(getGyroscopeRotation().getDegrees());
+    }
     // Always reset desiredChassisSpeeds to null to prevent latching to the last state (aka motor safety)!!
     desiredChassisSpeeds = null;
   }
@@ -256,7 +271,21 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param states array of states. Must be ordered frontLeft, frontRight, backLeft, backRight
    */
   public void setModuleStates(SwerveModuleState[] states) {
-    IntStream.range(0, swerveModules.length).forEach(i -> swerveModules[i].setDesiredState(states[i]));
+    double[] moduleSetpointArray = new double[states.length * 2];
+    IntStream.range(0, swerveModules.length).forEach(i -> {
+      var swerveModule = swerveModules[i];
+      var desiredState = SwerveModuleState.optimize(states[i], swerveModule.getSteerAngle());
+      swerveModule.setDesiredState(desiredState);
+      
+      // Module setpoints for Advantage Scope
+      if (DrivetrainConstants.ADD_TO_DASHBOARD) {
+        moduleSetpointArray[i * 2] = desiredState.angle.getDegrees();
+        moduleSetpointArray[(i * 2) + 1] = desiredState.speedMetersPerSecond;
+      }
+    });
+    if (DrivetrainConstants.ADD_TO_DASHBOARD) {
+      moduleStatesTable.getEntry("Setpoints").setDoubleArray(moduleSetpointArray);
+    }
   }
 
   /**

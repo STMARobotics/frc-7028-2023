@@ -28,9 +28,8 @@ public class SwerveModule {
   }
 
   public void setDesiredState(SwerveModuleState moduleState) {
-    var optimizedState = SwerveModuleState.optimize(moduleState, getSteerAngle());
-    driveController.setReferenceVelocity(optimizedState.speedMetersPerSecond);
-    steerController.setDesiredRotation(optimizedState.angle);
+    driveController.setReferenceVelocity(moduleState.speedMetersPerSecond);
+    steerController.setDesiredRotation(moduleState.angle);
   }
 
   public SwerveModuleState getState() {

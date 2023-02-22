@@ -30,6 +30,7 @@ import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.ShootConeCommand;
 import frc.robot.commands.ShootCubeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
@@ -111,6 +112,7 @@ public class RobotContainer {
     configureButtonBindings();
     configureDashboard();
     reseedTimer.start();
+    new LEDBootAnimationCommand(ledSubsystem).schedule();
   }
 
   private void configureDashboard() {

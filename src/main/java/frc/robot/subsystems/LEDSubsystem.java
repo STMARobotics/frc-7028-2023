@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -10,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class LEDSubsystem extends SubsystemBase {
   
-  private static final int STRIP_COUNT = 4;
   private static final int LED_COUNT = 128;
-  private static final int STRIP_SIZE = LED_COUNT / STRIP_COUNT;
+  public static final int STRIP_COUNT = 4;
+  public static final int STRIP_SIZE = LED_COUNT / STRIP_COUNT;
 
   /**
    * Lighting mode
@@ -40,18 +42,84 @@ public class LEDSubsystem extends SubsystemBase {
     WANT_CONE,
 
     /** Robot going to human player station to get a cube */
-    WANT_CUBE
+    WANT_CUBE,
+
+    /** A custom mode will be set by calling methods to set LEDs */
+    CUSTOM
   }
 
   private final AddressableLED leds = new AddressableLED(0);
   private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(LED_COUNT);
 
   private Mode currentMode = Mode.BLUE_GOLD;
+  private Timer timer = new Timer();
+  private boolean refresh = false;
 
   public LEDSubsystem() {
     leds.setLength(LED_COUNT);
     leds.setData(buffer);
     leds.start();
+  }
+
+  /**
+   * Sets a specific LED in the buffer. Must set mode to CUSTOM
+   * 
+   * @param stripId strip to write
+   * @param ledId LED id to write
+   * @param color color of the LED
+   */
+  public void setLED(int stripId, int ledId, Color color) {
+    buffer.setLED(customUpdateIndex(stripId, ledId), color);
+  }
+
+  /**
+   * Sets a specific LED in the buffer. Must set mode to CUSTOM
+   *
+   * @param stripId strip to write
+   * @param ledId LED id to write
+   * @param color color of the LED
+   */
+  public void setLED(int stripId, int ledId, Color8Bit color) {
+    buffer.setLED(customUpdateIndex(stripId, ledId), color);
+  }
+
+  /**
+   * Sets a specific led in the buffer. Must set mode to CUSTOM
+   *
+   * @param stripId strip to write
+   * @param ledId LED id to write
+   * @param h hue [0-180)
+   * @param s saturation [0-255]
+   * @param v value [0-255]
+   */
+  public void setHSV(int stripId, int ledId, int h, int s, int v) {
+    buffer.setHSV(customUpdateIndex(stripId, ledId), h, s, v);
+  }
+
+  /**
+   * Sets a specific led in the buffer. Must set mode to CUSTOM
+   *
+   * @param stripId strip to write
+   * @param ledId LED id to write
+   * @param r red [0-255]
+   * @param g green [0-255]
+   * @param b blue [0-255]
+   */
+  public void setRGB(int stripId, int ledId, int r, int g, int b) {
+    buffer.setRGB(customUpdateIndex(stripId, ledId), r, g, b);
+  }
+
+  /**
+   * Calculates the index for an LED on a strip. The strips serpentine - index 0 and 2 start at the bottom of the robot,
+   * 1 and 3 start at the top.
+   * @param stripId ID of the strip [0,3]
+   * @param ledId ID of the LED on the strip, always at the bottom of the robot
+   * @return LED index in the buffer
+   */
+  private int customUpdateIndex(int stripId, int ledId) {
+    refresh = true;
+    int firstId = stripId * STRIP_SIZE;
+    return stripId % 2 == 0 ? firstId + ledId : firstId + STRIP_SIZE - ledId - 1;
   }
 
   @Override
@@ -81,39 +149,52 @@ public class LEDSubsystem extends SubsystemBase {
       case WANT_CUBE:
         wantCube();
         break;
+      case CUSTOM:
+        break;
     }
-    leds.setData(buffer);
+    if (refresh) {
+      leds.setData(buffer);
+      refresh = false;
+    }
   }
 
+  /**
+   * Set the LED mode
+   * @param mode mode
+   */
   public void setMode(Mode mode) {
-    currentMode = mode;
+    if (mode != currentMode) {
+      currentMode = mode;
+      refresh = true;
+      timer.reset();
+    }
+  }
+
+  /**
+   * Alternate every-other LED between two different colors.
+   * @param color1 first color
+   * @param color2 second color
+   * @param interval interval to alternate, in seconds
+   */
+  public void alternate(Color color1, Color color2, double interval) {
+    timer.start();
+    if (timer.advanceIfElapsed(interval) || refresh) {
+      long currentTime = System.currentTimeMillis();
+      for (int strip = 0; strip < STRIP_COUNT; strip++) {
+        for (int index = 0; index < STRIP_SIZE; index++) {
+          if (index % 2 == (currentTime / (int) (interval * 1000) % 2)) {
+            setLED(strip, index, color1);
+          } else {
+            setLED(strip, index, color2);
+          }
+        }
+      }
+      refresh = true;
+    }
   }
 
   private void blueGold() {
-    alternate(Color.kBlue, Color.kOrange, 1000);
-  }
-
-  private void alternate(Color color1, Color color2, int interval) {
-    long currentTime = System.currentTimeMillis();
-    for (var strip = 0; strip < STRIP_COUNT; strip++) {
-      int offset = strip * STRIP_SIZE;
-      Color evenColor;
-      Color oddColor;
-      if (strip % 2 == 1) {
-        evenColor = color1;
-        oddColor = color2;
-      } else {
-        evenColor = color2;
-        oddColor = color1;
-      }
-      for (var i = 0; i < STRIP_SIZE; i++) {
-        if (i % 2 == ((currentTime / interval) % 2)) {
-          buffer.setLED(i + offset, evenColor);
-        } else {
-          buffer.setLED(i + offset, oddColor);
-        }
-      }
-    }
+    alternate(Color.kBlue, Color.kOrange, 1.0);
   }
 
   private void blue() {
@@ -129,7 +210,7 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private void shootingHasTarget() {
-    alternate(Color.kOrange, Color.kRed, 500);
+    alternate(Color.kOrange, Color.kRed,5);
   }
 
   private void shootingNoTarget() {

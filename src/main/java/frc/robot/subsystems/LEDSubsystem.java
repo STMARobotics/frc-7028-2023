@@ -44,6 +44,9 @@ public class LEDSubsystem extends SubsystemBase {
     /** Robot going to human player station to get a cube */
     WANT_CUBE,
 
+    /** Driverstation disconnected */
+    DS_DISCONNECT,
+
     /** A custom mode will be set by calling methods to set LEDs */
     CUSTOM
   }
@@ -126,28 +129,31 @@ public class LEDSubsystem extends SubsystemBase {
   public void periodic() {
     switch (currentMode) {
       case BLUE_GOLD:
-        blueGold();
+        alternate(Color.kBlue, Color.kOrange, 1.0);
         break;
       case HAS_CUBE:
-        blue();
+        setAll(Color.kBlue);
         break;
       case HAS_CONE:
-        yellow();
+        setAll(Color.kOrange);
         break;
       case SHOOTING_NO_TARGET:
-        shootingNoTarget();
+        setAll(Color.kRed);
         break;
       case SHOOTING_HAS_TARGET:
-        shootingHasTarget();
+        alternate(Color.kOrange, Color.kRed, 0.5);
         break;
       case SHOOTING_WITHOUT_TARGET:
-        shootingWithoutTarget();
+        setAll(Color.kOrangeRed);
         break;
       case WANT_CONE:
-        wantCone();
+        setAll(Color.kYellow);
         break;
       case WANT_CUBE:
-        wantCube();
+        setAll(Color.kPurple);
+        break;
+      case DS_DISCONNECT:
+        alternate(Color.kDarkRed, Color.kIndianRed, 0.5);
         break;
       case CUSTOM:
         break;
@@ -192,48 +198,10 @@ public class LEDSubsystem extends SubsystemBase {
       refresh = true;
     }
   }
-
-  private void blueGold() {
-    alternate(Color.kBlue, Color.kOrange, 1.0);
-  }
-
-  private void blue() {
+  
+  public void setAll(Color color) {
     for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setRGB(i, 0, 0, 255);
-    }
-  }
-
-  private void yellow() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kOrange);
-    }
-  }
-
-  private void shootingHasTarget() {
-    alternate(Color.kOrange, Color.kRed,5);
-  }
-
-  private void shootingNoTarget() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kRed);
-    }
-  }
-
-  private void shootingWithoutTarget() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kBlack);
-    }
-  }
-
-  private void wantCone() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kBlack);
-    }
-  }
-
-  private void wantCube() {
-    for (var i = 0; i < LED_COUNT; i++) {
-      buffer.setLED(i, Color.kBlack);
+      buffer.setLED(i, color);
     }
   }
 

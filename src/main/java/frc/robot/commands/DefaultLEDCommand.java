@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
@@ -22,7 +23,9 @@ public class DefaultLEDCommand extends CommandBase {
 
   @Override
   public void execute() {
-    if (hasCone.getAsBoolean()) {
+    if (!DriverStation.isDSAttached()) {
+      ledSubsystem.setMode(Mode.DS_DISCONNECT);
+    } else if (hasCone.getAsBoolean()) {
       ledSubsystem.setMode(Mode.HAS_CONE);
     } else {
       ledSubsystem.setMode(Mode.BLUE_GOLD);

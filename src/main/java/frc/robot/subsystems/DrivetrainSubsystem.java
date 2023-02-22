@@ -102,7 +102,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
-            FRONT_LEFT_MODULE_STEER_OFFSET
+            FRONT_LEFT_MODULE_STEER_OFFSET,
+            DrivetrainConstants.DRIVE_kS,
+            DrivetrainConstants.DRIVE_kV,
+            DrivetrainConstants.DRIVE_kA
         ),
         createSwerveModule(
             frontRightLayout,
@@ -110,7 +113,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
             FRONT_RIGHT_MODULE_STEER_MOTOR,
             FRONT_RIGHT_MODULE_STEER_ENCODER,
-            FRONT_RIGHT_MODULE_STEER_OFFSET
+            FRONT_RIGHT_MODULE_STEER_OFFSET,
+            DrivetrainConstants.DRIVE_kS,
+            DrivetrainConstants.DRIVE_kV + 0.075,
+            DrivetrainConstants.DRIVE_kA
         ),
         createSwerveModule(
             backLeftLayout,
@@ -118,7 +124,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER,
-            BACK_LEFT_MODULE_STEER_OFFSET
+            BACK_LEFT_MODULE_STEER_OFFSET,
+            DrivetrainConstants.DRIVE_kS,
+            DrivetrainConstants.DRIVE_kV,
+            DrivetrainConstants.DRIVE_kA
         ),
         createSwerveModule(
             backRightLayout,
@@ -126,7 +135,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER,
-            BACK_RIGHT_MODULE_STEER_OFFSET
+            BACK_RIGHT_MODULE_STEER_OFFSET,
+            DrivetrainConstants.DRIVE_kS,
+            DrivetrainConstants.DRIVE_kV + 0.075,
+            DrivetrainConstants.DRIVE_kA
         )};
 
     // Put the motors in brake mode when enabled, coast mode when disabled
@@ -157,10 +169,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
       int driveMotorPort,
       int steerMotorPort,
       int steerEncoderPort,
-      double steerOffset) {
+      double steerOffset,
+      double kS,
+      double kV,
+      double kA) {
 
     return new SwerveModule(
-        new SwerveSpeedController(driveMotorPort, moduleConfiguration, container), 
+        new SwerveSpeedController(driveMotorPort, moduleConfiguration, container, kS, kV, kA), 
         new SwerveSteerController(steerMotorPort, steerEncoderPort, steerOffset, container, moduleConfiguration));
   }
 

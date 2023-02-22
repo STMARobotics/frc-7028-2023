@@ -1,12 +1,9 @@
 package frc.robot.swerve;
 
 import static frc.robot.Constants.DrivetrainConstants.CANIVORE_BUS_NAME;
-import static frc.robot.Constants.DrivetrainConstants.DRIVE_kA;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kD;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kI;
 import static frc.robot.Constants.DrivetrainConstants.DRIVE_kP;
-import static frc.robot.Constants.DrivetrainConstants.DRIVE_kS;
-import static frc.robot.Constants.DrivetrainConstants.DRIVE_kV;
 
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -30,11 +27,15 @@ public class SwerveSpeedController {
   private final double sensorVelocityCoefficient;
   private final double nominalVoltage = 12.0;
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DRIVE_kS, DRIVE_kV, DRIVE_kA);
+  private final SimpleMotorFeedforward feedforward;
 
   private double referenceVelocity;
 
-  public SwerveSpeedController(int port, ModuleConfiguration moduleConfiguration, ShuffleboardContainer container) {
+  public SwerveSpeedController(int port, ModuleConfiguration moduleConfiguration, ShuffleboardContainer container,
+      double kS, double kV, double kA) {
+    
+    feedforward = new SimpleMotorFeedforward(kS, kV, kA);
+    
     sensorPositionCoefficient = Math.PI * moduleConfiguration.getWheelDiameter()
         * moduleConfiguration.getDriveReduction() / TICKS_PER_ROTATION;
     sensorVelocityCoefficient = sensorPositionCoefficient * 10.0;

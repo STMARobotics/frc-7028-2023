@@ -37,42 +37,42 @@ public final class Constants {
   
   public static final class DrivetrainConstants {
 
-    public static final boolean ADD_TO_DASHBOARD = false;
+    public static final boolean ADD_TO_DASHBOARD = true;
 
     /**
      * The left-to-right distance between the drivetrain wheels
      *
      * Should be measured from center to center.
      */
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = inchesToMeters(24.5);
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = inchesToMeters(18.75);
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
      * Should be measured from center to center.
      */
-    public static final double DRIVETRAIN_WHEELBASE_METERS = inchesToMeters(24.5);
+    public static final double DRIVETRAIN_WHEELBASE_METERS = inchesToMeters(18.75);
 
     public static final String CANIVORE_BUS_NAME = "swerve";
 
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 3;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 13;
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 23;
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(286.787109375);
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -toRadians(286.962890625);
 
     public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 2;
     public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 12;
     public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 22;
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(41.66015625);
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -toRadians(41.220703125);
 
     public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 1;
     public static final int BACK_LEFT_MODULE_STEER_MOTOR = 11;
     public static final int BACK_LEFT_MODULE_STEER_ENCODER = 21;
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(68.5546875);
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -toRadians(68.90625);
 
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 0;
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 10;
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 20;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(66.09375);
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -toRadians(66.4453125);
     
     public static final int PIGEON_ID = 30;
 
@@ -107,17 +107,17 @@ public final class Constants {
     );
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double DRIVE_kS = 0.6716;
+    public static final double DRIVE_kS = 0.1739;
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-    public static final double DRIVE_kV = 2.5913;
+    public static final double DRIVE_kV = 2.300; //2.2074;
     /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-    public static final double DRIVE_kA = 0.19321;
+    public static final double DRIVE_kA = 0.52878;
 
     public static final double STEER_kP = 0.2;
-    public static final double STEER_kI = 0.0;
-    public static final double STEER_kD = 0.1;
+    public static final double STEER_kI = 0.001;
+    public static final double STEER_kD = 0.0;
 
-    public static final double DRIVE_kP = 0.02;
+    public static final double DRIVE_kP = 0.05;
     public static final double DRIVE_kI = 0.0;
     public static final double DRIVE_kD = 0.0;
 
@@ -173,18 +173,13 @@ public final class Constants {
     public static double THETA_kI = 0.0;
     public static double THETA_kD = 0.0;
     
-    public static double X_kP = 8.0;
+    public static double X_kP = 2.0;
     public static double X_kI = 0.0;
     public static double X_kD = 0.0;
 
-    public static double Y_kP = 8.0;
+    public static double Y_kP = 2.0;
     public static double Y_kI = 0.0;
     public static double Y_kD = 0.0;
-
-    public static double ROTATION_kP = 5.0;
-    public static double ROTATION_kI = 0.0;
-    public static double ROTATION_kD = 0.0;
-
   }
   
   public static class ElevatorConstants {

@@ -1,17 +1,23 @@
 {
+  "canivore names": [
+    "swerve",
+    "swerve"
+  ],
   "counts per rotation": 2048.0,
+  "encoder canivore name": "rio",
   "encoder type": "Built-in",
   "encoding": false,
   "gearing denominator": 1.0,
-  "gearing numerator": 8.14,
-  "gyro": "NavX",
-  "gyro ctor": "SPI (MXP)",
+  "gearing numerator": 6.75,
+  "gyro": "Pigeon2",
+  "gyro canivore name": "swerve",
+  "gyro ctor": "30, swerve\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
   "is drivetrain": true,
   "motor controllers": [
     "TalonFX",
     "TalonFX"
   ],
-  "number of samples per average": 1,
+  "number of samples per average": 8,
   "primary encoder inverted": false,
   "primary encoder ports": [
     0,
@@ -38,5 +44,5 @@
     true,
     true
   ],
-  "velocity measurement period": 100
+  "velocity measurement period": 5
 }

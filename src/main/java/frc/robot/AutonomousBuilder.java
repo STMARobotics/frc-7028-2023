@@ -58,7 +58,7 @@ public class AutonomousBuilder {
         poseEstimatorSubsystem::setCurrentPose,
         DrivetrainConstants.KINEMATICS,
         new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
-        new PIDConstants(AutoConstants.ROTATION_kP, AutoConstants.ROTATION_kI, AutoConstants.ROTATION_kD),
+        new PIDConstants(AutoConstants.THETA_kP, AutoConstants.THETA_kI, AutoConstants.THETA_kD),
         drivetrainSubsystem::setModuleStates,
         eventMap,
         true,

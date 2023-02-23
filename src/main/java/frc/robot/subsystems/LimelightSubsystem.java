@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,46 +50,47 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   public void addTargetDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {
-    layout.addBoolean("Target", () -> getLatestRetroTarget().isPresent());
+    layout.addBoolean("Target", () -> getLatestRetroTarget().isPresent()).withPosition(0, 0);
     layout.addDouble("Distance", () -> {
         var optResults = getLatestRetroTarget();
         if (optResults.isPresent()) {
           return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
         }
         return 0;
-    });
+    }).withPosition(0, 1);
     layout.addDouble("Angle", () -> {
       var optResults = getLatestRetroTarget();
       if (optResults.isPresent()) {
         return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
       }
       return 0;
-    });
+    }).withPosition(0, 2);
   }
 
   public void addDetectorDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {
-    layout.addBoolean("Target", () -> getLatestDetectorTarget().isPresent());
+    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 4));
+    layout.addBoolean("Target", () -> getLatestDetectorTarget().isPresent()).withPosition(0, 0);
     layout.addDouble("Distance", () -> {
         var optResults = getLatestDetectorTarget();
         if (optResults.isPresent()) {
           return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
         }
         return 0;
-    });
+    }).withPosition(0, 1);
     layout.addDouble("Angle", () -> {
       var optResults = getLatestDetectorTarget();
       if (optResults.isPresent()) {
         return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).angle.getDegrees();
       }
       return 0;
-    });
+    }).withPosition(0, 2);
     layout.addString("Class", () -> {
       var optResults = getLatestDetectorTarget();
       if (optResults.isPresent()) {
         return optResults.get().className;
       }
       return "";
-    });
+    }).withPosition(0, 3);
   }
 
   /**

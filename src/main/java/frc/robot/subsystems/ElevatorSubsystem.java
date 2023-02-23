@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -9,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -109,11 +112,14 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout layout) {
-    layout.addNumber("Position Raw", elevatorLeader::getSelectedSensorPosition);
-    layout.addNumber("Position Meters", this::getElevatorPosition);
-    layout.addBoolean("Top Limit", this::isAtTopLimit);
-    layout.addBoolean("Botton Limit", this::isAtBottomLimit);
-    layout.addNumber("Target Position Meters", () -> targetPosition);
+    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 3));
+    layout.addNumber("Position Raw", elevatorLeader::getSelectedSensorPosition).withPosition(0, 0);
+    layout.addNumber("Position Meters", this::getElevatorPosition).withPosition(0, 1);
+    layout.addNumber("Target Position Meters", () -> targetPosition).withPosition(0, 2);
+    var limitsLayout = layout.getLayout("Limits", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 1)).withPosition(0, 3).withSize(2,1);
+    limitsLayout.addBoolean("Top Limit", this::isAtTopLimit).withPosition(0, 0);
+    limitsLayout.addBoolean("Botton Limit", this::isAtBottomLimit).withPosition(1, 0);
   }
 
   @Override

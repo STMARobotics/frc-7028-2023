@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.math.util.Units.inchesToMeters;
+import static edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts.kGrid;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
@@ -18,7 +19,6 @@ import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -116,7 +116,7 @@ public class RobotContainer {
   }
 
   private void configureDashboard() {
-    /**** Vision tab ****/
+    /**** Driver tab ****/
     var driverTab = Shuffleboard.getTab("Driver");
     autoBuilder.addDashboardWidgets(driverTab);
 
@@ -128,26 +128,26 @@ public class RobotContainer {
 
     // Top target
     final var topLimelightCalcs = new LimelightCalcs(LOW_LIMELIGHT_TO_ROBOT, SCORE_CONE_TOP.targetHeight);
-    final var topTargetLayout = visionTab.getLayout("Top Target", BuiltInLayouts.kList);
+    final var topTargetLayout = visionTab.getLayout("Top Target", kGrid).withPosition(6, 0).withSize(1, 2);
     lowLimelightSubsystem.addTargetDashboardWidgets(topTargetLayout, topLimelightCalcs);
 
     // Mid target
     final var midLimelightCalcs = new LimelightCalcs(
         HIGH_LIMELIGHT_TO_ROBOT, SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
-    final var midTargetLayout = visionTab.getLayout("Mid Target", BuiltInLayouts.kList);
+    final var midTargetLayout = visionTab.getLayout("Mid Target", kGrid).withPosition(7, 0).withSize(1, 2);
     highLimelightSubsystem.addTargetDashboardWidgets(midTargetLayout, midLimelightCalcs);
     
     // Pickup game piece
     final var pickupLimelightCalcs = new LimelightCalcs(
         HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight,  elevatorSubsystem::getElevatorPosition);
-    final var pickupLayout = visionTab.getLayout("Pickup", BuiltInLayouts.kList);
+    final var pickupLayout = visionTab.getLayout("Pickup", kGrid).withPosition(8, 0).withSize(1, 3);
     highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
 
     /**** Subsystems tab ****/
     final var subsystemsTab = Shuffleboard.getTab("Subsystems");
-    shooterSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Shooter", BuiltInLayouts.kList));
-    wristSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Wrist", BuiltInLayouts.kList));
-    elevatorSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Elevator", BuiltInLayouts.kList));
+    elevatorSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Elevator", kGrid).withPosition(0, 0).withSize(2, 3));
+    shooterSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Shooter", kGrid).withPosition(2, 0).withSize(2, 3));
+    wristSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Wrist", kGrid).withPosition(4, 0).withSize(2, 2));
 
   }
 

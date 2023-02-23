@@ -81,8 +81,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardTab tab) {
-    tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
-    tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
+    tab.add("Field", field2d).withPosition(0, 0).withSize(6, 4);
+    tab.addString("Pose", this::getFomattedPose).withPosition(6, 2).withSize(2, 1);
   }
 
   /**

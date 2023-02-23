@@ -68,9 +68,9 @@ public class SwerveSpeedController {
 
   private void addDashboardEntries(ShuffleboardContainer container) {
     if (container != null) {
-      container.addNumber("Current Velocity", () -> getStateVelocity());
-      container.addNumber("Target Velocity", () -> referenceVelocity);
-      container.addNumber("Current Position", () -> getStatePosition());
+      container.addNumber("Current Velocity", () -> getStateVelocity()).withPosition(0, 0);
+      container.addNumber("Target Velocity", () -> referenceVelocity).withPosition(0, 1);
+      container.addNumber("Current Position", () -> getStatePosition()).withPosition(0, 2);
     }
   }
 

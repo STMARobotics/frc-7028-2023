@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_FOLLOWER_ID;
 import static frc.robot.Constants.ShooterConstants.SHOOTER_LEADER_ID;
 
+import java.util.Map;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
@@ -13,6 +15,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -56,11 +59,14 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout layout) {
-    layout.addNumber("Right Velocity Raw", shooterRight::getSelectedSensorVelocity);
-    layout.addNumber("Left Velocity Raw", shooterLeft::getSelectedSensorVelocity);
-    layout.addNumber("Velocity RPS", this::getVelocity);
-    layout.addBoolean("Has Cone", this::hasCone);
-    layout.addBoolean("Has Cube", this::hasCube);
+    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 4));
+    layout.addNumber("Velocity RPS", this::getVelocity).withPosition(0, 0);
+    layout.addNumber("Right Velocity Raw", shooterRight::getSelectedSensorVelocity).withPosition(0, 1);
+    layout.addNumber("Left Velocity Raw", shooterLeft::getSelectedSensorVelocity).withPosition(0, 2);
+    var gamePieceLayout = layout.getLayout("Game Piece", BuiltInLayouts.kGrid)
+        .withProperties(Map.of("Number of columns", 2, "Number of rows", 1)).withPosition(0, 3);
+    gamePieceLayout.addBoolean("Has Cone", this::hasCone).withPosition(0, 0);
+    gamePieceLayout.addBoolean("Has Cube", this::hasCube).withPosition(1, 0);
   }
 
   public void shootVelocity(double rps) {

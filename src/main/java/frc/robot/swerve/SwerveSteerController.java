@@ -108,9 +108,9 @@ public class SwerveSteerController {
 
   private void addDashboardEntries(ShuffleboardContainer container) {
     if (container != null) {
-      container.addNumber("Current Angle", () -> getStateRotation().getDegrees());
-      container.addNumber("Target Angle", () -> Math.toDegrees(desiredAngleRadians));
-      container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition());
+      container.addNumber("Current Angle", () -> getStateRotation().getDegrees()).withPosition(0, 3);
+      container.addNumber("Target Angle", () -> Math.toDegrees(desiredAngleRadians)).withPosition(0, 4);
+      container.addNumber("Absolute Encoder Angle", () -> encoder.getAbsolutePosition()).withPosition(0, 5);
     }
   }
 

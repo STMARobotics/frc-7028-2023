@@ -25,6 +25,7 @@ import static frc.robot.Constants.DrivetrainConstants.FRONT_RIGHT_MODULE_STEER_O
 import static frc.robot.Constants.DrivetrainConstants.PIGEON_ID;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -82,19 +83,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
     ShuffleboardLayout backRightLayout = null;
 
     if (DrivetrainConstants.ADD_TO_DASHBOARD) {
-      frontLeftLayout = tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+      frontLeftLayout = tab.getLayout("Front Left Module", BuiltInLayouts.kGrid)
+          .withProperties(Map.of("Number of columns", 1, "Number of rows", 6))
           .withSize(2, 4)
           .withPosition(0, 0);
 
-      frontRightLayout = tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+      frontRightLayout = tab.getLayout("Front Right Module", BuiltInLayouts.kGrid)
+          .withProperties(Map.of("Number of columns", 1, "Number of rows", 6))
           .withSize(2, 4)
           .withPosition(2, 0);
       
-      backLeftLayout =tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+      backLeftLayout = tab.getLayout("Back Left Module", BuiltInLayouts.kGrid)
+          .withProperties(Map.of("Number of columns", 1, "Number of rows", 6))
           .withSize(2, 4)
           .withPosition(4, 0);
       
-      backRightLayout = tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+      backRightLayout = tab.getLayout("Back Right Module", BuiltInLayouts.kGrid)
+          .withProperties(Map.of("Number of columns", 1, "Number of rows", 6))
           .withSize(2, 4)
           .withPosition(6, 0);
     }

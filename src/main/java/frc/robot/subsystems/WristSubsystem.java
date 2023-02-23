@@ -6,6 +6,7 @@ import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
 import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
 import static edu.wpi.first.math.util.Units.radiansToRotations;
 
+import java.util.Map;
 import java.util.Objects;
 
 import com.revrobotics.CANSparkMax;
@@ -102,9 +103,10 @@ public class WristSubsystem extends SubsystemBase {
   }
 
   public void addDashboardWidgets(ShuffleboardLayout layout) {
-    layout.addNumber("Target Position", this::getGoalPosition);
-    layout.addNumber("Position Radians", this::getWristPosition);
-    layout.addNumber("Position Raw", wristEncoder::getPosition);
+    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 3));
+    layout.addNumber("Position Radians", this::getWristPosition).withPosition(0, 0);
+    layout.addNumber("Target Position", this::getGoalPosition).withPosition(0, 1);
+    layout.addNumber("Position Raw", wristEncoder::getPosition).withPosition(0, 2);
   }
   
   @Override

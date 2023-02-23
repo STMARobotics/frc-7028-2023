@@ -16,6 +16,7 @@ import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -31,10 +32,13 @@ public class WristSubsystem extends SubsystemBase {
   private static final double ENCODER_OFFSET = -0.373663187026978d;
   
   private static final float LIMIT_BOTTOM = 0.369f;
-  private static final float LIMIT_TOP = 0.633f;
+  private static final float LIMIT_TOP = 0.60f;
+  private static final double LIMIT_TOP_RADIANS = Units.rotationsToRadians(LIMIT_TOP + ENCODER_OFFSET);
+  private static final double LIMIT_BOTTOM_RADIANS = Units.rotationsToRadians(LIMIT_BOTTOM + ENCODER_OFFSET);
+
   // Profile constraints, in radians per second
   private static final TrapezoidProfile.Constraints PROFILE_CONSTRAINTS = new TrapezoidProfile.Constraints(40, 15);
-  private static final double GRAVITY_FEED_FORWARD = 0.027;
+  private static final double GRAVITY_FEED_FORWARD = .03;
 
   private final CANSparkMax wristLeader;
 
@@ -58,7 +62,7 @@ public class WristSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(wristEncoder);
 
     // Configure closed-loop control
-    double kP = 3.0; 
+    double kP = 3.5; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0; 
@@ -108,7 +112,7 @@ public class WristSubsystem extends SubsystemBase {
     if (goal != null) {
       var targetState = trapezoidProfile.calculate(profileTime += 0.02);
       double cosineScalar = Math.cos(getWristPosition());
-      double feedForward = GRAVITY_FEED_FORWARD * cosineScalar;;
+      double feedForward = GRAVITY_FEED_FORWARD * cosineScalar;
 
       pidController.setReference(
           armRadiansToEncoderRotations(targetState.position),
@@ -139,8 +143,9 @@ public class WristSubsystem extends SubsystemBase {
    * @param radians position in radians
    */
   public void moveToPosition(double radians) {
+    var target = MathUtil.clamp(radians, LIMIT_BOTTOM_RADIANS, LIMIT_TOP_RADIANS);
     // Set the target position, but move in execute() so feed forward keeps updating
-    var newGoal = new TrapezoidProfile.State(radians, 0.0);
+    var newGoal = new TrapezoidProfile.State(target, 0.0);
     if (!Objects.equals(newGoal, goal)) {
       var currentState = new TrapezoidProfile.State(getWristPosition(), 0);
       trapezoidProfile = new TrapezoidProfile(PROFILE_CONSTRAINTS, newGoal, currentState);

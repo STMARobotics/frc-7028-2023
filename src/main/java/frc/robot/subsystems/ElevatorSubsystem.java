@@ -23,7 +23,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   // Motor's encoder limits, in encoder ticks
   private static final double MOTOR_BOTTOM = 0;
-  private static final double MOTOR_TOP = 40012;
+  private static final double MOTOR_TOP = 56530;
 
   // Mutiply by sensor position to get meters
   private static final double MOTOR_ENCODER_POSITION_COEFFICIENT = ELEVATOR_HEIGHT / (MOTOR_TOP - MOTOR_BOTTOM);
@@ -31,7 +31,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private static final int ANALOG_BOTTOM = 758;
   private static final int ANALOG_TOP = 1796;
 
-  private static final double GRAVITY_FEED_FORWARD = 0.05;
+  private static final double GRAVITY_FEED_FORWARD = 0.04;
 
   // Mutiply by sensor position to get meters
   private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);
@@ -44,6 +44,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final DigitalInput topLimitSwitch = new DigitalInput(8);
   private final DigitalInput bottomLimitSwitch = new DigitalInput(9);
 
+  private double targetPosition = 0;
+
   public ElevatorSubsystem() {
     elevatorLeader = new WPI_TalonFX(ElevatorConstants.ELEVATOR_LEADER_ID);
     elevatorFollower = new WPI_TalonFX(ElevatorConstants.ELEVATOR_FOLLOWER_ID);
@@ -52,18 +54,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     analogSensor = new AnalogInput(ElevatorConstants.ANALOG_SENSOR_CHANNEL);
 
     // Configure closed-loop control
-    double kP = .09; 
+    double kP = 0.11;
     double kI = 0;
     double kD = 0; 
     double kIz = 0;
     double kF = 0.00;
-    double kMaxOutput = 0.5;
-    double kMinOutput = -.05;
+    double kMaxOutput = 0.7;
+    double kMinOutput = -.2;
     double allowedErr = 1;
 
     // Magic Motion Coefficients
-    double maxVel = 6000;
-    double maxAcc = 15000;
+    double maxVel = 10000;
+    double maxAcc = 30000;
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.slot0.kP = kP;
@@ -111,6 +113,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     layout.addNumber("Position Meters", this::getElevatorPosition);
     layout.addBoolean("Top Limit", this::isAtTopLimit);
     layout.addBoolean("Botton Limit", this::isAtBottomLimit);
+    layout.addNumber("Target Position Meters", () -> targetPosition);
   }
 
   @Override
@@ -128,6 +131,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param speed duty cycle [-1, 1]
    */
   public void moveElevator(double speed) {
+    targetPosition = 0;
     elevatorLeader.set(speed);
   }
 
@@ -136,6 +140,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param meters position in meters
    */
   public void moveToPosition(double meters) {
+    targetPosition = meters;
     elevatorLeader.set(TalonFXControlMode.MotionMagic, metersToMotorPosition(meters),
         DemandType.ArbitraryFeedForward, GRAVITY_FEED_FORWARD);
   }

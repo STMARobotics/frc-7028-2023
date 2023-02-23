@@ -139,9 +139,12 @@ public class RobotContainer {
     
     // Pickup game piece
     final var pickupLimelightCalcs = new LimelightCalcs(
-        HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight,  elevatorSubsystem::getElevatorPosition);
+        HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight, elevatorSubsystem::getElevatorPosition);
     final var pickupLayout = visionTab.getLayout("Pickup", kGrid).withPosition(8, 0).withSize(1, 3);
     highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
+    pickupLayout.addDouble(
+        "Camera Height", () -> -HIGH_LIMELIGHT_TO_ROBOT.getTranslation().getY() + elevatorSubsystem.getElevatorPosition())
+        .withPosition(0, 4);
 
     /**** Subsystems tab ****/
     final var subsystemsTab = Shuffleboard.getTab("Subsystems");

@@ -68,7 +68,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   public void addDetectorDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {
-    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 4));
+    layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 5));
     layout.addBoolean("Target", () -> getLatestDetectorTarget().isPresent()).withPosition(0, 0);
     layout.addDouble("Distance", () -> {
         var optResults = getLatestDetectorTarget();

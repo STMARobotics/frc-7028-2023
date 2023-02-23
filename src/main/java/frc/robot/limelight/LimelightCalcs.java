@@ -15,7 +15,7 @@ import edu.wpi.first.math.util.Units;
 public class LimelightCalcs {
 
   private final Transform3d cameraToRobot;
-  private final Transform3d robotToCamera;
+  private final Transform2d robotToCamera2d;
   private final double targetHeight;
   private final DoubleSupplier cameraHeightOffsetSupplier;
 
@@ -28,7 +28,9 @@ public class LimelightCalcs {
    */
   public LimelightCalcs(Transform3d cameraToRobot, double targetHeight, DoubleSupplier cameraHeightOffsetSupplier) {
     this.cameraToRobot = cameraToRobot;
-    this.robotToCamera = cameraToRobot.inverse();
+    this.robotToCamera2d = new Transform2d(
+        cameraToRobot.getTranslation().toTranslation2d(),
+        cameraToRobot.getRotation().toRotation2d()).inverse();
     this.targetHeight = targetHeight;
     this.cameraHeightOffsetSupplier = cameraHeightOffsetSupplier;
   }
@@ -56,21 +58,18 @@ public class LimelightCalcs {
 
   /**
    * Gets the robot relative translation of the target
-   * @param targetYDegrees Y coordinate of the target in degrees
    * @param targetXDegrees X coordinate of the target in degrees
+   * @param targetYDegrees Y coordinate of the target in degrees
    * @return robot relative translaction
    */
-  public Translation2d getTargetTranslation(double targetYDegrees, double targetXDegrees) {
+  public Translation2d getTargetTranslation(double targetXDegrees, double targetYDegrees) {
     var targetOnCameraCoordinates = new Translation2d(
         getCameraToTargetDistance(targetYDegrees),
         Rotation2d.fromDegrees(-targetXDegrees));
     
     var targetPoseOnCameraCoordinates = new Pose2d(targetOnCameraCoordinates, new Rotation2d());
 
-    var cameraTransform = new Transform2d(
-        new Translation2d(robotToCamera.getX(), robotToCamera.getY()),
-        new Rotation2d(robotToCamera.getRotation().getZ()));
-    return targetPoseOnCameraCoordinates.transformBy(cameraTransform).getTranslation();
+    return targetPoseOnCameraCoordinates.transformBy(robotToCamera2d).getTranslation();
   }
 
   /**
@@ -80,7 +79,9 @@ public class LimelightCalcs {
    * @return robot relative target
    */
   public VisionTargetInfo getRobotRelativeTargetInfo(double targetXDegrees, double targetYDegrees) {
-    var translation = getTargetTranslation(targetYDegrees, targetXDegrees);
+    var rolledAngles = new Translation2d(targetXDegrees, targetYDegrees)
+        .rotateBy(new Rotation2d(cameraToRobot.getRotation().getX()));
+    var translation = getTargetTranslation(rolledAngles.getX(), rolledAngles.getY());
     var distance = translation.getDistance(new Translation2d());
     var angle = new Rotation2d(translation.getX(), translation.getY());
     return new VisionTargetInfo(translation, distance, angle);

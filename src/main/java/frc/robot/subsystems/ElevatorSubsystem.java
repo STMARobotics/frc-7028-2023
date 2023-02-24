@@ -22,7 +22,7 @@ import frc.robot.Constants.ElevatorConstants;
 public class ElevatorSubsystem extends SubsystemBase {
 
   // Elevator travel distance, in meters
-  private static final double ELEVATOR_HEIGHT = 1.105 - 0.102;
+  private static final double ELEVATOR_HEIGHT = 1.002;
 
   // Motor's encoder limits, in encoder ticks
   private static final double MOTOR_BOTTOM = 0;
@@ -157,6 +157,14 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public double getElevatorPosition() {
     return motorPositionToMeters(elevatorLeader.getSelectedSensorPosition());
+  }
+
+  /**
+   * Gets the position of the elevator top / first stage, where the Limelight is mounted.
+   * This moves slower than the wrist / second stage.
+   */
+  public double getElevatorTopPosition() {
+    return getElevatorPosition() * .489;
   }
 
   /**

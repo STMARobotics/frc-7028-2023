@@ -57,7 +57,7 @@ public class RobotContainer {
 
   private final ControlBindings controlBindings;;
 
-  private final PhotonCamera photonCamera = null;//new PhotonCamera("OV9281");
+  private final PhotonCamera photonCamera = new PhotonCamera("OV9281");
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);

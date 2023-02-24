@@ -158,8 +158,8 @@ public final class Constants {
     
     /** Physical location of the high camera on the robot, relative to the center of the robot. */
     public static final Transform3d HIGH_LIMELIGHT_TO_ROBOT = new Transform3d(
-        new Translation3d(-0.083, 0.254, -0.537),
-        new Rotation3d(0.0, degreesToRadians(-9.8), degreesToRadians(0.0)));
+        new Translation3d(-0.11, -0.015, -0.895),
+        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(41.5), 0.0));
 
     public static final String HIGH_LIMELIGHT_NAME = "limelight-high";
     

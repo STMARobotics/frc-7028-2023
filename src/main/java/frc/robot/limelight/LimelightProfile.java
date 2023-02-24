@@ -20,8 +20,17 @@ public enum LimelightProfile {
   /** Score a cone in a low node */
   SCORE_CONE_LOW(0, Units.inchesToMeters(24.125), HIGH_LIMELIGHT_TO_ROBOT, true),
 
-  /** Gamepiece on the floor */
-  PICKUP_GAMEPIECE_FLOOR(1, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true);
+  /** Cone pickup on the floor */
+  PICKUP_CONE_FLOOR(1, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
+
+  /** Cube pickup on the floor */
+  PICKUP_CUBE_FLOOR(1, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
+
+  /** Cone pickup from double substation */
+  PICKUP_CONE_DOUBLE_STATION(1, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true),
+
+  /** Cube pickup from double substation */
+  PICKUP_CUBE_DOUBLE_STATION(1, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true);
 
   /** ID for the Limelight profile */
   public final int pipelineId;

@@ -54,6 +54,16 @@ public class JoystickControlBindings implements ControlBindings {
   public Optional<Trigger> intakeCube() {
     return Optional.empty();
   }
+  
+  @Override
+  public Optional<Trigger> doubleStationCone() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Trigger> doubleStationCube() {
+    return Optional.empty();
+  }
 
   @Override
   public Optional<Trigger> reseedSteerMotors() {

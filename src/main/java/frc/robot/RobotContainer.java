@@ -9,7 +9,10 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
-import static frc.robot.limelight.LimelightProfile.PICKUP_GAMEPIECE_FLOOR;
+import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
+import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
+import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_DOUBLE_STATION;
+import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
@@ -138,7 +141,7 @@ public class RobotContainer {
     
     // Pickup game piece
     final var pickupLimelightCalcs = new LimelightCalcs(
-        PICKUP_GAMEPIECE_FLOOR.cameraToRobot, PICKUP_GAMEPIECE_FLOOR.targetHeight,
+        PICKUP_CONE_FLOOR.cameraToRobot, PICKUP_CONE_FLOOR.targetHeight,
         elevatorSubsystem::getElevatorTopPosition);
     final var pickupLayout = visionTab.getLayout("Pickup", kGrid).withPosition(8, 0).withSize(1, 3);
     highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
@@ -203,14 +206,25 @@ public class RobotContainer {
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
     controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-      0.058, 0.0, -0.1, 0.4, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-      poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
-      shooterSubsystem::hasCone)));
+        0.058, 0.0, -0.1, 0.4, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
+        shooterSubsystem::hasCone)));
 
     controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-      0.058, 0.0, -0.3, 0.3, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-      poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
-      shooterSubsystem::hasCube)));
+        0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
+        shooterSubsystem::hasCube)));
+    
+    // Double sub-station intake
+    controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+        1.0, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
+        shooterSubsystem::hasCone)));
+    
+    controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+        1.0, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_DOUBLE_STATION,
+        shooterSubsystem::hasCone)));
 
     // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(

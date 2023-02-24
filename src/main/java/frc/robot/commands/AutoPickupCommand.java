@@ -22,6 +22,9 @@ import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
+/**
+ * Command to pick up a game piece with object detection
+ */
 public class AutoPickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
@@ -123,8 +126,11 @@ public class AutoPickupCommand extends CommandBase {
     if (readyToIntake) {
       shooterSubsystem.shootDutyCycle(intakeDutyCycle);
       if (lastTargetHeading == null) {
-        // We've never seen a game piece, just drive robot foward
-        drivetrainSubsystem.drive(new ChassisSpeeds(forwardSpeed, 0, 0));
+        // We've never seen a game piece, just stop
+        drivetrainSubsystem.drive(new ChassisSpeeds(
+            xSlewRateLimiter.calculate(0.0),
+            ySlewRateLimiter.calculate(0.0),
+            0.0));
       } else {
         var omegaSpeed = thetaController.calculate(drivetrainHeading.getRadians());
         if (thetaController.atGoal()) {
@@ -142,6 +148,7 @@ public class AutoPickupCommand extends CommandBase {
             omegaSpeed));
       }
     } else {
+      // Waiting for wrist/elevator, just stop
       drivetrainSubsystem.drive(new ChassisSpeeds(
           xSlewRateLimiter.calculate(0.0),
           ySlewRateLimiter.calculate(0.0),

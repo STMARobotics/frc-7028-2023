@@ -5,6 +5,10 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
+  /**
+   * @deprecated Replace with {@link AutoPickupCommand}
+   */
+  @Deprecated
 public class AutoIntakeCommand extends CommandBase {
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;

@@ -55,6 +55,17 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
+  public Optional<Trigger> doubleStationCone() {
+    return Optional.of(driverController.rightStick().and(driverController.leftTrigger()));
+  }
+
+  @Override
+  public Optional<Trigger> doubleStationCube() {
+    return Optional.of(
+        driverController.rightStick().and(driverController.leftStick()).and(driverController.leftTrigger()));
+  }
+
+  @Override
   public Optional<Trigger> reseedSteerMotors() {
     return Optional.of(driverController.start());
   }

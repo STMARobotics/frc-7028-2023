@@ -23,6 +23,8 @@ public interface ControlBindings {
   Optional<Trigger> teleopIntakeCone();
   Optional<Trigger> intakeCone();
   Optional<Trigger> intakeCube();
+  Optional<Trigger> doubleStationCone();
+  Optional<Trigger> doubleStationCube();
   Optional<Trigger> tuneShoot();
   Optional<Trigger> shootConeHigh();
   Optional<Trigger> shootConeMid();

@@ -20,12 +20,13 @@ import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.ShootConeCommand;
+import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.Profile;
+import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -125,7 +126,7 @@ public class AutonomousBuilder {
 
   private Command shootCone2Event() {
     return new ShootConeCommand(
-        Profile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
+        ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
         shooterSubsystem, coneLimelightSubsystem, ledSubsystem).withTimeout(5.0);
   }
 

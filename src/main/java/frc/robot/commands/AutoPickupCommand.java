@@ -15,10 +15,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightCalcs;
+import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.Profile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -44,7 +44,7 @@ public class AutoPickupCommand extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final LimelightSubsystem limelightSubsystem;
-  private final Profile profile;
+  private final LimelightProfile profile;
   private final Supplier<Pose2d> robotPoseSupplier;
   private final BooleanSupplier finishedSuppiler;
 
@@ -59,7 +59,7 @@ public class AutoPickupCommand extends CommandBase {
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
       ShooterSubsystem shooterSubsystem, Supplier<Pose2d> poseSupplier, LimelightSubsystem limelightSubsystem,
-      Profile profile, BooleanSupplier finishedSuppiler) {
+      LimelightProfile profile, BooleanSupplier finishedSuppiler) {
 
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
@@ -113,27 +113,6 @@ public class AutoPickupCommand extends CommandBase {
       thetaController.setGoal(lastTargetHeading.getRadians());
     }
 
-    if (lastTargetHeading == null) {
-      // We've never seen a game piece, just drive robot foward
-      drivetrainSubsystem.drive(new ChassisSpeeds(forwardSpeed, 0, 0));
-    } else {
-      var omegaSpeed = thetaController.calculate(drivetrainHeading.getRadians());
-      if (thetaController.atGoal()) {
-        omegaSpeed = 0;
-      }
-
-      var chaseSpeed = forwardSpeed;
-      if (lastTargetDistance > .8) {
-        chaseSpeed = 0.8;
-      }
-      var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
-      chaseSpeed = xSlewRateLimiter.calculate(chaseSpeed);
-      drivetrainSubsystem.drive(new ChassisSpeeds(
-          xSlewRateLimiter.calculate(xySpeed.getX()),
-          ySlewRateLimiter.calculate(xySpeed.getY()),
-          omegaSpeed));
-    }
-
     wristSubsystem.moveToPosition(wristRadians);
     elevatorSubsystem.moveToPosition(elevatorMeters);
 
@@ -143,8 +122,31 @@ public class AutoPickupCommand extends CommandBase {
 
     if (readyToIntake) {
       shooterSubsystem.shootDutyCycle(intakeDutyCycle);
+      if (lastTargetHeading == null) {
+        // We've never seen a game piece, just drive robot foward
+        drivetrainSubsystem.drive(new ChassisSpeeds(forwardSpeed, 0, 0));
+      } else {
+        var omegaSpeed = thetaController.calculate(drivetrainHeading.getRadians());
+        if (thetaController.atGoal()) {
+          omegaSpeed = 0;
+        }
+
+        var chaseSpeed = forwardSpeed;
+        if (lastTargetDistance > .8) {
+          chaseSpeed = 0.8;
+        }
+        var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
+        drivetrainSubsystem.drive(new ChassisSpeeds(
+            xSlewRateLimiter.calculate(xySpeed.getX()),
+            ySlewRateLimiter.calculate(xySpeed.getY()),
+            omegaSpeed));
+      }
+    } else {
+      drivetrainSubsystem.drive(new ChassisSpeeds(
+          xSlewRateLimiter.calculate(0.0),
+          ySlewRateLimiter.calculate(0.0),
+          0.0));
     }
-    
   }
 
   @Override

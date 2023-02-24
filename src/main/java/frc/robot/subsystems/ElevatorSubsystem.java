@@ -34,7 +34,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private static final int ANALOG_BOTTOM = 758;
   private static final int ANALOG_TOP = 1796;
 
-  private static final double GRAVITY_FEED_FORWARD = 0.04;
+  private static final double GRAVITY_FEED_FORWARD = 0.05;
 
   // Mutiply by sensor position to get meters
   private static final double ANALOG_SENSOR_COEFFICIENT = ELEVATOR_HEIGHT / (ANALOG_TOP - ANALOG_BOTTOM);

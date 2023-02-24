@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightCalcs;
+import frc.robot.limelight.LimelightProfile;
 import frc.robot.limelight.VisionTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -18,7 +19,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.Profile;
+import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -31,7 +32,6 @@ public class ShootConeCommand extends CommandBase {
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double AIM_TOLERANCE = Units.degreesToRadians(1.0);
   private static final double DISTANCE_TOLERANCE = 0.1;
-  private static final double DISTANCE_GOAL = 1.47;
   private static final double SHOOT_TIME = 5.0;
 
   private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
@@ -46,10 +46,11 @@ public class ShootConeCommand extends CommandBase {
   private final LEDSubsystem ledSubsystem;
   private final Timer shootTimer = new Timer();
 
-  private final ProfiledPIDController aimController = new ProfiledPIDController(0.8, 0.0, 0, OMEGA_CONSTRAINTS);
-  private final ProfiledPIDController distanceController = new ProfiledPIDController(0.8, 0, 0, DISTANCE_CONSTRAINTS);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(3.0, 0.0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.3, 0, 0, DISTANCE_CONSTRAINTS);
 
-  private final Profile shooterProfile;
+  private final LimelightProfile limelightProfile;
+  private final ShooterProfile shooterProfile;
   private final LimelightCalcs limelightCalcs;
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
@@ -63,15 +64,16 @@ public class ShootConeCommand extends CommandBase {
   /**
    * Constructor
    * @param shooterProfile shooter profile
+   * @param limelightProfile limelight profile
    * @param drivetrainSubsystem drivetrain
    * @param elevatorSubsystem elevator
    * @param wristSubsystem wrist
    * @param shooterSubsystem shooter
    * @param limelightSubssystem limelight
-   * @param cameraToRobot camera to robot transformation
+   * @param ledSubsystem LED subsystem
    */
-  public ShootConeCommand(Profile shooterProfile, DrivetrainSubsystem drivetrainSubsystem,
-      ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
+  public ShootConeCommand(ShooterProfile shooterProfile, LimelightProfile limelightProfile,
+      DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
       ShooterSubsystem shooterSubsystem, LimelightSubsystem limelightSubsystem, LEDSubsystem ledSubsystem) {
     this.shooterProfile = shooterProfile;
     this.drivetrainSubsystem = drivetrainSubsystem;
@@ -80,9 +82,12 @@ public class ShootConeCommand extends CommandBase {
     this.shooterSubsystem = shooterSubsystem;
     this.limelightSubsystem = limelightSubsystem;
     this.ledSubsystem = ledSubsystem;
+    this.limelightProfile = limelightProfile;
 
-    limelightCalcs = new LimelightCalcs(shooterProfile.cameraToRobot, shooterProfile.targetHeight);
+    limelightCalcs = new LimelightCalcs(limelightProfile.cameraToRobot, limelightProfile.targetHeight, 
+        limelightProfile.cameraOnElevator ? elevatorSubsystem::getElevatorTopPosition : () -> 0.0);
     aimController.enableContinuousInput(-Math.PI, Math.PI);
+    distanceController.setGoal(shooterProfile.shootingDistance);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -95,8 +100,7 @@ public class ShootConeCommand extends CommandBase {
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
     aimController.setTolerance(AIM_TOLERANCE);
     limelightSubsystem.enable();
-    distanceController.setGoal(DISTANCE_GOAL);
-    limelightSubsystem.setPipelineId(shooterProfile.pipelineId);
+    limelightSubsystem.setPipelineId(limelightProfile.pipelineId);
     readyToShootDebouncer.calculate(false);
     elevatoFilter.reset();
     wristFilter.reset();
@@ -121,13 +125,12 @@ public class ShootConeCommand extends CommandBase {
       drivetrainSubsystem.stop();
       ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
     } else {
-      ledSubsystem.setMode(Mode.SHOOTING_HAS_TARGET);
       // Get shooter settings from lookup table
       var shooterSettings = shooterProfile.lookupTable.calculate(lastTargetInfo.distance);
 
       // Get the robot heading, and the robot-relative heading of the target
       var drivetrainHeading = drivetrainSubsystem.getGyroscopeRotation();
-      var targetHeadingRadians = drivetrainHeading.minus(lastTargetInfo.angle).getRadians();
+      var targetHeading = drivetrainHeading.plus(lastTargetInfo.angle);
       
       if (firstTarget) {
         // On the first iteration, reset the PID controller
@@ -135,8 +138,8 @@ public class ShootConeCommand extends CommandBase {
       }
 
       // Get corrections from PID controllers
-      aimController.setGoal(targetHeadingRadians);
-      var rotationCorrection = -aimController.calculate(drivetrainHeading.getRadians());
+      aimController.setGoal(targetHeading.getRadians());
+      var rotationCorrection = aimController.calculate(drivetrainHeading.getRadians());
       var distanceCorrection = -distanceController.calculate(lastTargetInfo.distance);
 
       // Filter the elevator and wrist positions, to prevent oscillation from mechanical shake
@@ -148,15 +151,17 @@ public class ShootConeCommand extends CommandBase {
           Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
           && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
           && Math.abs(lastTargetInfo.angle.getRadians()) < AIM_TOLERANCE
-          && Math.abs(lastTargetInfo.distance - DISTANCE_GOAL) < DISTANCE_TOLERANCE);
+          && Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE);
 
       if (isShooting || readyToShoot) {
         // Shoot
+        ledSubsystem.setMode(Mode.SHOOTING);
         shooterSubsystem.shootVelocity(shooterSettings.velocity);
         shootTimer.start();
         isShooting = true;
         drivetrainSubsystem.stop();
       } else {
+        ledSubsystem.setMode(Mode.SHOOTING_HAS_TARGET);
         // Not ready to shoot, move the elevator, wrist, and drivetrain
         elevatorSubsystem.moveToPosition(shooterSettings.height);
         wristSubsystem.moveToPosition(shooterSettings.angle);

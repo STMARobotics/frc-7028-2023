@@ -159,7 +159,7 @@ public final class Constants {
     /** Physical location of the high camera on the robot, relative to the center of the robot. */
     public static final Transform3d HIGH_LIMELIGHT_TO_ROBOT = new Transform3d(
         new Translation3d(-0.11, -0.015, -0.895),
-        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(41.5), 0.0));
+        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(34.6), 0.0));
 
     public static final String HIGH_LIMELIGHT_NAME = "limelight-high";
     
@@ -201,12 +201,15 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.5, 33.5, 1.0, 0.6),    
-      shooterSettings(2.0, 33.5, 1.0, 0.6)
+      shooterSettings(1.0, 33.5, 1.0, 0.6)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.0, 0.4064, 1.127, 34.5)
+      shooterSettings(1.0, 28.0, 0.9, 0.3)
+    ));
+
+    public static VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
+      shooterSettings(1.0, 5.0, 0.0, 0.058)
     ));
 
   }

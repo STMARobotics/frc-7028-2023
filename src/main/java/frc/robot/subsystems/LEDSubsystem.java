@@ -35,6 +35,9 @@ public class LEDSubsystem extends SubsystemBase {
     /** Robot is shooting and sees a target */
     SHOOTING_HAS_TARGET,
 
+    /** Robot is shooting */
+    SHOOTING,
+
     /** Robot is shooting in a position that doesn't need a target */
     SHOOTING_WITHOUT_TARGET,
 
@@ -141,10 +144,13 @@ public class LEDSubsystem extends SubsystemBase {
         setAll(Color.kRed);
         break;
       case SHOOTING_HAS_TARGET:
-        alternate(Color.kOrange, Color.kRed, 0.5);
+        alternate(Color.kGreen, Color.kRed, 0.5);
         break;
       case SHOOTING_WITHOUT_TARGET:
         setAll(Color.kOrangeRed);
+        break;
+      case SHOOTING:
+        setAll(Color.kGreen);
         break;
       case WANT_CONE:
         setAll(Color.kYellow);

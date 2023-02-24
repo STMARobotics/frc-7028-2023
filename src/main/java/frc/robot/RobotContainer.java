@@ -10,10 +10,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
-import static frc.robot.Constants.VisionConstants.LOW_LIMELIGHT_TO_ROBOT;
-import static frc.robot.subsystems.Profile.PICKUP_GAMEPIECE_FLOOR;
-import static frc.robot.subsystems.Profile.SCORE_CONE_MIDDLE;
-import static frc.robot.subsystems.Profile.SCORE_CONE_TOP;
+import static frc.robot.limelight.LimelightProfile.PICKUP_GAMEPIECE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
@@ -38,12 +35,13 @@ import frc.robot.commands.TuneShootCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
 import frc.robot.limelight.LimelightCalcs;
+import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.Profile;
+import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -127,19 +125,22 @@ public class RobotContainer {
     poseEstimator.addDashboardWidgets(visionTab);
 
     // Top target
-    final var topLimelightCalcs = new LimelightCalcs(LOW_LIMELIGHT_TO_ROBOT, SCORE_CONE_TOP.targetHeight);
+    final var topLimelightCalcs = new LimelightCalcs(
+        LimelightProfile.SCORE_CONE_TOP.cameraToRobot, LimelightProfile.SCORE_CONE_TOP.targetHeight);
     final var topTargetLayout = visionTab.getLayout("Top Target", kGrid).withPosition(6, 0).withSize(1, 2);
     lowLimelightSubsystem.addTargetDashboardWidgets(topTargetLayout, topLimelightCalcs);
 
     // Mid target
     final var midLimelightCalcs = new LimelightCalcs(
-        SCORE_CONE_MIDDLE.cameraToRobot, SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorTopPosition);
+        LimelightProfile.SCORE_CONE_MIDDLE.cameraToRobot, LimelightProfile.SCORE_CONE_MIDDLE.targetHeight,
+        elevatorSubsystem::getElevatorTopPosition);
     final var midTargetLayout = visionTab.getLayout("Mid Target", kGrid).withPosition(7, 0).withSize(1, 2);
     highLimelightSubsystem.addTargetDashboardWidgets(midTargetLayout, midLimelightCalcs);
     
     // Pickup game piece
     final var pickupLimelightCalcs = new LimelightCalcs(
-        PICKUP_GAMEPIECE_FLOOR.cameraToRobot, PICKUP_GAMEPIECE_FLOOR.targetHeight, elevatorSubsystem::getElevatorTopPosition);
+        PICKUP_GAMEPIECE_FLOOR.cameraToRobot, PICKUP_GAMEPIECE_FLOOR.targetHeight,
+        elevatorSubsystem::getElevatorTopPosition);
     final var pickupLayout = visionTab.getLayout("Pickup", kGrid).withPosition(8, 0).withSize(1, 3);
     highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
     pickupLayout.addDouble(
@@ -208,7 +209,7 @@ public class RobotContainer {
       shooterSubsystem::hasCone)));
 
     controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-      0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+      0.058, 0.0, -0.3, 0.3, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
       poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
       shooterSubsystem::hasCube)));
 
@@ -217,12 +218,12 @@ public class RobotContainer {
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
 
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-        SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-        shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
+      ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem,
+          wristSubsystem, shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
 
     controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-      Profile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem, wristSubsystem,
-      shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
+        ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
+        wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
 
     // Drive to cone node to the left of tag 1, then just shoot
     // controller.rightTrigger().whileTrue(new DriveToPoseCommand(

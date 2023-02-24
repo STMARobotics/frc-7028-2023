@@ -133,17 +133,17 @@ public class RobotContainer {
 
     // Mid target
     final var midLimelightCalcs = new LimelightCalcs(
-        HIGH_LIMELIGHT_TO_ROBOT, SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorPosition);
+        HIGH_LIMELIGHT_TO_ROBOT, SCORE_CONE_MIDDLE.targetHeight, elevatorSubsystem::getElevatorTopPosition);
     final var midTargetLayout = visionTab.getLayout("Mid Target", kGrid).withPosition(7, 0).withSize(1, 2);
     highLimelightSubsystem.addTargetDashboardWidgets(midTargetLayout, midLimelightCalcs);
     
     // Pickup game piece
     final var pickupLimelightCalcs = new LimelightCalcs(
-        HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight, elevatorSubsystem::getElevatorPosition);
+        HIGH_LIMELIGHT_TO_ROBOT, PICKUP_GAMEPIECE_FLOOR.targetHeight, elevatorSubsystem::getElevatorTopPosition);
     final var pickupLayout = visionTab.getLayout("Pickup", kGrid).withPosition(8, 0).withSize(1, 3);
     highLimelightSubsystem.addDetectorDashboardWidgets(pickupLayout, pickupLimelightCalcs);
     pickupLayout.addDouble(
-        "Camera Height", () -> -HIGH_LIMELIGHT_TO_ROBOT.getTranslation().getY() + elevatorSubsystem.getElevatorPosition())
+        "Camera Height", () -> -HIGH_LIMELIGHT_TO_ROBOT.getTranslation().getZ() + elevatorSubsystem.getElevatorTopPosition())
         .withPosition(0, 4);
 
     /**** Subsystems tab ****/

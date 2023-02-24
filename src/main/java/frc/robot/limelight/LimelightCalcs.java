@@ -80,7 +80,7 @@ public class LimelightCalcs {
    */
   public VisionTargetInfo getRobotRelativeTargetInfo(double targetXDegrees, double targetYDegrees) {
     var rolledAngles = new Translation2d(targetXDegrees, targetYDegrees)
-        .rotateBy(new Rotation2d(cameraToRobot.getRotation().getX()));
+        .rotateBy(new Rotation2d(-cameraToRobot.getRotation().getX()));
     var translation = getTargetTranslation(rolledAngles.getX(), rolledAngles.getY());
     var distance = translation.getDistance(new Translation2d());
     var angle = new Rotation2d(translation.getX(), translation.getY());

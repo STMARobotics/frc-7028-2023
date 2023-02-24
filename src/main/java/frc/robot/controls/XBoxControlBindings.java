@@ -117,7 +117,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> tuneShoot() {
-    return Optional.empty();
+    return Optional.of(driverController.rightTrigger().and(driverController.x()));
   }
 
   @Override

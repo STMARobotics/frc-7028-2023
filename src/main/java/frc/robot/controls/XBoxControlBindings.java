@@ -21,12 +21,12 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> elevatorDown() {
-    return Optional.of(driverController.x());
+    return Optional.of(driverController.rightStick().and(driverController.y()));
   }
 
   @Override
   public Optional<Trigger> elevatorUp() {
-    return Optional.of(driverController.y());
+    return Optional.of(driverController.rightStick().and(driverController.b()));
   }
 
   @Override
@@ -51,7 +51,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> intakeCube() {
-    return Optional.empty();
+    return Optional.of(driverController.leftStick().and(driverController.leftTrigger()));
   }
 
   @Override
@@ -66,32 +66,32 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shootConeHigh() {
-    return Optional.of(driverController.rightTrigger());
+    return Optional.of(driverController.y());
   }
 
   @Override
   public Optional<Trigger> shootConeLow() {
-    return Optional.empty();
+    return Optional.of(driverController.a());
   }
 
   @Override
   public Optional<Trigger> shootConeMid() {
-    return Optional.empty();
+    return Optional.of(driverController.x());
   }
 
   @Override
   public Optional<Trigger> shootCubeHigh() {
-    return Optional.empty();
+    return Optional.of(driverController.leftStick().and(driverController.y()));
   }
 
   @Override
   public Optional<Trigger> shootCubeLow() {
-    return Optional.empty();
+    return Optional.of(driverController.leftStick().and(driverController.a()));
   }
 
   @Override
   public Optional<Trigger> shootCubeMid() {
-    return Optional.empty();
+    return Optional.of(driverController.leftStick().and(driverController.x()));
   }
 
   @Override
@@ -116,12 +116,12 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wristDown() {
-    return Optional.of(driverController.a());
+    return Optional.of(driverController.rightStick().and(driverController.b()));
   }
 
   @Override
   public Optional<Trigger> wristUp() {
-    return Optional.of(driverController.x());
+    return Optional.of(driverController.rightStick().and(driverController.y()));
   }
   
   @Override

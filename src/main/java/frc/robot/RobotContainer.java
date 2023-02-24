@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts.kGrid;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
@@ -213,10 +212,11 @@ public class RobotContainer {
       poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_GAMEPIECE_FLOOR,
       shooterSubsystem::hasCube)));
 
-    // Shoot
+    // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
 
+    // Shoot Cone
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
       ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem,
           wristSubsystem, shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
@@ -224,14 +224,20 @@ public class RobotContainer {
     controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
         ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
         wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
-
-    // Drive to cone node to the left of tag 1, then just shoot
-    // controller.rightTrigger().whileTrue(new DriveToPoseCommand(
-    //     drivetrainSubsystem, poseEstimator::getCurrentPose, new Pose2d(14.59, 1.67, Rotation2d.fromDegrees(0.0)))
-    //         .andThen(new JustShootCommand(0.4064, 1.05, 34.5, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
+    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
+        ShooterProfile.SCORE_CONE_LOW, LimelightProfile.SCORE_CONE_LOW, drivetrainSubsystem, elevatorSubsystem,
+        wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
+    
+    // Shoot cube
     controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-      inchesToMeters(17), 1, 60, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.8, 0.5, 40.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    
+    controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
+        0.3, 0.3, 20.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    
+    controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
+        0.06, 0.0, 5.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
   }
 
   /**

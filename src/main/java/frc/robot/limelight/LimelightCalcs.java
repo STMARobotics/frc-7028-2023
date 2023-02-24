@@ -2,7 +2,6 @@ package frc.robot.limelight;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -66,10 +65,8 @@ public class LimelightCalcs {
     var targetOnCameraCoordinates = new Translation2d(
         getCameraToTargetDistance(targetYDegrees),
         Rotation2d.fromDegrees(-targetXDegrees));
-    
-    var targetPoseOnCameraCoordinates = new Pose2d(targetOnCameraCoordinates, new Rotation2d());
 
-    return targetPoseOnCameraCoordinates.transformBy(robotToCamera2d).getTranslation();
+    return targetOnCameraCoordinates.plus(robotToCamera2d.getTranslation().rotateBy(robotToCamera2d.getRotation()));
   }
 
   /**

@@ -13,7 +13,7 @@ public class LEDBootAnimationCommand extends CommandBase {
   private final LEDSubsystem ledSubsystem;
   private final Timer timer = new Timer();
   
-  private int blipIndex = 0;
+  private int blipIndex = -1;
 
   public LEDBootAnimationCommand(LEDSubsystem ledSubsystem) {
     this.ledSubsystem = ledSubsystem;

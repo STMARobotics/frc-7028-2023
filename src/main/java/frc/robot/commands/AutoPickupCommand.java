@@ -7,6 +7,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,12 +26,13 @@ public class AutoPickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
+  private static final double THETA_TOLERANCE = .02;
 
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2.0,
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND);
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 3.0,
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2);
   
-  private final ProfiledPIDController thetaController = new ProfiledPIDController(0.8, 0.0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController thetaController = new ProfiledPIDController(3.0, 0.0, 0, OMEGA_CONSTRAINTS);
 
   private final double elevatorMeters;
   private final double wristRadians;
@@ -47,8 +49,11 @@ public class AutoPickupCommand extends CommandBase {
   private final BooleanSupplier finishedSuppiler;
 
   private final LimelightCalcs limelightCalcs;
+  private final SlewRateLimiter xSlewRateLimiter = new SlewRateLimiter(3.0);
+  private final SlewRateLimiter ySlewRateLimiter = new SlewRateLimiter(3.0);
 
   private Rotation2d lastTargetHeading;
+  private Double lastTargetDistance;
 
   public AutoPickupCommand(
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
@@ -70,8 +75,10 @@ public class AutoPickupCommand extends CommandBase {
     this.finishedSuppiler = finishedSuppiler;
 
     DoubleSupplier cameraHeightOffset = 
-        profile.cameraOnElevator ? elevatorSubsystem::getElevatorPosition : () -> 0.0;
+        profile.cameraOnElevator ? elevatorSubsystem::getElevatorTopPosition : () -> 0.0;
     limelightCalcs = new LimelightCalcs(profile.cameraToRobot, profile.targetHeight, cameraHeightOffset);
+    thetaController.setTolerance(THETA_TOLERANCE);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -80,7 +87,19 @@ public class AutoPickupCommand extends CommandBase {
   public void initialize() {
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(profile.pipelineId);
-    thetaController.reset(robotPoseSupplier.get().getRotation().getRadians());
+    var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
+    var robotAngle = robotPoseSupplier.get().getRotation();
+    thetaController.reset(robotPoseSupplier.get().getRotation().getRadians(), chassisSpeeds.omegaRadiansPerSecond);
+    lastTargetDistance = null;
+    lastTargetHeading = null;
+
+    var fieldSpeeds = 
+        new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).rotateBy(robotAngle);
+    var robotSpeeds = new ChassisSpeeds(fieldSpeeds.getX(), fieldSpeeds.getY(), chassisSpeeds.omegaRadiansPerSecond);
+    
+    // Reset the slew rate limiters, in case the robot is already moving
+    xSlewRateLimiter.reset(robotSpeeds.vxMetersPerSecond);
+    ySlewRateLimiter.reset(robotSpeeds.vyMetersPerSecond);
   }
   
   @Override
@@ -90,6 +109,7 @@ public class AutoPickupCommand extends CommandBase {
     if (detectorTarget.isPresent()) {
       var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(detectorTarget.get());
       lastTargetHeading = drivetrainHeading.plus(targetInfo.angle);
+      lastTargetDistance = targetInfo.distance;
       thetaController.setGoal(lastTargetHeading.getRadians());
     }
 
@@ -102,8 +122,16 @@ public class AutoPickupCommand extends CommandBase {
         omegaSpeed = 0;
       }
 
-      var xySpeed = new Translation2d(forwardSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
-      drivetrainSubsystem.drive(new ChassisSpeeds(xySpeed.getX(), xySpeed.getY(), omegaSpeed));
+      var chaseSpeed = forwardSpeed;
+      if (lastTargetDistance > .8) {
+        chaseSpeed = 0.8;
+      }
+      var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
+      chaseSpeed = xSlewRateLimiter.calculate(chaseSpeed);
+      drivetrainSubsystem.drive(new ChassisSpeeds(
+          xSlewRateLimiter.calculate(xySpeed.getX()),
+          ySlewRateLimiter.calculate(xySpeed.getY()),
+          omegaSpeed));
     }
 
     wristSubsystem.moveToPosition(wristRadians);

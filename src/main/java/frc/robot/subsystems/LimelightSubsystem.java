@@ -71,11 +71,11 @@ public class LimelightSubsystem extends SubsystemBase {
     layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 5));
     layout.addBoolean("Target", () -> getLatestDetectorTarget().isPresent()).withPosition(0, 0);
     layout.addDouble("Distance", () -> {
-        var optResults = getLatestDetectorTarget();
-        if (optResults.isPresent()) {
-          return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
-        }
-        return 0;
+      var optResults = getLatestDetectorTarget();
+      if (optResults.isPresent()) {
+        return limelightCalcs.getRobotRelativeTargetInfo(optResults.get()).distance;
+      }
+      return 0;
     }).withPosition(0, 1);
     layout.addDouble("Angle", () -> {
       var optResults = getLatestDetectorTarget();

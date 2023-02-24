@@ -21,12 +21,12 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> elevatorDown() {
-    return Optional.of(driverController.rightStick().and(driverController.y()));
+    return Optional.of(driverController.rightTrigger().and(driverController.y()));
   }
 
   @Override
   public Optional<Trigger> elevatorUp() {
-    return Optional.of(driverController.rightStick().and(driverController.b()));
+    return Optional.of(driverController.rightTrigger().and(driverController.b()));
   }
 
   @Override
@@ -127,12 +127,12 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wristDown() {
-    return Optional.of(driverController.rightStick().and(driverController.b()));
+    return Optional.of(driverController.rightTrigger().and(driverController.b()));
   }
 
   @Override
   public Optional<Trigger> wristUp() {
-    return Optional.of(driverController.rightStick().and(driverController.y()));
+    return Optional.of(driverController.rightTrigger().and(driverController.y()));
   }
   
   @Override

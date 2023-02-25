@@ -62,8 +62,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       var layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
       layout.setOrigin(originPosition);
       if (photonCamera != null) {
-        photonPoseEstimator =
-            new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP, photonCamera, APRILTAG_CAMERA_TO_ROBOT);
+        photonPoseEstimator = new PhotonPoseEstimator(
+            layout, PoseStrategy.MULTI_TAG_PNP, photonCamera, APRILTAG_CAMERA_TO_ROBOT.inverse());
       }
     } catch(IOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());

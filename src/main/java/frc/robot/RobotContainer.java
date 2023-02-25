@@ -15,19 +15,20 @@ import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AfterDoubleStationCommand;
 import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
+import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
@@ -221,23 +222,17 @@ public class RobotContainer {
     
     // Double sub-station intake
     final var doublePickupHeight = 1.0;
-    controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+    controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
       doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-        shooterSubsystem::hasCone)).onFalse(
-            run(() -> elevatorSubsystem.moveToPosition(doublePickupHeight), elevatorSubsystem)
-              .alongWith(run(() -> wristSubsystem.moveToPosition(.3), wristSubsystem))
-              .alongWith(run(() -> drivetrainSubsystem.drive(new ChassisSpeeds(-0.3, 0.0, 0.0)), drivetrainSubsystem)).withTimeout(2.0)
-              .andThen(run(() -> elevatorSubsystem.moveToPosition(.5), elevatorSubsystem).withTimeout(.5))));
+        shooterSubsystem::hasCone))
+            .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
     
-    controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
+    controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
       doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-        shooterSubsystem::hasCube)).onFalse(
-            run(() -> elevatorSubsystem.moveToPosition(doublePickupHeight), elevatorSubsystem)
-              .alongWith(run(() -> wristSubsystem.moveToPosition(.3), wristSubsystem))
-              .alongWith(run(() -> drivetrainSubsystem.drive(new ChassisSpeeds(-0.3, 0.0, 0.0)), drivetrainSubsystem)).withTimeout(2.0)
-              .andThen(run(() -> elevatorSubsystem.moveToPosition(.5), elevatorSubsystem).withTimeout(.5))));
+        shooterSubsystem::hasCube))
+            .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
 
     // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(

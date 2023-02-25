@@ -9,11 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightDetectorTarget;
 import frc.robot.limelight.LimelightResults;
@@ -33,7 +30,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
   private boolean takeSnapshot = false;
 
-  private boolean enabled;
+  private boolean enabled = true;
   private boolean driverMode;
   private double activePipelineId;
   private ObjectMapper mapper;
@@ -43,10 +40,6 @@ public class LimelightSubsystem extends SubsystemBase {
     this.networkTableName = networkTableName;
 
     limelightNetworkTable.getEntry("snapshot").setDouble(0.0);
-
-    new Trigger(RobotState::isEnabled)
-        .onTrue(Commands.runOnce(this::enable))
-        .onFalse(Commands.runOnce(this::disable, this).ignoringDisable(true));
   }
 
   public void addTargetDashboardWidgets(ShuffleboardLayout layout, LimelightCalcs limelightCalcs) {

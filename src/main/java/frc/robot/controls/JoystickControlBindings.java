@@ -22,22 +22,22 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> elevatorDown() {
-    return Optional.of(rightJoystick.povDown());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> elevatorUp() {
-    return Optional.of(rightJoystick.povUp());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> fieldHeadingDrive() {
-    return Optional.of(leftJoystick.povDown());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> fieldOrientedDrive() {
-    return Optional.of(leftJoystick.povUp());
+    return Optional.empty();
   }
 
   @Override
@@ -57,7 +57,7 @@ public class JoystickControlBindings implements ControlBindings {
   
   @Override
   public Optional<Trigger> doubleStationCone() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.povLeft());
   }
 
   @Override
@@ -72,7 +72,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> resetPose() {
-    return Optional.of(leftJoystick.button(3));
+    return Optional.of(leftJoystick.povUp());
   }
 
   @Override
@@ -82,12 +82,12 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shootConeLow() {
-    return Optional.empty();
+    return Optional.of(rightJoystick.povDown());
   }
 
   @Override
   public Optional<Trigger> shootConeMid() {
-    return Optional.empty();
+    return Optional.of(rightJoystick.povLeft());
   }
 
   @Override
@@ -107,12 +107,12 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shooterIn() {
-    return Optional.of(rightJoystick.button(2));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> shooterOut() {
-    return Optional.of(rightJoystick.button(3));
+    return Optional.empty();
   }
 
   @Override
@@ -127,12 +127,12 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wristDown() {
-    return Optional.of(rightJoystick.povRight());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> wristUp() {
-    return Optional.of(rightJoystick.povLeft());
+    return Optional.empty();
   }
   
   @Override

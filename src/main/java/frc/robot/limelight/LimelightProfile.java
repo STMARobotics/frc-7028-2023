@@ -15,22 +15,22 @@ public enum LimelightProfile {
   SCORE_CONE_TOP(0, Units.inchesToMeters(44.0), LOW_LIMELIGHT_TO_ROBOT, false),
 
   /** Score a cone on a middle node */
-  SCORE_CONE_MIDDLE(0, Units.inchesToMeters(24.125), HIGH_LIMELIGHT_TO_ROBOT, true),
+  SCORE_CONE_MIDDLE(1, Units.inchesToMeters(24.125), HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Score a cone in a low node */
-  SCORE_CONE_LOW(0, Units.inchesToMeters(24.125), HIGH_LIMELIGHT_TO_ROBOT, true),
+  SCORE_CONE_LOW(1, Units.inchesToMeters(24.125), HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Cone pickup on the floor */
-  PICKUP_CONE_FLOOR(1, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
+  PICKUP_CONE_FLOOR(0, 0.165, HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Cube pickup on the floor */
-  PICKUP_CUBE_FLOOR(1, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
+  PICKUP_CUBE_FLOOR(2, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Cone pickup from double substation */
-  PICKUP_CONE_DOUBLE_STATION(1, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true),
+  PICKUP_CONE_DOUBLE_STATION(0, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Cube pickup from double substation */
-  PICKUP_CUBE_DOUBLE_STATION(1, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true);
+  PICKUP_CUBE_DOUBLE_STATION(2, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true);
 
   /** ID for the Limelight profile */
   public final int pipelineId;

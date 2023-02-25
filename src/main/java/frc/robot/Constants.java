@@ -107,9 +107,9 @@ public final class Constants {
     );
 
     /** Voltage needed to overcome the motor’s static friction. kS */
-    public static final double DRIVE_kS = 0.1739;
+    public static final double DRIVE_kS = 0.18;
     /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-    public static final double DRIVE_kV = 2.300; //2.2074;
+    public static final double DRIVE_kV = 2.300;
     /** Voltage needed to induce a given acceleration in the motor shaft. kA */
     public static final double DRIVE_kA = 0.52878;
 
@@ -147,7 +147,7 @@ public final class Constants {
 
     /** Physical location of the apriltag camera on the robot, relative to the center of the robot. */
     public static final Transform3d APRILTAG_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(0.0, -0.1375, -.90), new Rotation3d(0.0, 0.0, -0.10));
+        new Transform3d(new Translation3d(-0.055, 0.250, -0.18), new Rotation3d(0.0, degreesToRadians(11.0), 0.0));
 
     /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
     public static final Transform3d LOW_LIMELIGHT_TO_ROBOT = new Transform3d(
@@ -201,7 +201,8 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.0, 33.5, 1.0, 0.6)
+      shooterSettings(1.25, 28.0, 0.8, 0.95),
+      shooterSettings(1.45, 30.0, 0.8, 0.95)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
@@ -209,7 +210,7 @@ public final class Constants {
     ));
 
     public static VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.0, 5.0, 0.0, 0.058)
+      shooterSettings(1.0, 15.0, 0.0, 0.1)
     ));
 
   }

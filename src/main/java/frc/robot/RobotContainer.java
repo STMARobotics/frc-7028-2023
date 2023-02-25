@@ -107,7 +107,7 @@ public class RobotContainer {
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
     ledSubsystem.setDefaultCommand(new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone));
     elevatorSubsystem.setDefaultCommand(
-        new DefaultElevatorCommand(elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - Math.PI/2) < .2));
+        new DefaultElevatorCommand(elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - 1.4) < .2));
 
     configureButtonBindings();
     configureDashboard();
@@ -206,7 +206,7 @@ public class RobotContainer {
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
     controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-        0.058, 0.0, -0.1, 0.4, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        0.049, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
         shooterSubsystem::hasCone)));
 
@@ -245,13 +245,13 @@ public class RobotContainer {
     
     // Shoot cube
     controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.8, 0.5, 40.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.8, 0.5, 30.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
         0.3, 0.3, 20.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.06, 0.0, 5.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.06, 0.0, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
   }
 
   /**

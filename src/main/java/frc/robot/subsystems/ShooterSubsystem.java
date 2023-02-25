@@ -89,9 +89,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void activeStop() {
     shooterRight.selectProfileSlot(1, 0);
-    shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition());
+    shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition() - 1000);
     shooterLeft.selectProfileSlot(1, 0);
-    shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition());
+    shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition() - 1000);
   }
 
   public void shootDutyCycle(double speed) {

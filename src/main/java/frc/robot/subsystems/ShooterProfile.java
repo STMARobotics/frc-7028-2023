@@ -12,7 +12,7 @@ import frc.robot.math.VelocityAngleInterpolator;
 public enum ShooterProfile {
 
   /** Score a cone on a top node */
-  SCORE_CONE_TOP(TOP_TABLE, 1.47),
+  SCORE_CONE_TOP(TOP_TABLE, 1.35),
 
   /** Score a cone on a middle node */
   SCORE_CONE_MIDDLE(MIDDLE_TABLE, 1.1),

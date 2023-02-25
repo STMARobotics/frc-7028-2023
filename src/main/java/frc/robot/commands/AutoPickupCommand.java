@@ -29,13 +29,13 @@ public class AutoPickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double THETA_TOLERANCE = .02;
+  private static final double THETA_TOLERANCE = .01;
 
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 3.0,
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2.0,
       MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2);
   
-  private final ProfiledPIDController thetaController = new ProfiledPIDController(3.0, 0.0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController thetaController = new ProfiledPIDController(4.0, 0.0, 0, OMEGA_CONSTRAINTS);
 
   private final double elevatorMeters;
   private final double wristRadians;
@@ -92,7 +92,7 @@ public class AutoPickupCommand extends CommandBase {
     limelightSubsystem.setPipelineId(profile.pipelineId);
     var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
     var robotAngle = robotPoseSupplier.get().getRotation();
-    thetaController.reset(robotPoseSupplier.get().getRotation().getRadians(), chassisSpeeds.omegaRadiansPerSecond);
+    thetaController.reset(robotAngle.getRadians(), chassisSpeeds.omegaRadiansPerSecond);
     lastTargetDistance = null;
     lastTargetHeading = null;
 

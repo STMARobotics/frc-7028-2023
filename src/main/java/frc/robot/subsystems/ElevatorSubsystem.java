@@ -57,7 +57,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     analogSensor = new AnalogInput(ElevatorConstants.ANALOG_SENSOR_CHANNEL);
 
     // Configure closed-loop control
-    double kP = 0.11;
+    double kP = 0.13;
     double kI = 0;
     double kD = 0; 
     double kIz = 0;

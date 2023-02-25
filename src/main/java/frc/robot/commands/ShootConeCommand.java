@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
@@ -46,8 +47,8 @@ public class ShootConeCommand extends CommandBase {
   private final LEDSubsystem ledSubsystem;
   private final Timer shootTimer = new Timer();
 
-  private final ProfiledPIDController aimController = new ProfiledPIDController(3.0, 0.0, 0, OMEGA_CONSTRAINTS);
-  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.3, 0, 0, DISTANCE_CONSTRAINTS);
+  private final ProfiledPIDController aimController = new ProfiledPIDController(5.5, 0.0, 0, OMEGA_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.5, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final LimelightProfile limelightProfile;
   private final ShooterProfile shooterProfile;
@@ -55,7 +56,7 @@ public class ShootConeCommand extends CommandBase {
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+  private final Debouncer readyToShootDebouncer = new Debouncer(0.5, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(5);
 
   private VisionTargetInfo lastTargetInfo = null;
@@ -122,7 +123,7 @@ public class ShootConeCommand extends CommandBase {
       elevatorSubsystem.stop();
       wristSubsystem.stop();
       shooterSubsystem.stop();
-      drivetrainSubsystem.stop();
+      drivetrainSubsystem.drive(new ChassisSpeeds(0.0, 0.0, 1.0));
       ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
     } else {
       // Get shooter settings from lookup table
@@ -138,7 +139,7 @@ public class ShootConeCommand extends CommandBase {
       }
 
       // Get corrections from PID controllers
-      aimController.setGoal(targetHeading.getRadians());
+      aimController.setGoal(targetHeading.getRadians() - 0.01);
       var rotationCorrection = aimController.calculate(drivetrainHeading.getRadians());
       var distanceCorrection = -distanceController.calculate(lastTargetInfo.distance);
 
@@ -152,6 +153,11 @@ public class ShootConeCommand extends CommandBase {
           && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
           && Math.abs(lastTargetInfo.angle.getRadians()) < AIM_TOLERANCE
           && Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE);
+
+      SmartDashboard.putBoolean("Elevator", Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE);
+      SmartDashboard.putBoolean("Wrist", Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE);
+      SmartDashboard.putBoolean("Aim", Math.abs(lastTargetInfo.angle.getRadians()) < AIM_TOLERANCE);
+      SmartDashboard.putBoolean("Distance", Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE);
 
       if (isShooting || readyToShoot) {
         // Shoot

@@ -39,7 +39,7 @@ public class WristSubsystem extends SubsystemBase {
 
   // Profile constraints, in radians per second
   private static final TrapezoidProfile.Constraints PROFILE_CONSTRAINTS = new TrapezoidProfile.Constraints(40, 15);
-  private static final double GRAVITY_FEED_FORWARD = .03;
+  private static final double GRAVITY_FEED_FORWARD = .04;
 
   private final CANSparkMax wristLeader;
 
@@ -63,7 +63,7 @@ public class WristSubsystem extends SubsystemBase {
     pidController.setFeedbackDevice(wristEncoder);
 
     // Configure closed-loop control
-    double kP = 3.5; 
+    double kP = 3.9; 
     double kI = 0;
     double kD = 0; 
     double kIz = 0; 

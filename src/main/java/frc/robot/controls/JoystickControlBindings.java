@@ -42,32 +42,32 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> teleopIntakeCone() {
-    return Optional.of(leftJoystick.trigger());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> intakeCone() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.trigger());
   }
 
   @Override
   public Optional<Trigger> intakeCube() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.button(4));
   }
   
   @Override
   public Optional<Trigger> doubleStationCone() {
-    return Optional.of(leftJoystick.povLeft());
+    return Optional.of(leftJoystick.button(2)); // TODO bind
   }
 
   @Override
   public Optional<Trigger> doubleStationCube() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.button(3));
   }
 
   @Override
   public Optional<Trigger> reseedSteerMotors() {
-    return Optional.of(leftJoystick.button(2));
+    return Optional.of(leftJoystick.button(6));
   }
 
   @Override
@@ -92,17 +92,17 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shootCubeHigh() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.povDown().and(rightJoystick.trigger()));
   }
 
   @Override
   public Optional<Trigger> shootCubeLow() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.povDown().and(rightJoystick.povDown()));
   }
 
   @Override
   public Optional<Trigger> shootCubeMid() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.povDown().and(rightJoystick.povLeft()));
   }
 
   @Override

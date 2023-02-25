@@ -41,6 +41,7 @@ public class AutoPickupCommand extends CommandBase {
   private final double wristRadians;
   private final double intakeDutyCycle;
   private final double forwardSpeed;
+  private final String className;
 
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
@@ -62,7 +63,7 @@ public class AutoPickupCommand extends CommandBase {
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
       ShooterSubsystem shooterSubsystem, Supplier<Pose2d> poseSupplier, LimelightSubsystem limelightSubsystem,
-      LimelightProfile profile, BooleanSupplier finishedSuppiler) {
+      LimelightProfile profile, BooleanSupplier finishedSuppiler, String className) {
 
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
@@ -76,6 +77,7 @@ public class AutoPickupCommand extends CommandBase {
     this.limelightSubsystem = limelightSubsystem;
     this.profile = profile;
     this.finishedSuppiler = finishedSuppiler;
+    this.className = className;
 
     DoubleSupplier cameraHeightOffset = 
         profile.cameraOnElevator ? elevatorSubsystem::getElevatorTopPosition : () -> 0.0;
@@ -110,10 +112,13 @@ public class AutoPickupCommand extends CommandBase {
     var drivetrainHeading = robotPoseSupplier.get().getRotation();
     var detectorTarget = limelightSubsystem.getLatestDetectorTarget();
     if (detectorTarget.isPresent()) {
-      var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(detectorTarget.get());
-      lastTargetHeading = drivetrainHeading.plus(targetInfo.angle);
-      lastTargetDistance = targetInfo.distance;
-      thetaController.setGoal(lastTargetHeading.getRadians());
+      var target = detectorTarget.get();
+      if (className.equalsIgnoreCase(target.className)) {
+        var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(detectorTarget.get());
+        lastTargetHeading = drivetrainHeading.plus(targetInfo.angle);
+        lastTargetDistance = targetInfo.distance;
+        thetaController.setGoal(lastTargetHeading.getRadians());
+      }
     }
 
     wristSubsystem.moveToPosition(wristRadians);

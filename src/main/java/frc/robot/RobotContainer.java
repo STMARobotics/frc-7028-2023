@@ -213,12 +213,12 @@ public class RobotContainer {
     controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
         0.049, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
-        shooterSubsystem::hasCone)));
+        shooterSubsystem::hasCone, "Cone")));
 
     controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
         0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
-        shooterSubsystem::hasCube)));
+        shooterSubsystem::hasCube, "Cube")));
     
     // Double sub-station intake
     final var doublePickupHeight = 1.0;

@@ -24,7 +24,7 @@ public class DoubleStationCommand extends SequentialCommandGroup {
 
     var pickup = new AutoPickupCommand(
       elevatorMeters, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-      poseSupplier, limelightSubsystem, profile, finishedSuppiler);
+      poseSupplier, limelightSubsystem, profile, finishedSuppiler, "");
 
     addCommands(pickup,
         run(() -> elevatorSubsystem.moveToPosition(elevatorMeters), elevatorSubsystem)

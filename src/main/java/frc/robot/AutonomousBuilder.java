@@ -87,7 +87,8 @@ public class AutonomousBuilder {
   }
 
   private void buildAutoTwoCone() {
-    autoChooser.setDefaultOption("2 Cone", buildAutoForPathGroup("twoCone"));
+    autoChooser.setDefaultOption("None", Commands.none());
+    autoChooser.addOption("2 Cone", buildAutoForPathGroup("twoCone"));
   }
 
   private Command buildAutoForPathGroup(String pathGroupName) {

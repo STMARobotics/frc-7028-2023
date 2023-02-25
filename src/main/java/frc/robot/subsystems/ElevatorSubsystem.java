@@ -87,7 +87,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Configure soft limits
     config.forwardSoftLimitEnable = true;
-    config.forwardSoftLimitThreshold = MOTOR_TOP - metersToMotorPosition(0.02);
+    config.forwardSoftLimitThreshold = MOTOR_TOP - metersToMotorPosition(0.005);
     config.reverseSoftLimitEnable = true;
     config.reverseSoftLimitThreshold = MOTOR_BOTTOM + metersToMotorPosition(0.02);
     config.forwardLimitSwitchNormal = LimitSwitchNormal.NormallyOpen;

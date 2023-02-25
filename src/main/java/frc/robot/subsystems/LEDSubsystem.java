@@ -135,7 +135,7 @@ public class LEDSubsystem extends SubsystemBase {
         alternate(Color.kBlue, Color.kOrange, 1.0);
         break;
       case HAS_CUBE:
-        setAll(Color.kBlue);
+        setAll(40, 0, 125);
         break;
       case HAS_CONE:
         setAll(Color.kOrange);
@@ -208,6 +208,12 @@ public class LEDSubsystem extends SubsystemBase {
   public void setAll(Color color) {
     for (var i = 0; i < LED_COUNT; i++) {
       buffer.setLED(i, color);
+    }
+  }
+
+  public void setAll(int r, int g, int b) {
+    for (var i = 0; i < LED_COUNT; i++) {
+      buffer.setRGB(i, r, g, b);
     }
   }
 

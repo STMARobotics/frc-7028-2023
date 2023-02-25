@@ -14,9 +14,12 @@ public class DefaultLEDCommand extends CommandBase {
 
   private final LEDSubsystem ledSubsystem;
   private final BooleanSupplier hasCone;
-  public DefaultLEDCommand(LEDSubsystem ledSubsystem, BooleanSupplier hasCone) {
+  private final BooleanSupplier hasCube;
+
+  public DefaultLEDCommand(LEDSubsystem ledSubsystem, BooleanSupplier hasCone, BooleanSupplier hasCube) {
     this.ledSubsystem = ledSubsystem;
     this.hasCone = hasCone;
+    this.hasCube = hasCube;
 
     addRequirements(ledSubsystem);
   }
@@ -27,6 +30,8 @@ public class DefaultLEDCommand extends CommandBase {
       ledSubsystem.setMode(Mode.DS_DISCONNECT);
     } else if (hasCone.getAsBoolean()) {
       ledSubsystem.setMode(Mode.HAS_CONE);
+    } else if (hasCube.getAsBoolean()) {
+      ledSubsystem.setMode(Mode.HAS_CUBE);
     } else {
       ledSubsystem.setMode(Mode.BLUE_GOLD);
     }

@@ -11,11 +11,11 @@ import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
-import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultElevatorCommand;
+import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
@@ -105,9 +106,12 @@ public class RobotContainer {
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
     wristSubsystem.setDefaultCommand(defaultWristCommand);
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
-    ledSubsystem.setDefaultCommand(new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone));
+    ledSubsystem.setDefaultCommand(
+        new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube));
     elevatorSubsystem.setDefaultCommand(
         new DefaultElevatorCommand(elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - 1.4) < .2));
+    highLimelightSubsystem.setDefaultCommand(
+        new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem));
 
     configureButtonBindings();
     configureDashboard();
@@ -216,15 +220,24 @@ public class RobotContainer {
         shooterSubsystem::hasCube)));
     
     // Double sub-station intake
+    final var doublePickupHeight = 1.0;
     controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-        1.0, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+      doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-        shooterSubsystem::hasCone)));
+        shooterSubsystem::hasCone)).onFalse(
+            run(() -> elevatorSubsystem.moveToPosition(doublePickupHeight), elevatorSubsystem)
+              .alongWith(run(() -> wristSubsystem.moveToPosition(.3), wristSubsystem))
+              .alongWith(run(() -> drivetrainSubsystem.drive(new ChassisSpeeds(-0.3, 0.0, 0.0)), drivetrainSubsystem)).withTimeout(2.0)
+              .andThen(run(() -> elevatorSubsystem.moveToPosition(.5), elevatorSubsystem).withTimeout(.5))));
     
     controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-        1.0, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_DOUBLE_STATION,
-        shooterSubsystem::hasCone)));
+      doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
+        shooterSubsystem::hasCube)).onFalse(
+            run(() -> elevatorSubsystem.moveToPosition(doublePickupHeight), elevatorSubsystem)
+              .alongWith(run(() -> wristSubsystem.moveToPosition(.3), wristSubsystem))
+              .alongWith(run(() -> drivetrainSubsystem.drive(new ChassisSpeeds(-0.3, 0.0, 0.0)), drivetrainSubsystem)).withTimeout(2.0)
+              .andThen(run(() -> elevatorSubsystem.moveToPosition(.5), elevatorSubsystem).withTimeout(.5))));
 
     // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
@@ -239,19 +252,21 @@ public class RobotContainer {
         ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
         wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
     
-    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-        ShooterProfile.SCORE_CONE_LOW, LimelightProfile.SCORE_CONE_LOW, drivetrainSubsystem, elevatorSubsystem,
-        wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
+    // controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
+    //     ShooterProfile.SCORE_CONE_LOW, LimelightProfile.SCORE_CONE_LOW, drivetrainSubsystem, elevatorSubsystem,
+    //     wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
+    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
+        0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     // Shoot cube
     controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.8, 0.5, 30.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.3, 0.3, 20.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     
     controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.06, 0.0, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
   }
 
   /**

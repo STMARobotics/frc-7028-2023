@@ -4,11 +4,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.MedianFilter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
@@ -59,8 +60,16 @@ public class ShootConeCommand extends CommandBase {
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(3);
   private final MovingAverageFilter rotationFilter = new MovingAverageFilter(3);
 
+  private final SlewRateLimiter xSlewRateLimiter = new SlewRateLimiter(8.0);
+  private final SlewRateLimiter ySlewRateLimiter = new SlewRateLimiter(8.0);
+
   private VisionTargetInfo lastTargetInfo = null;
   private boolean isShooting = false;
+
+  private boolean elevatorReady = false;
+  private boolean wristReady = false;
+  private boolean distanceReady = false;
+  private boolean aimReady = false;
 
   /**
    * Constructor
@@ -88,7 +97,9 @@ public class ShootConeCommand extends CommandBase {
     limelightCalcs = new LimelightCalcs(limelightProfile.cameraToRobot, limelightProfile.targetHeight, 
         limelightProfile.cameraOnElevator ? elevatorSubsystem::getElevatorTopPosition : () -> 0.0);
     aimController.enableContinuousInput(-Math.PI, Math.PI);
+    aimController.setTolerance(shooterProfile.aimTolerance / 3.0);
     distanceController.setGoal(shooterProfile.shootingDistance);
+    distanceController.setTolerance(DISTANCE_TOLERANCE / 2.0);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -99,8 +110,6 @@ public class ShootConeCommand extends CommandBase {
     lastTargetInfo = null;
     isShooting = false;
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
-    aimController.setTolerance(shooterProfile.aimTolerance / 3.0);
-    distanceController.setTolerance(DISTANCE_TOLERANCE / 2.0);
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(limelightProfile.pipelineId);
     readyToShootDebouncer.calculate(false);
@@ -108,6 +117,15 @@ public class ShootConeCommand extends CommandBase {
     wristFilter.reset();
     distanceFilter.reset();
     rotationFilter.reset();
+
+    var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
+    xSlewRateLimiter.reset(chassisSpeeds.vxMetersPerSecond);
+    ySlewRateLimiter.reset(chassisSpeeds.vyMetersPerSecond);
+
+    elevatorReady = false;
+    wristReady = false;
+    distanceReady = false;
+    aimReady = false;
   }
 
   @Override
@@ -125,7 +143,8 @@ public class ShootConeCommand extends CommandBase {
       elevatorSubsystem.stop();
       wristSubsystem.stop();
       shooterSubsystem.stop();
-      drivetrainSubsystem.drive(new ChassisSpeeds(0.0, 0.0, 1.0));
+      drivetrainSubsystem.drive(
+          new ChassisSpeeds(xSlewRateLimiter.calculate(0.0), ySlewRateLimiter.calculate(0.0), 1.0));
       ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
     } else {
       // Get shooter settings from lookup table
@@ -150,16 +169,11 @@ public class ShootConeCommand extends CommandBase {
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
 
       // Check if the elevator and wrist are in the right position, and if the distance and angle are right
-      var readyToShoot = readyToShootDebouncer.calculate(
-          Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE
-          && Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE
-          && Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance
-          && Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE);
-
-      SmartDashboard.putBoolean("Elevator", Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE);
-      SmartDashboard.putBoolean("Wrist", Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE);
-      SmartDashboard.putBoolean("Aim",  Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance);
-      SmartDashboard.putBoolean("Distance", Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE);
+      elevatorReady = Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE;
+      wristReady = Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE;
+      aimReady = Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance;
+      distanceReady = Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE;
+      var readyToShoot = readyToShootDebouncer.calculate(elevatorReady && wristReady && aimReady && distanceReady);
 
       if (isShooting || readyToShoot) {
         // Shoot
@@ -169,15 +183,34 @@ public class ShootConeCommand extends CommandBase {
         isShooting = true;
         drivetrainSubsystem.stop();
       } else {
-        ledSubsystem.setMode(Mode.SHOOTING_HAS_TARGET);
+        updateReadyStateLEDs();
         // Not ready to shoot, move the elevator, wrist, and drivetrain
         elevatorSubsystem.moveToPosition(shooterSettings.height);
         wristSubsystem.moveToPosition(shooterSettings.angle);
 
         // Rotate the distance measurement so we drive toward the target in X and Y direction, not just robot forward
         var xySpeeds = new Translation2d(distanceFilter.calculate(distanceCorrection), 0).rotateBy(lastTargetInfo.angle);
-        drivetrainSubsystem.drive(
-            new ChassisSpeeds(xySpeeds.getX(), xySpeeds.getY(), rotationFilter.calculate(rotationCorrection)));
+        drivetrainSubsystem.drive(new ChassisSpeeds(
+            xSlewRateLimiter.calculate(xySpeeds.getX()),
+            ySlewRateLimiter.calculate(xySpeeds.getY()),
+            rotationFilter.calculate(rotationCorrection)));
+      }
+    }
+  }
+
+  /**
+   * Updates the LED strips. 1/4 of each strip indicates a status: elevator, wrist, distance, aim
+   */
+  private void updateReadyStateLEDs() {
+    boolean[] statuses = new boolean[] {elevatorReady, wristReady, distanceReady, aimReady};
+    int ledsPerStatus = LEDSubsystem.STRIP_SIZE / statuses.length;
+    ledSubsystem.setMode(Mode.CUSTOM);
+    for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
+      int ledIndex = 0;
+      for (int statusId = 0; statusId < statuses.length; statusId++) {
+        for(;ledIndex < (ledsPerStatus * (statusId + 1)); ledIndex++) {
+          ledSubsystem.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CONE_COLOR : Color.kBlack);
+        }
       }
     }
   }
@@ -192,7 +225,6 @@ public class ShootConeCommand extends CommandBase {
     elevatorSubsystem.stop();
     wristSubsystem.stop();
     shooterSubsystem.stop();
-    drivetrainSubsystem.stop();
   }
 
 }

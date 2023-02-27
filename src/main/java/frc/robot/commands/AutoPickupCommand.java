@@ -97,14 +97,10 @@ public class AutoPickupCommand extends CommandBase {
     thetaController.reset(robotAngle.getRadians(), chassisSpeeds.omegaRadiansPerSecond);
     lastTargetDistance = null;
     lastTargetHeading = null;
-
-    var fieldSpeeds = 
-        new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).rotateBy(robotAngle);
-    var robotSpeeds = new ChassisSpeeds(fieldSpeeds.getX(), fieldSpeeds.getY(), chassisSpeeds.omegaRadiansPerSecond);
     
     // Reset the slew rate limiters, in case the robot is already moving
-    xSlewRateLimiter.reset(robotSpeeds.vxMetersPerSecond);
-    ySlewRateLimiter.reset(robotSpeeds.vyMetersPerSecond);
+    xSlewRateLimiter.reset(chassisSpeeds.vxMetersPerSecond);
+    ySlewRateLimiter.reset(chassisSpeeds.vyMetersPerSecond);
   }
   
   @Override

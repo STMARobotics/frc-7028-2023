@@ -15,6 +15,8 @@ public class LEDSubsystem extends SubsystemBase {
   private static final int LED_COUNT = 128;
   public static final int STRIP_COUNT = 4;
   public static final int STRIP_SIZE = LED_COUNT / STRIP_COUNT;
+  public static final Color CUBE_COLOR = new Color(40, 0, 125);
+  public static final Color CONE_COLOR = Color.kOrange;
 
   /**
    * Lighting mode
@@ -135,10 +137,10 @@ public class LEDSubsystem extends SubsystemBase {
         alternate(Color.kBlue, Color.kOrange, 1.0);
         break;
       case HAS_CUBE:
-        setAll(40, 0, 125);
+        setAll(CUBE_COLOR);
         break;
       case HAS_CONE:
-        setAll(Color.kOrange);
+        setAll(CONE_COLOR);
         break;
       case SHOOTING_NO_TARGET:
         setAll(Color.kRed);

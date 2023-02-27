@@ -31,9 +31,9 @@ import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.ShootConeCommand;
-import frc.robot.commands.ShootCubeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
 import frc.robot.controls.ControlBindings;
@@ -236,7 +236,7 @@ public class RobotContainer {
 
     // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
-        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
 
     // Shoot Cone
     controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
@@ -247,18 +247,18 @@ public class RobotContainer {
         ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
         wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
     
-    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
+        0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
     
     // Shoot cube
-    controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
+        0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
     
-    controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
+        0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
     
-    controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
-        0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
+    controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
+        0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
   }
 
   /**

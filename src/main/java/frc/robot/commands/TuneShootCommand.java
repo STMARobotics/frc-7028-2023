@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -18,10 +19,10 @@ public class TuneShootCommand extends JustShootCommand {
    * @param wristSubsystem wrist
    * @param shooterSubsystem shooter
    */
-  public TuneShootCommand(
-      ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem) {
+  public TuneShootCommand(ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
+      ShooterSubsystem shooterSubsystem, LEDSubsystem ledSubsystem) {
     
-    super(elevatorSubsystem, wristSubsystem, shooterSubsystem);
+    super(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
 
     var shuffleboardTab = Shuffleboard.getTab("Shoot");
     wristEntry = shuffleboardTab.add("Wrist Angle", 1.127).getEntry();

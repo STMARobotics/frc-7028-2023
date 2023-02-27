@@ -114,7 +114,7 @@ public class AutonomousBuilder {
   }
   
   private Command shootCone1Event() {
-    return new JustShootCommand(inchesToMeters(1.3), 0.2, 25, elevatorSubsystem, wristSubsystem, shooterSubsystem)
+    return new JustShootCommand(inchesToMeters(1.3), 0.2, 25, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)
         .andThen(new DefaultWristCommand(wristSubsystem)
             .alongWith(new DefaultElevatorCommand(elevatorSubsystem, shooterSubsystem::hasCone)));
   }

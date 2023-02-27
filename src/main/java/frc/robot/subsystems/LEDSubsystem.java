@@ -155,10 +155,10 @@ public class LEDSubsystem extends SubsystemBase {
         setAll(Color.kGreen);
         break;
       case WANT_CONE:
-        setAll(Color.kYellow);
+        alternate(CONE_COLOR, Color.kBlack, 1.0);
         break;
       case WANT_CUBE:
-        setAll(Color.kPurple);
+        alternate(CUBE_COLOR, Color.kBlack, 1.0);
         break;
       case DS_DISCONNECT:
         alternate(Color.kDarkRed, Color.kIndianRed, 0.5);

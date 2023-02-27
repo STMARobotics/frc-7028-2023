@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts.kGrid;
+import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
@@ -18,6 +19,7 @@ import org.photonvision.PhotonCamera;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Constants.VisionConstants;
@@ -33,9 +35,11 @@ import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
+import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
+import frc.robot.commands.WantGamePieceCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
 import frc.robot.limelight.LimelightCalcs;
@@ -80,6 +84,8 @@ public class RobotContainer {
 
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
       ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, poseEstimator);
+  
+  private GamePiece currentGamePiece = GamePiece.CONE;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -196,6 +202,12 @@ public class RobotContainer {
     controlBindings.wristDown().ifPresent(trigger -> trigger.whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(-.1), wristSubsystem::stop, wristSubsystem)));
 
+    // Select game Piece mode
+    controlBindings.coneMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CONE)
+        .andThen(new WantGamePieceCommand(ledSubsystem, GamePiece.CONE))));
+    controlBindings.cubeMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CUBE)
+        .andThen(new WantGamePieceCommand(ledSubsystem, GamePiece.CUBE))));
+
     // Shooter
     controlBindings.shooterOut().ifPresent(trigger -> trigger.whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem)));
@@ -203,23 +215,28 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem)));
 
     // Intake
-    controlBindings.teleopIntakeCone().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
+    controlBindings.manualIntake().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
         0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> controlBindings.translationX().getAsDouble() * 0.25,
         () -> controlBindings.translationY().getAsDouble() * 0.25,
         () -> controlBindings.omega().getAsDouble() / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
-    controlBindings.intakeCone().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-        0.049, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
-        shooterSubsystem::hasCone, "Cone")));
+    var conePickup =
+        new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem)
+            .alongWith(new AutoPickupCommand(
+                0.049, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+                poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
+                shooterSubsystem::hasCone, "Cone"));
+    var cubePickup =
+        new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem)
+            .alongWith(new AutoPickupCommand(
+                0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+                poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
+                shooterSubsystem::hasCube, "Cube"));
+    controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(
+        either(conePickup, cubePickup, () -> currentGamePiece == GamePiece.CONE)));
 
-    controlBindings.intakeCube().ifPresent(trigger -> trigger.whileTrue(new AutoPickupCommand(
-        0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
-        shooterSubsystem::hasCube, "Cube")));
-    
     // Double sub-station intake
     final var doublePickupHeight = 1.0;
     controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
@@ -238,27 +255,31 @@ public class RobotContainer {
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
 
-    // Shoot Cone
-    controlBindings.shootConeHigh().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-      ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP, drivetrainSubsystem, elevatorSubsystem,
-          wristSubsystem, shooterSubsystem, lowLimelightSubsystem, ledSubsystem)));
+    // Shoot Top
+    var coneTop = new ShootConeCommand(ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP,
+        drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, lowLimelightSubsystem,
+        ledSubsystem);
+    var cubeTop = new JustShootCommand(0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+    controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(
+        either(coneTop, cubeTop, shooterSubsystem::hasCone)));
 
-    controlBindings.shootConeMid().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-        ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
-        wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
+    // Shoot Mid
+    var coneMid = new ShootConeCommand(ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE,
+        drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, highLimelightSubsystem,
+        ledSubsystem);
+    var cubeMid = new JustShootCommand(0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+    controlBindings.shootMid().ifPresent(trigger -> trigger.whileTrue(
+        either(coneMid, cubeMid, shooterSubsystem::hasCone)));
     
-    controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
-        0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
-    
-    // Shoot cube
-    controlBindings.shootCubeHigh().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
-        0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
-    
-    controlBindings.shootCubeMid().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
-        0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
-    
-    controlBindings.shootCubeLow().ifPresent(trigger -> trigger.whileTrue(new JustShootCommand(
-        0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
+    // Shoot Low
+    var coneLow = new JustShootCommand(0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+    var cubeLow = new JustShootCommand(0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+    controlBindings.shootLow().ifPresent(trigger -> trigger.whileTrue(
+      either(coneLow, cubeLow, shooterSubsystem::hasCone)));
   }
 
   /**

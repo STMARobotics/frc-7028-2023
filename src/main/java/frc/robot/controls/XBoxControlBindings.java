@@ -40,18 +40,13 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> teleopIntakeCone() {
+  public Optional<Trigger> manualIntake() {
     return Optional.empty();
   }
 
   @Override
-  public Optional<Trigger> intakeCone() {
+  public Optional<Trigger> autoIntake() {
     return Optional.of(driverController.leftTrigger());
-  }
-
-  @Override
-  public Optional<Trigger> intakeCube() {
-    return Optional.of(driverController.leftStick().and(driverController.leftTrigger()));
   }
 
   @Override
@@ -76,33 +71,18 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> shootConeHigh() {
+  public Optional<Trigger> shootHigh() {
     return Optional.of(driverController.y());
   }
 
   @Override
-  public Optional<Trigger> shootConeLow() {
+  public Optional<Trigger> shootLow() {
     return Optional.of(driverController.a());
   }
 
   @Override
-  public Optional<Trigger> shootConeMid() {
+  public Optional<Trigger> shootMid() {
     return Optional.of(driverController.x());
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeHigh() {
-    return Optional.of(driverController.leftStick().and(driverController.y()));
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeLow() {
-    return Optional.of(driverController.leftStick().and(driverController.a()));
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeMid() {
-    return Optional.of(driverController.leftStick().and(driverController.x()));
   }
 
   @Override
@@ -118,6 +98,16 @@ public class XBoxControlBindings implements ControlBindings {
   @Override
   public Optional<Trigger> tuneShoot() {
     return Optional.of(driverController.rightTrigger().and(driverController.x()));
+  }
+
+  @Override
+  public Optional<Trigger> coneMode() {
+    return Optional.of(driverController.leftStick());
+  }
+
+  @Override
+  public Optional<Trigger> cubeMode() {
+    return Optional.of(driverController.rightStick());
   }
 
   @Override

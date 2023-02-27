@@ -41,23 +41,18 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> teleopIntakeCone() {
+  public Optional<Trigger> manualIntake() {
     return Optional.empty();
   }
 
   @Override
-  public Optional<Trigger> intakeCone() {
+  public Optional<Trigger> autoIntake() {
     return Optional.of(leftJoystick.trigger());
-  }
-
-  @Override
-  public Optional<Trigger> intakeCube() {
-    return Optional.of(leftJoystick.button(4));
   }
   
   @Override
   public Optional<Trigger> doubleStationCone() {
-    return Optional.of(leftJoystick.button(2)); // TODO bind
+    return Optional.of(leftJoystick.button(2));
   }
 
   @Override
@@ -76,33 +71,18 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> shootConeHigh() {
+  public Optional<Trigger> shootHigh() {
     return Optional.of(rightJoystick.trigger());
   }
 
   @Override
-  public Optional<Trigger> shootConeLow() {
+  public Optional<Trigger> shootLow() {
     return Optional.of(rightJoystick.povDown());
   }
 
   @Override
-  public Optional<Trigger> shootConeMid() {
+  public Optional<Trigger> shootMid() {
     return Optional.of(rightJoystick.povLeft());
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeHigh() {
-    return Optional.of(leftJoystick.povDown().and(rightJoystick.trigger()));
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeLow() {
-    return Optional.of(leftJoystick.povDown().and(rightJoystick.povDown()));
-  }
-
-  @Override
-  public Optional<Trigger> shootCubeMid() {
-    return Optional.of(leftJoystick.povDown().and(rightJoystick.povLeft()));
   }
 
   @Override
@@ -132,6 +112,16 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wristUp() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Trigger> coneMode() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Trigger> cubeMode() {
     return Optional.empty();
   }
   

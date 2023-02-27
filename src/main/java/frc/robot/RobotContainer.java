@@ -247,9 +247,6 @@ public class RobotContainer {
         ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE, drivetrainSubsystem, elevatorSubsystem,
         wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
     
-    // controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootConeCommand(
-    //     ShooterProfile.SCORE_CONE_LOW, LimelightProfile.SCORE_CONE_LOW, drivetrainSubsystem, elevatorSubsystem,
-    //     wristSubsystem, shooterSubsystem, highLimelightSubsystem, ledSubsystem)));
     controlBindings.shootConeLow().ifPresent(trigger -> trigger.whileTrue(new ShootCubeCommand(
         0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem)));
     

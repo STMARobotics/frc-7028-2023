@@ -147,7 +147,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private String getFomattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f) %.2f degrees", 
+    return String.format("(%.3f, %.3f) %.2f degrees", 
         pose.getX(), 
         pose.getY(),
         pose.getRotation().getDegrees());

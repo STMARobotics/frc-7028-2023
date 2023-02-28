@@ -24,16 +24,16 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  */
 public class DriveToPoseCommand extends CommandBase {
   
-  private static final double TRANSLATION_TOLERANCE = 0.05;
+  private static final double TRANSLATION_TOLERANCE = 0.02;
   private static final double THETA_TOLERANCE = Units.degreesToRadians(0.5);
 
   /** Default constraints are 90% of max speed, accelerate to full speed in 1/3 second */
   private static final TrapezoidProfile.Constraints DEFAULT_XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
       MAX_VELOCITY_METERS_PER_SECOND * 0.5,
-      MAX_VELOCITY_METERS_PER_SECOND * 2.0);
+      MAX_VELOCITY_METERS_PER_SECOND);
   private static final TrapezoidProfile.Constraints DEFAULT_OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.9,
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 3.0);
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.4,
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND);
 
   private final ProfiledPIDController xController;
   private final ProfiledPIDController yController;

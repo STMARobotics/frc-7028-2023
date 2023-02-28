@@ -176,6 +176,12 @@ public class ShootConeCommand extends CommandBase {
       var readyToShoot = readyToShootDebouncer.calculate(elevatorReady && wristReady && aimReady && distanceReady);
 
       if (isShooting || readyToShoot) {
+        if (false == isShooting) {
+          System.out.printf("Shooting Cone actual elev: %.4f wrist: %.4f dist: %.4f aim: %.4f%n",
+              elevatorPosition, wristPosition, lastTargetInfo.distance, lastTargetInfo.angle.getRadians());
+          System.out.printf("Goal elev: %.4f wrist: %.4f dist: %.4f%n",
+              shooterSettings.height, shooterSettings.angle, shooterProfile.shootingDistance);
+        }
         // Shoot
         ledSubsystem.setMode(Mode.SHOOTING);
         shooterSubsystem.shootVelocity(shooterSettings.velocity);

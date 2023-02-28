@@ -32,7 +32,7 @@ public class ShootConeCommand extends CommandBase {
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double DISTANCE_TOLERANCE = 0.1;
-  private static final double SHOOT_TIME = 5.0;
+  private static final double SHOOT_TIME = 0.5;
   private static final double AIM_OFFSET = -0.01;
 
   private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
@@ -225,6 +225,7 @@ public class ShootConeCommand extends CommandBase {
     elevatorSubsystem.stop();
     wristSubsystem.stop();
     shooterSubsystem.stop();
+    shootTimer.stop();
   }
 
 }

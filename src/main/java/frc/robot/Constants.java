@@ -173,11 +173,11 @@ public final class Constants {
     public static double THETA_kI = 0.0;
     public static double THETA_kD = 0.0;
     
-    public static double X_kP = 2.0;
+    public static double X_kP = 2.5;
     public static double X_kI = 0.0;
     public static double X_kD = 0.0;
 
-    public static double Y_kP = 2.0;
+    public static double Y_kP = 2.5;
     public static double Y_kI = 0.0;
     public static double Y_kD = 0.0;
   }
@@ -201,8 +201,8 @@ public final class Constants {
     public static double SHOOT_TIME = 0.5;
 
     public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 28.0, 0.8, 0.95),
-      shooterSettings(1.45, 30.0, 0.8, 0.95)
+      shooterSettings(1.25, 28.5, 0.8, 0.95),
+      shooterSettings(1.45, 31.0, 0.8, 0.95)
     ));
 
     public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

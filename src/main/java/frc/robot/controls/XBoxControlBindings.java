@@ -50,14 +50,8 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> doubleStationCone() {
+  public Optional<Trigger> doubleStationPickup() {
     return Optional.of(driverController.rightStick().and(driverController.leftTrigger()));
-  }
-
-  @Override
-  public Optional<Trigger> doubleStationCube() {
-    return Optional.of(
-        driverController.rightStick().and(driverController.leftStick()).and(driverController.leftTrigger()));
   }
 
   @Override
@@ -123,6 +117,11 @@ public class XBoxControlBindings implements ControlBindings {
   @Override
   public Optional<Trigger> wristUp() {
     return Optional.of(driverController.rightTrigger().and(driverController.y()));
+  }
+
+  @Override
+  public Optional<Trigger> flipConeRight() {
+    return Optional.of(driverController.rightTrigger());
   }
   
   @Override

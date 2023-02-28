@@ -22,14 +22,14 @@ public interface ControlBindings {
   Optional<Trigger> shooterOut();
   Optional<Trigger> manualIntake();
   Optional<Trigger> autoIntake();
-  Optional<Trigger> doubleStationCone();
-  Optional<Trigger> doubleStationCube();
+  Optional<Trigger> doubleStationPickup();
   Optional<Trigger> tuneShoot();
   Optional<Trigger> shootHigh();
   Optional<Trigger> shootMid();
   Optional<Trigger> shootLow();
   Optional<Trigger> coneMode();
   Optional<Trigger> cubeMode();
+  Optional<Trigger> flipConeRight();
   DoubleSupplier translationX();
   DoubleSupplier translationY();
   DoubleSupplier omega();

@@ -24,13 +24,13 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  */
 public class DriveToPoseCommand extends CommandBase {
   
-  private static final double TRANSLATION_TOLERANCE = 0.1;
+  private static final double TRANSLATION_TOLERANCE = 0.05;
   private static final double THETA_TOLERANCE = Units.degreesToRadians(0.5);
 
   /** Default constraints are 90% of max speed, accelerate to full speed in 1/3 second */
   private static final TrapezoidProfile.Constraints DEFAULT_XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      MAX_VELOCITY_METERS_PER_SECOND * 0.9,
-      MAX_VELOCITY_METERS_PER_SECOND * 3.0);
+      MAX_VELOCITY_METERS_PER_SECOND * 0.5,
+      MAX_VELOCITY_METERS_PER_SECOND * 2.0);
   private static final TrapezoidProfile.Constraints DEFAULT_OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(
       MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.9,
       MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 3.0);
@@ -65,11 +65,11 @@ public class DriveToPoseCommand extends CommandBase {
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
     yController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
+    xController.setTolerance(TRANSLATION_TOLERANCE);
+    yController.setTolerance(TRANSLATION_TOLERANCE);
     thetaController = new ProfiledPIDController(THETA_kP, THETA_kI, THETA_kD, omegaConstraints);
-
-    xController.setTolerance(0.2);
-    yController.setTolerance(0.2);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    thetaController.setTolerance(THETA_TOLERANCE);
 
     addRequirements(drivetrainSubsystem);
   }
@@ -78,11 +78,6 @@ public class DriveToPoseCommand extends CommandBase {
   @Override
   public void initialize() {
     resetPIDControllers();
-
-    thetaController.setTolerance(THETA_TOLERANCE);
-    xController.setTolerance(TRANSLATION_TOLERANCE);
-    yController.setTolerance(TRANSLATION_TOLERANCE);
-
     setGoalPose(goalPose);
   }
 

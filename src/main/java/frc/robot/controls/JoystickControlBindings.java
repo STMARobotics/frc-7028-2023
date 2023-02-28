@@ -51,13 +51,8 @@ public class JoystickControlBindings implements ControlBindings {
   }
   
   @Override
-  public Optional<Trigger> doubleStationCone() {
+  public Optional<Trigger> doubleStationPickup() {
     return Optional.of(leftJoystick.button(2));
-  }
-
-  @Override
-  public Optional<Trigger> doubleStationCube() {
-    return Optional.of(leftJoystick.button(3));
   }
 
   @Override
@@ -87,7 +82,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shooterIn() {
-    return Optional.empty();
+    return Optional.of(rightJoystick.button(3));
   }
 
   @Override
@@ -102,7 +97,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wheelsToX() {
-    return Optional.of(leftJoystick.povRight());
+    return Optional.of(leftJoystick.button(4));
   }
 
   @Override
@@ -117,11 +112,16 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> coneMode() {
-    return Optional.empty();
+    return Optional.of(leftJoystick.povRight());
   }
 
   @Override
   public Optional<Trigger> cubeMode() {
+    return Optional.of(leftJoystick.povLeft());
+  }
+
+  @Override
+  public Optional<Trigger> flipConeRight() {
     return Optional.empty();
   }
   

@@ -223,33 +223,35 @@ public class RobotContainer {
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
     var conePickup =
-        new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem)
-            .alongWith(new AutoPickupCommand(
-                0.049, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-                poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
-                shooterSubsystem::hasCone, "Cone"));
+        new AutoPickupCommand(
+            0.046, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+            poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
+            shooterSubsystem::hasCone, "Cone")
+        .deadlineWith(
+            new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
     var cubePickup =
-        new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem)
-            .alongWith(new AutoPickupCommand(
-                0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-                poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
-                shooterSubsystem::hasCube, "Cube"));
+        new AutoPickupCommand(
+            0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+            poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
+            shooterSubsystem::hasCube, "Cube")
+        .deadlineWith(
+            new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem));
     controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(
         either(conePickup, cubePickup, () -> currentGamePiece == GamePiece.CONE)));
 
     // Double sub-station intake
     final var doublePickupHeight = 1.0;
-    controlBindings.doubleStationCone().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
+    controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
       doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
         shooterSubsystem::hasCone))
             .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
     
-    controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
-      doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-        shooterSubsystem::hasCube))
-            .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
+    // controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
+    //   doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+    //     poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
+    //     shooterSubsystem::hasCube))
+    //         .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
 
     // Tune Shoot
     controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(

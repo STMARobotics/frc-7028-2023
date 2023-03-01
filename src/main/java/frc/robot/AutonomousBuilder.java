@@ -3,12 +3,18 @@ package frc.robot;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -88,13 +94,23 @@ public class AutonomousBuilder {
 
   private void buildAutoTwoCone() {
     autoChooser.setDefaultOption("None", Commands.none());
-    autoChooser.addOption("2 Cone", buildAutoForPathGroup("twoCone"));
+    // Add all the paths in the pathplanner directory
+    try (Stream<Path> files = Files.list(Paths.get(Filesystem.getDeployDirectory().getAbsolutePath(), "pathplanner"))) {
+      files.filter(file -> !Files.isDirectory(file))
+          .map(Path::getFileName)
+          .map(Path::toString)
+          .filter(fileName -> fileName.endsWith(".path"))
+          .map(pathName -> pathName.substring(0, pathName.lastIndexOf(".")))
+          .forEach(pathName -> autoChooser.addOption("PP: " + pathName, buildAutoForPathGroup("pathName")));
+    } catch (IOException e) {
+      System.out.println("********* Failed to list PathPlanner paths. *********");
+    }
   }
 
   private Command buildAutoForPathGroup(String pathGroupName) {
     var twoConePath = PathPlanner.loadPathGroup(pathGroupName, PathPlanner.getConstraintsFromPath(pathGroupName));
     if (twoConePath == null) {
-      return Commands.print("********* Path failed to load. Not running auto *********");
+      return Commands.print("********* Path failed to load. Not running auto: " + pathGroupName + " *********");
     }
     return swerveAutoBuilder.fullAuto(twoConePath);
   }

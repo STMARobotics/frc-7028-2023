@@ -38,13 +38,13 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
    * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then meters.
    */
-  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, 0.1);
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
   /**
    * Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
    * less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
    */
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, 0.9);
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(2.0, 2.0, 2.0);
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final SwerveDrivePoseEstimator poseEstimator;
@@ -83,6 +83,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public void addDashboardWidgets(ShuffleboardTab tab) {
     tab.add("Field", field2d).withPosition(0, 0).withSize(6, 4);
     tab.addString("Pose", this::getFomattedPose).withPosition(6, 2).withSize(2, 1);
+    tab.addString("Vision Pose", () -> formatPose(poseEstimator.getEstimatedPosition()))
+        .withPosition(6, 3).withSize(2, 1);
   }
 
   /**
@@ -146,7 +148,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   }
 
   private String getFomattedPose() {
-    var pose = getCurrentPose();
+    return formatPose(getCurrentPose());
+  }
+
+  private String formatPose(Pose2d pose) {
     return String.format("(%.3f, %.3f) %.2f degrees", 
         pose.getX(), 
         pose.getY(),

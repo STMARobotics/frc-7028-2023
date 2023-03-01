@@ -147,7 +147,7 @@ public final class Constants {
 
     /** Physical location of the apriltag camera on the robot, relative to the center of the robot. */
     public static final Transform3d APRILTAG_CAMERA_TO_ROBOT =
-        new Transform3d(new Translation3d(-0.055, 0.250, -0.18), new Rotation3d(0.0, degreesToRadians(11.0), 0.0));
+        new Transform3d(new Translation3d(-0.06, 0.250, -0.2127), new Rotation3d(0.0, degreesToRadians(15.0), 0.0));
 
     /** Physical location of the shooter camera on the robot, relative to the center of the robot. */
     public static final Transform3d LOW_LIMELIGHT_TO_ROBOT = new Transform3d(

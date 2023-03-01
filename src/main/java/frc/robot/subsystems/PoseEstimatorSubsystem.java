@@ -31,6 +31,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   /** Minimum target ambiguity. Targets with higher ambiguity will be discarded */
   private static final double AMBIGUITY_THRESHOLD = 0.2;
 
+  /** Maximum distance a vision pose can be from the current pose and still be considered valid */
+  private static final double DISTANCE_THRESHOLD = 4;
+
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
   // "trust" the estimate from that particular component more than the others. 
@@ -129,11 +132,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     // Update pose estimator with AprilTag data
     if (photonPoseEstimator == null) {
       var photonResults = photonCamera.getLatestResult();
-      if (photonResults.hasTargets()) {
-        // Filter ambiguous results
-        photonResults.targets.removeIf(target ->
-            target.getPoseAmbiguity() == -1 || target.getPoseAmbiguity() > AMBIGUITY_THRESHOLD);
-        
+      if (photonResults.hasTargets() 
+          && (photonResults.targets.size() > 1 || photonResults.targets.get(0).getPoseAmbiguity() < AMBIGUITY_THRESHOLD)) {
         // Update pose estimator
         photonPoseEstimator.update(photonResults).ifPresent(estimatedRobotPose -> {
           sawTag = true;

@@ -28,6 +28,9 @@ import frc.robot.Constants.DrivetrainConstants;
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
 
+  /** Minimum target ambiguity. Targets with higher ambiguity will be discarded */
+  private static final double AMBIGUITY_THRESHOLD = 0.2;
+
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
   // "trust" the estimate from that particular component more than the others. 
@@ -50,12 +53,13 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private final PhotonPoseEstimator photonPoseEstimator;
+  private final PhotonCamera photonCamera;
 
-  private double previousPipelineTimestamp = 0;
   private OriginPosition originPosition = OriginPosition.kBlueAllianceWallRightSide;
   private boolean sawTag = false;
 
   public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
+    this.photonCamera = photonCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
     PhotonPoseEstimator photonPoseEstimator = null;
     try {
@@ -83,8 +87,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public void addDashboardWidgets(ShuffleboardTab tab) {
     tab.add("Field", field2d).withPosition(0, 0).withSize(6, 4);
     tab.addString("Pose", this::getFomattedPose).withPosition(6, 2).withSize(2, 1);
-    tab.addString("Vision Pose", () -> formatPose(poseEstimator.getEstimatedPosition()))
-        .withPosition(6, 3).withSize(2, 1);
   }
 
   /**
@@ -124,19 +126,25 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         drivetrainSubsystem.getGyroscopeRotation(),
         drivetrainSubsystem.getModulePositions());
     
-    if (photonPoseEstimator != null) {
-      // Update pose estimator with the best visible target
-      photonPoseEstimator.update().ifPresent(estimatedRobotPose -> {
-        sawTag = true;
-        var estimatedPose = estimatedRobotPose.estimatedPose;
-        // Make sure we have a new measurement, and that it's on the field
-        if (estimatedRobotPose.timestampSeconds != previousPipelineTimestamp
-            && estimatedPose.getX() > 0.0 && estimatedPose.getX() <= FIELD_LENGTH_METERS
-            && estimatedPose.getY() > 0.0 && estimatedPose.getY() <= FIELD_WIDTH_METERS) {
-          previousPipelineTimestamp = estimatedRobotPose.timestampSeconds;
-          poseEstimator.addVisionMeasurement(estimatedPose.toPose2d(), estimatedRobotPose.timestampSeconds);
-        }
-      });
+    // Update pose estimator with AprilTag data
+    if (photonPoseEstimator == null) {
+      var photonResults = photonCamera.getLatestResult();
+      if (photonResults.hasTargets()) {
+        // Filter ambiguous results
+        photonResults.targets.removeIf(target ->
+            target.getPoseAmbiguity() == -1 || target.getPoseAmbiguity() > AMBIGUITY_THRESHOLD);
+        
+        // Update pose estimator
+        photonPoseEstimator.update(photonResults).ifPresent(estimatedRobotPose -> {
+          sawTag = true;
+          var estimatedPose = estimatedRobotPose.estimatedPose;
+          // Make sure the measurement is on the field
+          if (estimatedPose.getX() > 0.0 && estimatedPose.getX() <= FIELD_LENGTH_METERS
+              && estimatedPose.getY() > 0.0 && estimatedPose.getY() <= FIELD_WIDTH_METERS) {
+            poseEstimator.addVisionMeasurement(estimatedPose.toPose2d(), estimatedRobotPose.timestampSeconds);
+          }
+        });
+      }
     }
 
     Pose2d dashboardPose = getCurrentPose();
@@ -148,10 +156,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   }
 
   private String getFomattedPose() {
-    return formatPose(getCurrentPose());
-  }
-
-  private String formatPose(Pose2d pose) {
+    var pose = getCurrentPose();
     return String.format("(%.3f, %.3f) %.2f degrees", 
         pose.getX(), 
         pose.getY(),

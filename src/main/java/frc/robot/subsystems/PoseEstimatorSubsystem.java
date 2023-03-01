@@ -31,9 +31,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   /** Minimum target ambiguity. Targets with higher ambiguity will be discarded */
   private static final double AMBIGUITY_THRESHOLD = 0.2;
 
-  /** Maximum distance a vision pose can be from the current pose and still be considered valid */
-  private static final double DISTANCE_THRESHOLD = 4;
-
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
   // "trust" the estimate from that particular component more than the others. 

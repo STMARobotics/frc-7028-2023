@@ -16,6 +16,7 @@ import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -42,6 +43,7 @@ import frc.robot.commands.TuneShootCommand;
 import frc.robot.commands.WantGamePieceCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
+import frc.robot.controls.XBoxControlBindings;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -92,8 +94,11 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Configure control binding scheme
-    controlBindings = new JoystickControlBindings();
-    // controlBindings = new XBoxControlBindings();
+    if (DriverStation.getJoystickIsXbox(0)) {
+      controlBindings = new XBoxControlBindings();
+    } else {
+      controlBindings = new JoystickControlBindings();
+    }
 
     fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
         drivetrainSubsystem,

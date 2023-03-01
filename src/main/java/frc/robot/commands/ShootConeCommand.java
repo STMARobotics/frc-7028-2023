@@ -17,6 +17,7 @@ import frc.robot.limelight.VisionTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -189,7 +190,7 @@ public class ShootConeCommand extends CommandBase {
         isShooting = true;
         drivetrainSubsystem.stop();
       } else {
-        updateReadyStateLEDs();
+        ledSubsystem.setCustomMode(this::updateReadyStateLEDs);
         // Not ready to shoot, move the elevator, wrist, and drivetrain
         elevatorSubsystem.moveToPosition(shooterSettings.height);
         wristSubsystem.moveToPosition(shooterSettings.angle);
@@ -207,18 +208,18 @@ public class ShootConeCommand extends CommandBase {
   /**
    * Updates the LED strips. 1/4 of each strip indicates a status: elevator, wrist, distance, aim
    */
-  private void updateReadyStateLEDs() {
+  private void updateReadyStateLEDs(LEDStrips ledStrips) {
     boolean[] statuses = new boolean[] {elevatorReady, wristReady, distanceReady, aimReady};
     int ledsPerStatus = LEDSubsystem.STRIP_SIZE / statuses.length;
-    ledSubsystem.setMode(Mode.CUSTOM);
     for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
       int ledIndex = 0;
       for (int statusId = 0; statusId < statuses.length; statusId++) {
         for(;ledIndex < (ledsPerStatus * (statusId + 1)); ledIndex++) {
-          ledSubsystem.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CONE_COLOR : Color.kBlack);
+          ledStrips.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CONE_COLOR : Color.kBlack);
         }
       }
     }
+    ledStrips.refresh();
   }
 
   @Override

@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -75,6 +75,7 @@ public class JustShootCommand extends CommandBase {
     wristSubsystem.moveToPosition(wristRadians);
     elevatorReady = false;
     wristReady = false;
+    ledSubsystem.setCustomMode(this::updateReadyStateLEDs);
   }
 
   @Override
@@ -86,7 +87,6 @@ public class JustShootCommand extends CommandBase {
     elevatorReady = Math.abs(elevatorPosition - elevatorMeters) < ELEVATOR_TOLERANCE;
     wristReady = Math.abs(wristPosition - wristRadians) < WRIST_TOLERANCE;
     var readyToShoot = readyToShootDebouncer.calculate(elevatorReady && wristReady);
-    updateReadyStateLEDs();
 
     if (isShooting || readyToShoot) {
       shooterSubsystem.shootVelocity(shooterRPS);
@@ -98,18 +98,18 @@ public class JustShootCommand extends CommandBase {
   /**
    * Updates the LED strips. 1/2 of each strip indicates a status: elevator, wrist
    */
-  private void updateReadyStateLEDs() {
+  private void updateReadyStateLEDs(LEDStrips ledStrips) {
     boolean[] statuses = new boolean[] {elevatorReady, wristReady};
     int ledsPerStatus = LEDSubsystem.STRIP_SIZE / statuses.length;
-    ledSubsystem.setMode(Mode.CUSTOM);
     for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
       int ledIndex = 0;
       for (int statusId = 0; statusId < statuses.length; statusId++) {
         for(;ledIndex < (ledsPerStatus * (statusId + 1)); ledIndex++) {
-          ledSubsystem.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CUBE_COLOR : Color.kBlack);
+          ledStrips.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CUBE_COLOR : Color.kBlack);
         }
       }
     }
+    ledStrips.refresh();
   }
 
   @Override

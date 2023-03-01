@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
@@ -32,8 +33,10 @@ public class DefaultLEDCommand extends CommandBase {
       ledSubsystem.setMode(Mode.HAS_CONE);
     } else if (hasCube.getAsBoolean()) {
       ledSubsystem.setMode(Mode.HAS_CUBE);
-    } else {
+    } else if (RobotState.isDisabled()) {
       ledSubsystem.setMode(Mode.BLUE_GOLD);
+    } else {
+      ledSubsystem.setMode(Mode.OFF);
     }
   }
   

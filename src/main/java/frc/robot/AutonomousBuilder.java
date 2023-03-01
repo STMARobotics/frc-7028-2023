@@ -100,8 +100,10 @@ public class AutonomousBuilder {
           .map(Path::getFileName)
           .map(Path::toString)
           .filter(fileName -> fileName.endsWith(".path"))
+          .filter(fileName -> fileName.startsWith("Auto - "))
+          .sorted()
           .map(pathName -> pathName.substring(0, pathName.lastIndexOf(".")))
-          .forEach(pathName -> autoChooser.addOption("PP: " + pathName, buildAutoForPathGroup(pathName)));
+          .forEach(pathName -> autoChooser.addOption("PP: " + pathName.substring(6), buildAutoForPathGroup(pathName)));
     } catch (IOException e) {
       System.out.println("********* Failed to list PathPlanner paths. *********");
     }

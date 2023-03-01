@@ -1,0 +1,105 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 2.1,
+        "y": 4.564301638171347
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.5793040969351484,
+        "y": 4.555258164644269
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.122431577831992,
+        "y": 4.781345002821225
+      },
+      "prevControl": {
+        "x": 5.019127807528442,
+        "y": 4.55073642788073
+      },
+      "nextControl": {
+        "x": 9.194929978424671,
+        "y": 5.423547537371329
+      },
+      "holonomicAngle": -90.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 10.90190733689286,
+        "y": 6.59003970823688
+      },
+      "prevControl": {
+        "x": 9.572516728412353,
+        "y": 6.205692083336054
+      },
+      "nextControl": {
+        "x": 12.289413836616852,
+        "y": 6.991189546592455
+      },
+      "holonomicAngle": 0.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 14.35,
+        "y": 7.1
+      },
+      "prevControl": {
+        "x": 14.132956635350121,
+        "y": 7.095478263236461
+      },
+      "nextControl": null,
+      "holonomicAngle": 90.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "PickupCone",
+          "Transit"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    }
+  ],
+  "maxVelocity": 4.5,
+  "maxAcceleration": 4.5,
+  "isReversed": null,
+  "markers": []
+}

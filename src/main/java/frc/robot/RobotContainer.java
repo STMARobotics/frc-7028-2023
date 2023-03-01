@@ -216,7 +216,7 @@ public class RobotContainer {
 
     // Intake
     controlBindings.manualIntake().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
-        0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+        0.060, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
         () -> controlBindings.translationX().getAsDouble() * 0.25,
         () -> controlBindings.translationY().getAsDouble() * 0.25,
         () -> controlBindings.omega().getAsDouble() / 6.0)

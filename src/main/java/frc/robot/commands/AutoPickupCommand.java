@@ -139,7 +139,7 @@ public class AutoPickupCommand extends CommandBase {
         }
 
         var chaseSpeed = forwardSpeed;
-        if (lastTargetDistance > .8) {
+        if (lastTargetDistance > .75) {
           chaseSpeed = 0.8;
         }
         var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));

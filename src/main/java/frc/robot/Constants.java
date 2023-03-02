@@ -168,49 +168,52 @@ public final class Constants {
   }
 
   public static class AutoConstants {
-    public static TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(PI, 2 / PI);
-    public static double THETA_kP = 3.5;
-    public static double THETA_kI = 0.0;
-    public static double THETA_kD = 0.0;
-    
-    public static double X_kP = 5.0;
-    public static double X_kI = 0.0;
-    public static double X_kD = 0.0;
+    public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(PI, 2 / PI);
+    public static final double THETA_kP = 3.1;
+    public static final double THETA_kI = 0.0;
+    public static final double THETA_kD = 0.0;
 
-    public static double Y_kP = 5.0;
-    public static double Y_kI = 0.0;
-    public static double Y_kD = 0.0;
+    public static final double X_kP = 5.0;
+    public static final double X_kI = 0.0;
+    public static final double X_kD = 0.0;
+
+    public static final double Y_kP = 5.0;
+    public static final double Y_kI = 0.0;
+    public static final double Y_kD = 0.0;
   }
   
   public static class ElevatorConstants {
-    public static int ELEVATOR_LEADER_ID = 40;
-    public static int ELEVATOR_FOLLOWER_ID = 41;
-    public static int ANALOG_SENSOR_CHANNEL = 0;
+    public static final int ELEVATOR_LEADER_ID = 40;
+    public static final int ELEVATOR_FOLLOWER_ID = 41;
+    public static final int ANALOG_SENSOR_CHANNEL = 0;
+    public static final double ELEVATOR_PARK_HEIGHT = .06;
+
   }
 
   public static class WristConstants {
-    public static int WRIST_LEADER_ID = 3;
+    public static final int WRIST_LEADER_ID = 3;
+    public static final double WRIST_PARK_HEIGHT = 1.4;
   }
 
   public static class ShooterConstants {
-    public static int SHOOTER_LEADER_ID = 5;
-    public static int SHOOTER_FOLLOWER_ID = 6;
+    public static final int SHOOTER_LEADER_ID = 5;
+    public static final int SHOOTER_FOLLOWER_ID = 6;
   }
 
   public static class ConeShootingConstants {
-    public static double SHOOT_TIME = 0.5;
+    public static final double SHOOT_TIME = 0.5;
 
-    public static VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 28.5, 0.8, 0.95),
-      shooterSettings(1.45, 31.0, 0.8, 0.95)
+    public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
+      shooterSettings(1.25, 28.0, 0.8, 0.95),
+      shooterSettings(1.45, 29.5, 0.8, 0.95)
     ));
 
-    public static VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.8, 25.5, 0.8, 0.45),
-      shooterSettings(1.3, 27.25, 0.8, 0.45)
+    public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
+      shooterSettings(0.8, 25.5, 0.83, 0.45),
+      shooterSettings(1.3, 27.25, 0.83, 0.45)
     ));
 
-    public static VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
+    public static final VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
       shooterSettings(1.0, 15.0, 0.0, 0.1)
     ));
 

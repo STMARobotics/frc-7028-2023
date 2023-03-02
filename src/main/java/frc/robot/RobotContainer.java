@@ -10,9 +10,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
+import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
-import static frc.robot.limelight.LimelightProfile.PICKUP_CUBE_FLOOR;
 
 import org.photonvision.PhotonCamera;
 
@@ -20,12 +20,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AfterDoubleStationCommand;
-import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
@@ -34,10 +32,7 @@ import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
-import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
-import frc.robot.commands.LEDCustomCommand;
-import frc.robot.commands.ShootConeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
 import frc.robot.commands.WantGamePieceCommand;
@@ -51,7 +46,6 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -85,7 +79,7 @@ public class RobotContainer {
   private final Timer reseedTimer = new Timer();
 
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
-      ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, poseEstimator);
+      ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem, poseEstimator);
   
   private GamePiece currentGamePiece = GamePiece.CONE;
 
@@ -120,8 +114,8 @@ public class RobotContainer {
     shooterSubsystem.setDefaultCommand(defaultShooterCommand);
     ledSubsystem.setDefaultCommand(
         new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube));
-    elevatorSubsystem.setDefaultCommand(
-        new DefaultElevatorCommand(elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - 1.4) < .2));
+    elevatorSubsystem.setDefaultCommand(new DefaultElevatorCommand(
+        elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - WRIST_PARK_HEIGHT) < .2));
     highLimelightSubsystem.setDefaultCommand(
         new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem));
 
@@ -227,22 +221,8 @@ public class RobotContainer {
         () -> controlBindings.omega().getAsDouble() / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
-    var conePickup =
-        new AutoPickupCommand(
-            0.046, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-            poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_FLOOR,
-            shooterSubsystem::hasCone, "Cone")
-        .deadlineWith(
-            new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
-    var cubePickup =
-        new AutoPickupCommand(
-            0.058, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-            poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CUBE_FLOOR,
-            shooterSubsystem::hasCube, "Cube")
-        .deadlineWith(
-            new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem));
     controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(
-        either(conePickup, cubePickup, () -> currentGamePiece == GamePiece.CONE)));
+        either(autoBuilder.pickupCone(), autoBuilder.pickupCube(), () -> currentGamePiece == GamePiece.CONE)));
 
     // Double sub-station intake
     final var doublePickupHeight = 1.0;
@@ -263,31 +243,17 @@ public class RobotContainer {
         new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
 
     // Shoot Top
-    var coneTop = new ShootConeCommand(ShooterProfile.SCORE_CONE_TOP, LimelightProfile.SCORE_CONE_TOP,
-        drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, lowLimelightSubsystem,
-        ledSubsystem);
-    var cubeTop = new JustShootCommand(0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
-        ledSubsystem);
     controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(
-        either(coneTop, cubeTop, shooterSubsystem::hasCone)));
+        either(autoBuilder.shootConeTop(), autoBuilder.shootCubeTop(), shooterSubsystem::hasCone)));
 
     // Shoot Mid
-    var coneMid = new ShootConeCommand(ShooterProfile.SCORE_CONE_MIDDLE, LimelightProfile.SCORE_CONE_MIDDLE,
-        drivetrainSubsystem, elevatorSubsystem, wristSubsystem, shooterSubsystem, highLimelightSubsystem,
-        ledSubsystem);
-    var cubeMid = new JustShootCommand(0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
-        ledSubsystem);
     controlBindings.shootMid().ifPresent(trigger -> trigger.whileTrue(
-        either(coneMid, cubeMid, shooterSubsystem::hasCone)));
+        either(autoBuilder.shootConeMid(), autoBuilder.shootCubeMid(), shooterSubsystem::hasCone)));
     
     // Shoot Low
-    var coneLow = new JustShootCommand(0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
-        ledSubsystem);
-    var cubeLow = new JustShootCommand(0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem,
-        ledSubsystem);
     controlBindings.shootLow().ifPresent(trigger -> trigger.whileTrue(
-      either(coneLow, cubeLow, shooterSubsystem::hasCone)));
-  }
+        either(autoBuilder.shootConeBottom(), autoBuilder.shootCubeBottom(), shooterSubsystem::hasCone)));
+    }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

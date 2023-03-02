@@ -57,7 +57,7 @@ public class ShootConeCommand extends CommandBase {
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer readyToShootDebouncer = new Debouncer(0.25, DebounceType.kRising);
+  private final Debouncer wristReadyDebouncer = new Debouncer(0.25, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(3);
   private final MovingAverageFilter rotationFilter = new MovingAverageFilter(3);
 
@@ -113,7 +113,7 @@ public class ShootConeCommand extends CommandBase {
     aimController.reset(drivetrainSubsystem.getGyroscopeRotation().getRadians());
     limelightSubsystem.enable();
     limelightSubsystem.setPipelineId(limelightProfile.pipelineId);
-    readyToShootDebouncer.calculate(false);
+    wristReadyDebouncer.calculate(false);
     elevatoFilter.reset();
     wristFilter.reset();
     distanceFilter.reset();
@@ -171,10 +171,10 @@ public class ShootConeCommand extends CommandBase {
 
       // Check if the elevator and wrist are in the right position, and if the distance and angle are right
       elevatorReady = Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE;
-      wristReady = Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE;
+      wristReady = wristReadyDebouncer.calculate(Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE);
       aimReady = Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance;
       distanceReady = Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE;
-      var readyToShoot = readyToShootDebouncer.calculate(elevatorReady && wristReady && aimReady && distanceReady);
+      var readyToShoot = elevatorReady && wristReady && aimReady && distanceReady;
 
       if (isShooting || readyToShoot) {
         if (false == isShooting) {

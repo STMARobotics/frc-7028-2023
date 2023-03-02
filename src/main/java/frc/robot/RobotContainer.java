@@ -14,10 +14,9 @@ import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
-import org.photonvision.PhotonCamera;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,7 +44,6 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -59,10 +57,10 @@ public class RobotContainer {
 
   private final ControlBindings controlBindings;;
 
-  private final PhotonCamera photonCamera = new PhotonCamera("OV9281");
-
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
-  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCamera, drivetrainSubsystem);
+    private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+  private final PoseEstimator poseEstimator =
+      new PoseEstimator(drivetrainSubsystem::getGyroscopeRotation, drivetrainSubsystem::getModulePositions);
+  private final Notifier poseEstimationNotifier = new Notifier(poseEstimator);
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final WristSubsystem wristSubsystem = new WristSubsystem();
   private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
@@ -118,6 +116,10 @@ public class RobotContainer {
         elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - WRIST_PARK_HEIGHT) < .2));
     highLimelightSubsystem.setDefaultCommand(
         new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem));
+
+    // Start pose estimator thread
+    poseEstimationNotifier.setName("Pose estimator");
+    poseEstimationNotifier.startPeriodic(0.02);
 
     configureButtonBindings();
     configureDashboard();

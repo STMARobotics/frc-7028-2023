@@ -35,7 +35,6 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -48,7 +47,7 @@ public class AutonomousBuilder {
   private final WristSubsystem wristSubsystem;
   private final LimelightSubsystem highLimelightSubsystem;
   private final LimelightSubsystem lowLimelightSubsystem;
-  private final PoseEstimatorSubsystem poseEstimator;
+  private final PoseEstimator poseEstimator;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final SwerveAutoBuilder swerveAutoBuilder;
@@ -56,7 +55,7 @@ public class AutonomousBuilder {
   public AutonomousBuilder(DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem,
       LEDSubsystem ledSubsystem, ShooterSubsystem shooterSubsystem, WristSubsystem wristSubsystem,
       LimelightSubsystem lowLimelightSubsystem, LimelightSubsystem highLimelightSubsystem,
-      PoseEstimatorSubsystem poseEstimatorSubsystem) {
+      PoseEstimator poseEstimator) {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
     this.ledSubsystem = ledSubsystem;
@@ -64,12 +63,12 @@ public class AutonomousBuilder {
     this.wristSubsystem = wristSubsystem;
     this.highLimelightSubsystem = highLimelightSubsystem;
     this.lowLimelightSubsystem = lowLimelightSubsystem;
-    this.poseEstimator = poseEstimatorSubsystem;
+    this.poseEstimator = poseEstimator;
 
     var eventMap = buildEventMap();
     swerveAutoBuilder = new SwerveAutoBuilder(
-        poseEstimatorSubsystem::getCurrentPose,
-        poseEstimatorSubsystem::setCurrentPose,
+        poseEstimator::getCurrentPose,
+        poseEstimator::setCurrentPose,
         DrivetrainConstants.KINEMATICS,
         new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
         new PIDConstants(AutoConstants.THETA_kP, AutoConstants.THETA_kI, AutoConstants.THETA_kD),

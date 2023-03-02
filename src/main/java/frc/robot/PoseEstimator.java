@@ -1,10 +1,12 @@
-package frc.robot.subsystems;
+package frc.robot;
 
 import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_TO_ROBOT;
 import static frc.robot.Constants.VisionConstants.FIELD_LENGTH_METERS;
 import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -18,15 +20,18 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
 
-public class PoseEstimatorSubsystem extends SubsystemBase {
+/**
+ * Pose estimator that can run on a background / Notifier thread. Public methods are thread safe.
+ */
+public class PoseEstimator implements Runnable {
 
   /** Minimum target ambiguity. Targets with higher ambiguity will be discarded */
   private static final double AMBIGUITY_THRESHOLD = 0.2;
@@ -47,20 +52,28 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
    * less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
    */
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(2.0, 2.0, 2.0);
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
 
-  private final DrivetrainSubsystem drivetrainSubsystem;
+  private final Supplier<Rotation2d> rotationSupplier;
+  private final Supplier<SwerveModulePosition[]> modulePositionSupplier;
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private final PhotonPoseEstimator photonPoseEstimator;
   private final PhotonCamera photonCamera;
 
+  private final AtomicReference<Pose2d> estimatedPose;
+  private final AtomicReference<Pose2d> resetPose = new AtomicReference<>();
+  private final AtomicReference<Alliance> resetAlliance = new AtomicReference<>();
+
   private OriginPosition originPosition = OriginPosition.kBlueAllianceWallRightSide;
   private boolean sawTag = false;
 
-  public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
-    this.photonCamera = photonCamera;
-    this.drivetrainSubsystem = drivetrainSubsystem;
+  public PoseEstimator(
+      Supplier<Rotation2d> rotationSupplier, Supplier<SwerveModulePosition[]> modulePositionSupplier) {
+    
+    this.rotationSupplier = rotationSupplier;
+    this.modulePositionSupplier = modulePositionSupplier;
+    this.photonCamera = new PhotonCamera("OV9281");;
     PhotonPoseEstimator photonPoseEstimator = null;
     try {
       var layout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
@@ -77,11 +90,12 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
     poseEstimator =  new SwerveDrivePoseEstimator(
         DrivetrainConstants.KINEMATICS,
-        drivetrainSubsystem.getGyroscopeRotation(),
-        drivetrainSubsystem.getModulePositions(),
+        rotationSupplier.get(),
+        modulePositionSupplier.get(),
         new Pose2d(),
         stateStdDevs,
         visionMeasurementStdDevs);
+    estimatedPose = new AtomicReference<Pose2d>(poseEstimator.getEstimatedPosition());
   }
 
   public void addDashboardWidgets(ShuffleboardTab tab) {
@@ -94,6 +108,14 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param alliance alliance
    */
   public void setAlliance(Alliance alliance) {
+    resetAlliance.set(alliance);
+  }
+
+  /**
+   * Internal method to change the alliance on the pose estimator thread
+   * @param alliance new alliance
+   */
+  private void changeAlliance(Alliance alliance) {
     boolean allianceChanged = false;
     switch(alliance) {
       case Blue:
@@ -114,20 +136,30 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       // The alliance changed, which changes the coordinate system.
       // Since a tag was seen, and the tags are all relative to the coordinate system, the estimated pose
       // needs to be transformed to the new coordinate system.
-      var newPose = flipAlliance(poseEstimator.getEstimatedPosition());
-      setCurrentPose(newPose);
+      var newPose = flipAlliance(estimatedPose.get());
+      poseEstimator.resetPosition(rotationSupplier.get(), modulePositionSupplier.get(), newPose);
     }
   }
 
   @Override
-  public void periodic() {
+  public void run() {
+    var newResetPose = resetPose.getAndSet(null);
+    if (newResetPose != null) {
+      // resetPose was called, so reset the pose
+      poseEstimator.resetPosition(rotationSupplier.get(), modulePositionSupplier.get(), newResetPose);
+    }
+
+    var newAlliance = resetAlliance.getAndSet(null);
+    if (newAlliance != null) {
+      // setAlliance was called, so reset the alliance
+      changeAlliance(newAlliance);
+    }
+
     // Update pose estimator with drivetrain sensors
-    poseEstimator.update(
-        drivetrainSubsystem.getGyroscopeRotation(),
-        drivetrainSubsystem.getModulePositions());
+    poseEstimator.update(rotationSupplier.get(), modulePositionSupplier.get());
     
     // Update pose estimator with AprilTag data
-    if (photonPoseEstimator == null) {
+    if (photonPoseEstimator != null && photonCamera != null) {
       var photonResults = photonCamera.getLatestResult();
       if (photonResults.hasTargets() 
           && (photonResults.targets.size() > 1 || photonResults.targets.get(0).getPoseAmbiguity() < AMBIGUITY_THRESHOLD)) {
@@ -143,8 +175,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         });
       }
     }
+    Pose2d newEstimatedPose = poseEstimator.getEstimatedPosition();
+    estimatedPose.set(newEstimatedPose);
 
-    Pose2d dashboardPose = getCurrentPose();
+    Pose2d dashboardPose = newEstimatedPose;
     if (originPosition == OriginPosition.kRedAllianceWallRightSide) {
       // Flip the pose when red, since the dashboard field photo cannot be rotated
       dashboardPose = flipAlliance(dashboardPose);
@@ -161,7 +195,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   }
 
   public Pose2d getCurrentPose() {
-    return poseEstimator.getEstimatedPosition();
+    return estimatedPose.get();
   }
 
   /**
@@ -171,10 +205,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    poseEstimator.resetPosition(
-      drivetrainSubsystem.getGyroscopeRotation(),
-      drivetrainSubsystem.getModulePositions(),
-      newPose);
+    resetPose.set(newPose);
+    estimatedPose.set(newPose);
   }
 
   /**

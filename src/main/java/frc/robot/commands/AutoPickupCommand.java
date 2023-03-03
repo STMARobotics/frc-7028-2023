@@ -120,40 +120,36 @@ public class AutoPickupCommand extends CommandBase {
     wristSubsystem.moveToPosition(wristRadians);
     elevatorSubsystem.moveToPosition(elevatorMeters);
 
-    var readyToIntake =
-        Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
-            && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
-
-    if (readyToIntake) {
-      shooterSubsystem.shootDutyCycle(intakeDutyCycle);
-      if (lastTargetHeading == null) {
-        // We've never seen a game piece, just stop
-        drivetrainSubsystem.drive(new ChassisSpeeds(
-            xSlewRateLimiter.calculate(0.0),
-            ySlewRateLimiter.calculate(0.0),
-            0.0));
-      } else {
-        var omegaSpeed = thetaController.calculate(drivetrainHeading.getRadians());
-        if (thetaController.atGoal()) {
-          omegaSpeed = 0;
-        }
-
-        var chaseSpeed = forwardSpeed;
-        if (lastTargetDistance > .75) {
-          chaseSpeed = 0.8;
-        }
-        var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
-        drivetrainSubsystem.drive(new ChassisSpeeds(
-            xSlewRateLimiter.calculate(xySpeed.getX()),
-            ySlewRateLimiter.calculate(xySpeed.getY()),
-            omegaSpeed));
-      }
-    } else {
-      // Waiting for wrist/elevator, just stop
+    if (lastTargetHeading == null) {
+      // We've never seen a game piece, just stop
       drivetrainSubsystem.drive(new ChassisSpeeds(
           xSlewRateLimiter.calculate(0.0),
           ySlewRateLimiter.calculate(0.0),
           0.0));
+    } else {
+      var omegaSpeed = thetaController.calculate(drivetrainHeading.getRadians());
+      if (thetaController.atGoal()) {
+        omegaSpeed = 0;
+      }
+      
+      var readyToIntake =
+        Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
+            && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
+      var withinPickupDistance = lastTargetDistance < .75;
+      var chaseSpeed = 0.8;
+      if (withinPickupDistance && !readyToIntake) {
+        chaseSpeed = 0.0;
+      } else if (withinPickupDistance && readyToIntake) {
+        chaseSpeed = forwardSpeed;
+      }
+
+      shooterSubsystem.shootDutyCycle(intakeDutyCycle);
+
+      var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
+      drivetrainSubsystem.drive(new ChassisSpeeds(
+          xSlewRateLimiter.calculate(xySpeed.getX()),
+          ySlewRateLimiter.calculate(xySpeed.getY()),
+          omegaSpeed));
     }
   }
 

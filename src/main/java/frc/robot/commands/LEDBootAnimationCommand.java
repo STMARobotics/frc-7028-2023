@@ -37,10 +37,10 @@ public class LEDBootAnimationCommand extends CommandBase {
             ledStrips.setLED(strip, index, Color.kBlue);
           }
         }
-        ledStrips.refresh();
       }
       blipIndex++;
     }
+    ledStrips.refresh();
   }
 
   @Override

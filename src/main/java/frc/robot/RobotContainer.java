@@ -10,7 +10,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
-import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
@@ -113,7 +112,7 @@ public class RobotContainer {
     ledSubsystem.setDefaultCommand(
         new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube));
     elevatorSubsystem.setDefaultCommand(new DefaultElevatorCommand(
-        elevatorSubsystem, () -> Math.abs(wristSubsystem.getWristPosition() - WRIST_PARK_HEIGHT) < .2));
+        elevatorSubsystem, wristSubsystem::isParked));
     highLimelightSubsystem.setDefaultCommand(
         new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem));
 

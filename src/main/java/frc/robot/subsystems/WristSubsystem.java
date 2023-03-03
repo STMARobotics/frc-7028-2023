@@ -5,6 +5,7 @@ import static com.revrobotics.CANSparkMax.SoftLimitDirection.kReverse;
 import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
 import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
 import static edu.wpi.first.math.util.Units.radiansToRotations;
+import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 
 import java.util.Map;
 import java.util.Objects;
@@ -30,10 +31,10 @@ import frc.robot.Constants.WristConstants;
 public class WristSubsystem extends SubsystemBase {
 
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
-  private static final double ENCODER_OFFSET = -0.373663187026978d;
+  private static final double ENCODER_OFFSET = -0.53759d;
   
-  private static final float LIMIT_BOTTOM = 0.369f;
-  private static final float LIMIT_TOP = 0.60f;
+  private static final float LIMIT_BOTTOM = 0.5366f;
+  private static final float LIMIT_TOP = 0.77f;
   private static final double LIMIT_TOP_RADIANS = Units.rotationsToRadians(LIMIT_TOP + ENCODER_OFFSET);
   private static final double LIMIT_BOTTOM_RADIANS = Units.rotationsToRadians(LIMIT_BOTTOM + ENCODER_OFFSET);
 
@@ -80,7 +81,7 @@ public class WristSubsystem extends SubsystemBase {
 
     // Voltage compensation and current limits
     wristLeader.enableVoltageCompensation(12);
-    wristLeader.setSmartCurrentLimit(30);
+    // wristLeader.setSmartCurrentLimit(30);
 
     // Configure soft limits
     wristLeader.setSoftLimit(kForward, LIMIT_TOP);
@@ -170,6 +171,21 @@ public class WristSubsystem extends SubsystemBase {
    */
   public double getWristVelocity() {
     return Units.rotationsToDegrees(wristEncoder.getVelocity());
+  }
+
+  /**
+   * Moves the wrist to the park/transit position.
+   */
+  public void parkWrist() {
+    moveToPosition(WRIST_PARK_HEIGHT);
+  }
+
+  /**
+   * Returns true if the wrist is in the park position, within a tolerance.
+   * @return true if wrist is parked
+   */
+  public boolean isParked() {
+    return Math.abs(getWristPosition() - WRIST_PARK_HEIGHT) < .2;
   }
 
   /**

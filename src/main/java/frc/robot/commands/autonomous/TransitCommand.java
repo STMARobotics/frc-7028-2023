@@ -1,18 +1,17 @@
 package frc.robot.commands.autonomous;
 
-import static frc.robot.Constants.ElevatorConstants.ELEVATOR_PARK_HEIGHT;
-import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
 /**
- * Command for autonomous while in transit. Similar to what DefaultWristCommand and DefaultElevatorCommand do, but it
- * stops once they reach their park positions.
+ * Command for autonomous to put the elevator and wrist into transit position. Similar to what DefaultWristCommand and
+ * DefaultElevatorCommand do, but it stops once they reach a safe position to start moving.
  */
 public class TransitCommand extends CommandBase {
+
+  private static final double WRIST_SAFE_POSITION = 0.09;
    
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
@@ -34,19 +33,19 @@ public class TransitCommand extends CommandBase {
 
   @Override
   public void execute() {
-    wristSubsystem.moveToPosition(WRIST_PARK_HEIGHT);
-    elevatorSubsystem.moveToPosition(ELEVATOR_PARK_HEIGHT);
+    wristSubsystem.parkWrist();
+    elevatorSubsystem.parkElevator();
   }
 
   @Override
   public boolean isFinished() {
-    return Math.abs(wristSubsystem.getWristPosition() - WRIST_PARK_HEIGHT) < 0.2
-        && Math.abs(elevatorSubsystem.getElevatorPosition() - ELEVATOR_PARK_HEIGHT) < 0.2;
+    return wristSubsystem.getWristPosition() > WRIST_SAFE_POSITION && elevatorSubsystem.isParked();
   }
 
   @Override
   public void end(boolean interrupted) {
     elevatorSubsystem.stop();
+    System.out.println("Transit finished");
   }
   
 }

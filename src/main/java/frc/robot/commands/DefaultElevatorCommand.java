@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import static frc.robot.Constants.ElevatorConstants.ELEVATOR_PARK_HEIGHT;
-
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -21,10 +19,10 @@ public class DefaultElevatorCommand extends CommandBase {
 
   @Override
   public void execute() {
-    if (idleSupplier.getAsBoolean() && (elevatorSubsystem.getElevatorPosition() - ELEVATOR_PARK_HEIGHT) < .01) {
+    if (idleSupplier.getAsBoolean() && elevatorSubsystem.isParked()) {
       elevatorSubsystem.stop();
     } else {
-      elevatorSubsystem.moveToPosition(ELEVATOR_PARK_HEIGHT);
+      elevatorSubsystem.parkElevator();
     }
   }
 }

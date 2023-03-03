@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ElevatorConstants.ELEVATOR_PARK_HEIGHT;
+
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -165,6 +167,21 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public double getElevatorTopPosition() {
     return getElevatorPosition() * .489;
+  }
+  
+  /**
+   * Moves the elevator to the park/transit position.
+   */
+  public void parkElevator() {
+    moveToPosition(ELEVATOR_PARK_HEIGHT);
+  }
+
+  /**
+   * Returns true if the elevator is below park position, within a tolerance.
+   * @return true if elevator is parked
+   */
+  public boolean isParked() {
+    return getElevatorPosition() < (ELEVATOR_PARK_HEIGHT + 0.1);
   }
 
   /**

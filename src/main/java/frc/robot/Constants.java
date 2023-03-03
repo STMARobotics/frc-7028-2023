@@ -219,4 +219,16 @@ public final class Constants {
 
   }
 
+  public static class PickupConstants {
+    public static final double CONE_ELEVATOR_HEIGHT = 0.049;
+    public static final double CONE_WRIST_ANGLE = 0.03;
+    public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
+    public static final double CONE_FORWARD_SPEED = 0.6;
+
+    public static final double CUBE_ELEVATOR_HEIGHT = 0.058;
+    public static final double CUBE_WRIST_ANGLE = 0.0;
+    public static final double CUBE_INTAKE_DUTY_CYCLE = -0.3;
+    public static final double CUBE_FORWARD_SPEED = 0.2;
+  }
+
 }

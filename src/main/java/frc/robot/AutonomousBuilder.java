@@ -31,6 +31,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterProfile;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -43,7 +44,7 @@ public class AutonomousBuilder {
   private final WristSubsystem wristSubsystem;
   private final LimelightSubsystem highLimelightSubsystem;
   private final LimelightSubsystem lowLimelightSubsystem;
-  private final PoseEstimator poseEstimator;
+  private final PoseEstimatorSubsystem poseEstimator;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final SwerveAutoBuilder swerveAutoBuilder;
@@ -51,7 +52,7 @@ public class AutonomousBuilder {
   public AutonomousBuilder(DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem,
       LEDSubsystem ledSubsystem, ShooterSubsystem shooterSubsystem, WristSubsystem wristSubsystem,
       LimelightSubsystem lowLimelightSubsystem, LimelightSubsystem highLimelightSubsystem,
-      PoseEstimator poseEstimator) {
+      PoseEstimatorSubsystem poseEstimator) {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
     this.ledSubsystem = ledSubsystem;

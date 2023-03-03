@@ -51,12 +51,6 @@ public class LEDSubsystem extends SubsystemBase {
     /** Robot is shooting in a position that doesn't need a target */
     SHOOTING_WITHOUT_TARGET,
 
-    /** Robot going to human player stations to get a cone */
-    WANT_CONE,
-
-    /** Robot going to human player station to get a cube */
-    WANT_CUBE,
-
     /** Driverstation disconnected */
     DS_DISCONNECT,
 
@@ -129,12 +123,6 @@ public class LEDSubsystem extends SubsystemBase {
           break;
         case SHOOTING:
           ledUpdateConsumer.set((l) -> setAllOnce(l, Color.kGreen));
-          break;
-        case WANT_CONE:
-          ledUpdateConsumer.set((l) -> l.alternate(CONE_COLOR, Color.kBlack, 1.0));
-          break;
-        case WANT_CUBE:
-          ledUpdateConsumer.set((l) -> l.alternate(CUBE_COLOR, Color.kBlack, 1.0));
           break;
         case DS_DISCONNECT:
           ledUpdateConsumer.set((l) -> l.alternate(Color.kDarkRed, Color.kIndianRed, 0.5));

@@ -30,9 +30,9 @@ import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
+import frc.robot.commands.LEDMarqueeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
-import frc.robot.commands.WantGamePieceCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
 import frc.robot.controls.XBoxControlBindings;
@@ -199,9 +199,9 @@ public class RobotContainer {
 
     // Select game Piece mode
     controlBindings.coneMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CONE)
-        .andThen(new WantGamePieceCommand(ledSubsystem, GamePiece.CONE))));
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 50, 10, .07))));
     controlBindings.cubeMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CUBE)
-        .andThen(new WantGamePieceCommand(ledSubsystem, GamePiece.CUBE))));
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 50, 10, .07))));
 
     // Shooter
     controlBindings.shooterOut().ifPresent(trigger -> trigger.whileTrue(startEnd(

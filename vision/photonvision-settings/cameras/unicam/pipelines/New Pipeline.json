@@ -1,0 +1,81 @@
+[ "AprilTagPipelineSettings", {
+  "pipelineIndex" : 0,
+  "pipelineType" : "AprilTag",
+  "inputImageRotationMode" : "DEG_0",
+  "pipelineNickname" : "New Pipeline",
+  "cameraAutoExposure" : false,
+  "cameraExposure" : 0.0,
+  "cameraBrightness" : 56,
+  "cameraGain" : 42,
+  "cameraRedGain" : 11,
+  "cameraBlueGain" : 20,
+  "cameraVideoModeIndex" : 2,
+  "streamingFrameDivisor" : "HALF",
+  "ledMode" : false,
+  "inputShouldShow" : false,
+  "outputShouldShow" : true,
+  "hsvHue" : {
+    "first" : 50,
+    "second" : 180
+  },
+  "hsvSaturation" : {
+    "first" : 50,
+    "second" : 255
+  },
+  "hsvValue" : {
+    "first" : 50,
+    "second" : 255
+  },
+  "hueInverted" : false,
+  "outputShouldDraw" : true,
+  "outputShowMultipleTargets" : true,
+  "contourArea" : {
+    "first" : 0.0,
+    "second" : 100.0
+  },
+  "contourRatio" : {
+    "first" : 0.0,
+    "second" : 20.0
+  },
+  "contourFullness" : {
+    "first" : 0.0,
+    "second" : 100.0
+  },
+  "contourSpecklePercentage" : 5,
+  "contourSortMode" : "Largest",
+  "contourTargetOffsetPointEdge" : "Center",
+  "contourTargetOrientation" : "Landscape",
+  "offsetRobotOffsetMode" : "None",
+  "offsetSinglePoint" : {
+    "x" : 0.0,
+    "y" : 0.0
+  },
+  "offsetDualPointA" : {
+    "x" : 0.0,
+    "y" : 0.0
+  },
+  "offsetDualPointAArea" : 0.0,
+  "offsetDualPointB" : {
+    "x" : 0.0,
+    "y" : 0.0
+  },
+  "offsetDualPointBArea" : 0.0,
+  "contourGroupingMode" : "Single",
+  "contourIntersection" : "Up",
+  "solvePNPEnabled" : true,
+  "targetModel" : "k6in_16h5",
+  "cornerDetectionStrategy" : "APPROX_POLY_DP_AND_EXTREME_CORNERS",
+  "cornerDetectionUseConvexHulls" : true,
+  "cornerDetectionExactSideCount" : false,
+  "cornerDetectionSideCount" : 4,
+  "cornerDetectionAccuracyPercentage" : 10.0,
+  "tagFamily" : "kTag16h5",
+  "decimate" : 1,
+  "blur" : 0.0,
+  "threads" : 4,
+  "debug" : false,
+  "refineEdges" : true,
+  "numIterations" : 154,
+  "hammingDist" : 0,
+  "decisionMargin" : 35
+} ]

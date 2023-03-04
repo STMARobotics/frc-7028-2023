@@ -1,0 +1,21 @@
+[ "DriverModePipelineSettings", {
+  "pipelineIndex" : -1,
+  "pipelineType" : "DriverMode",
+  "inputImageRotationMode" : "DEG_0",
+  "pipelineNickname" : "Driver Mode",
+  "cameraAutoExposure" : true,
+  "cameraExposure" : 20.0,
+  "cameraBrightness" : 50,
+  "cameraGain" : 75,
+  "cameraRedGain" : 11,
+  "cameraBlueGain" : 20,
+  "cameraVideoModeIndex" : 0,
+  "streamingFrameDivisor" : "NONE",
+  "ledMode" : false,
+  "inputShouldShow" : true,
+  "outputShouldShow" : true,
+  "offsetPoint" : {
+    "first" : 0.0,
+    "second" : 0.0
+  }
+} ]

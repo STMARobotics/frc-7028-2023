@@ -10,15 +10,27 @@ import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
+import static frc.robot.GamePiece.CONE;
+import static frc.robot.GamePiece.CUBE;
+import static frc.robot.controls.OperatorButtons.ENTER_SELECTION;
+import static frc.robot.controls.OperatorButtons.GRID_CENTER;
+import static frc.robot.controls.OperatorButtons.GRID_LEFT;
+import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
+import static frc.robot.controls.OperatorButtons.MODE_CONE;
+import static frc.robot.controls.OperatorButtons.MODE_CUBE;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
+
+import java.util.Arrays;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AfterDoubleStationCommand;
 import frc.robot.commands.DefaultElevatorCommand;
@@ -35,6 +47,7 @@ import frc.robot.commands.TeleopConePickupCommand;
 import frc.robot.commands.TuneShootCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
+import frc.robot.controls.OperatorNodeButtons;
 import frc.robot.controls.XBoxControlBindings;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
@@ -43,6 +56,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.ScoreLocationSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -54,7 +68,9 @@ import frc.robot.subsystems.WristSubsystem;
  */
 public class RobotContainer {
 
-  private final ControlBindings controlBindings;;
+  private final ControlBindings controlBindings;
+  private final CommandJoystick operatorJoysticks[] =
+      new CommandJoystick[] {new CommandJoystick(2), new CommandJoystick(3)};
 
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final PoseEstimatorSubsystem poseEstimator =
@@ -65,6 +81,8 @@ public class RobotContainer {
   private final LimelightSubsystem lowLimelightSubsystem = new LimelightSubsystem(VisionConstants.LOW_LIMELIGHT_NAME);
   private final LimelightSubsystem highLimelightSubsystem = new LimelightSubsystem(VisionConstants.HIGH_LIMELIGHT_NAME);
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
+  private final ScoreLocationSubsystem scoreLocation =
+      new ScoreLocationSubsystem(shooterSubsystem::hasCone, shooterSubsystem::hasCube);
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand;
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand;
@@ -77,7 +95,7 @@ public class RobotContainer {
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
       ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem, poseEstimator);
   
-  private GamePiece currentGamePiece = GamePiece.CONE;
+  private GamePiece currentGamePiece = CONE;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -198,10 +216,10 @@ public class RobotContainer {
         startEnd(() -> wristSubsystem.moveWrist(-.1), wristSubsystem::stop, wristSubsystem)));
 
     // Select game Piece mode
-    controlBindings.coneMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CONE)
-        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 50, 10, .07))));
-    controlBindings.cubeMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = GamePiece.CUBE)
-        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 50, 10, .07))));
+    controlBindings.coneMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = CONE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07))));
+    controlBindings.cubeMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = CUBE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07))));
 
     // Shooter
     controlBindings.shooterOut().ifPresent(trigger -> trigger.whileTrue(startEnd(
@@ -218,7 +236,7 @@ public class RobotContainer {
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
     controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(
-        either(autoBuilder.pickupCone(), autoBuilder.pickupCube(), () -> currentGamePiece == GamePiece.CONE)));
+        either(autoBuilder.pickupCone(), autoBuilder.pickupCube(), () -> currentGamePiece == CONE)));
 
     // Double sub-station intake
     final var doublePickupHeight = 1.0;
@@ -249,7 +267,30 @@ public class RobotContainer {
     // Shoot Low
     controlBindings.shootLow().ifPresent(trigger -> trigger.whileTrue(
         either(autoBuilder.shootConeBottom(), autoBuilder.shootCubeBottom(), shooterSubsystem::hasCone)));
-    }
+    
+    //////////// Operator \\\\\\\\\\\\
+    // Enter location selection
+    operatorJoysticks[ENTER_SELECTION.joystickId].button(ENTER_SELECTION.buttonId)
+        .onTrue(Commands.print("Enter cable side")).onFalse(Commands.print("Enter not cable side"));
+    
+    // Game piece mode
+    operatorJoysticks[MODE_CONE.joystickId].button(MODE_CONE.buttonId).onTrue(runOnce(() -> currentGamePiece = CONE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07)));
+    operatorJoysticks[MODE_CUBE.joystickId].button(MODE_CUBE.buttonId).onTrue(runOnce(() -> currentGamePiece = CUBE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07)));
+
+    // Grid selection
+    operatorJoysticks[GRID_LEFT.joystickId].button(GRID_LEFT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(0)));
+    operatorJoysticks[GRID_CENTER.joystickId].button(GRID_CENTER.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(1)));
+    operatorJoysticks[GRID_RIGHT.joystickId].button(GRID_RIGHT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(2)));
+
+    // Node selection
+    Arrays.stream(OperatorNodeButtons.values()).forEach(button -> 
+      operatorJoysticks[button.joystickId].button(button.buttonId)
+          .onTrue(runOnce(() -> scoreLocation.selectColumn(button.column).selectRow(button.row)))
+    );
+
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

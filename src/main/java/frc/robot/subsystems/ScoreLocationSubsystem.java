@@ -30,7 +30,7 @@ public class ScoreLocationSubsystem extends SubsystemBase {
     this.hasCone = hasCone;
     this.hasCube = hasCube;
 
-    var gridsTab = Shuffleboard.getTab("Grids");
+    var gridsTab = Shuffleboard.getTab("Driver");
     var gridsLayout = gridsTab.getLayout("Grids", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 9, "Number of rows", 3, "Label Position", "HIDDEN"))
         .withSize(9, 3)

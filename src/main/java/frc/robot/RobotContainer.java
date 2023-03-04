@@ -16,8 +16,6 @@ import static frc.robot.controls.OperatorButtons.ENTER_SELECTION;
 import static frc.robot.controls.OperatorButtons.GRID_CENTER;
 import static frc.robot.controls.OperatorButtons.GRID_LEFT;
 import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
-import static frc.robot.controls.OperatorButtons.MODE_CONE;
-import static frc.robot.controls.OperatorButtons.MODE_CUBE;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
@@ -271,14 +269,8 @@ public class RobotContainer {
     //////////// Operator \\\\\\\\\\\\
     // Enter location selection
     operatorJoysticks[ENTER_SELECTION.joystickId].button(ENTER_SELECTION.buttonId)
-        .onTrue(Commands.print("Enter cable side")).onFalse(Commands.print("Enter not cable side"));
+        .onTrue(Commands.print("Enter not cable side")).onFalse(Commands.print("Enter cable side"));
     
-    // Game piece mode
-    operatorJoysticks[MODE_CONE.joystickId].button(MODE_CONE.buttonId).onTrue(runOnce(() -> currentGamePiece = CONE)
-        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07)));
-    operatorJoysticks[MODE_CUBE.joystickId].button(MODE_CUBE.buttonId).onTrue(runOnce(() -> currentGamePiece = CUBE)
-        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07)));
-
     // Grid selection
     operatorJoysticks[GRID_LEFT.joystickId].button(GRID_LEFT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(0)));
     operatorJoysticks[GRID_CENTER.joystickId].button(GRID_CENTER.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(1)));

@@ -67,12 +67,12 @@ public class JoystickControlBindings implements ControlBindings {
   
   @Override
   public Optional<Trigger> shootAutomatically() {
-    return Optional.empty();
+    return Optional.of(rightJoystick.trigger());
   }
 
   @Override
   public Optional<Trigger> shootHigh() {
-    return Optional.of(rightJoystick.trigger());
+    return Optional.of(rightJoystick.povUp());
   }
 
   @Override

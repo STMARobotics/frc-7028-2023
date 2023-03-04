@@ -6,6 +6,9 @@ import static frc.robot.Constants.AutoConstants.THETA_kP;
 import static frc.robot.Constants.AutoConstants.X_kD;
 import static frc.robot.Constants.AutoConstants.X_kI;
 import static frc.robot.Constants.AutoConstants.X_kP;
+import static frc.robot.Constants.AutoConstants.Y_kD;
+import static frc.robot.Constants.AutoConstants.Y_kI;
+import static frc.robot.Constants.AutoConstants.Y_kP;
 import static frc.robot.Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 import static frc.robot.Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
 
@@ -64,7 +67,7 @@ public class DriveToPoseCommand extends CommandBase {
     this.goalPose = goalPose;
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
-    yController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
+    yController = new ProfiledPIDController(Y_kP, Y_kI, Y_kD, xyConstraints);
     xController.setTolerance(TRANSLATION_TOLERANCE);
     yController.setTolerance(TRANSLATION_TOLERANCE);
     thetaController = new ProfiledPIDController(THETA_kP, THETA_kI, THETA_kD, omegaConstraints);

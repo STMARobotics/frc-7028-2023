@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.GamePiece;
 
 public class ScoreLocationSubsystem extends SubsystemBase {
 
@@ -120,4 +121,10 @@ public class ScoreLocationSubsystem extends SubsystemBase {
     return selectedRow;
   }
 
+  public GamePiece getSelectedGamePiece() {
+    if (selectedRow == 0 || selectedColumn == 1) {
+      return GamePiece.CUBE;
+    }
+    return GamePiece.CONE;
+  }
 }

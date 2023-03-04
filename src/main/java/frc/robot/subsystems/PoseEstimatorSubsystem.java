@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide;
 import static edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide;
-import static frc.robot.Constants.VisionConstants.FIELD_LENGTH_METERS;
-import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.util.function.Supplier;
 
@@ -13,7 +11,6 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -22,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.VisionConstants;
 
 /**
  * Pose estimator that uses odometry and AprilTags with PhotonVision.
@@ -52,11 +50,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private final PhotonRunnable photonEstimator = new PhotonRunnable();
   private final Notifier photonNotifier = new Notifier(photonEstimator);
-
-  // Pose on the opposite side of the field. Use with `relativeTo` to flip a pose to the opposite alliance
-  private final Pose2d flippingPose = new Pose2d(
-      new Translation2d(FIELD_LENGTH_METERS, FIELD_WIDTH_METERS),
-      new Rotation2d(Math.PI));
 
   private OriginPosition originPosition = kBlueAllianceWallRightSide;
   private boolean sawTag = false;
@@ -175,7 +168,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * @return pose relative to the other alliance's coordinate system
    */
   private Pose2d flipAlliance(Pose2d poseToFlip) {
-    return poseToFlip.relativeTo(flippingPose);
+    return poseToFlip.relativeTo(VisionConstants.FLIPPING_POSE);
   }
 
 }

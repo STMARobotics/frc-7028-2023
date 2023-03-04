@@ -12,6 +12,8 @@ import static java.lang.Math.toRadians;
 
 import java.util.List;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -166,6 +168,11 @@ public final class Constants {
     public static final double FIELD_LENGTH_METERS = 16.54175;
     public static final double FIELD_WIDTH_METERS = 8.0137;
 
+    // Pose on the opposite side of the field. Use with `relativeTo` to flip a pose to the opposite alliance
+    public static final Pose2d FLIPPING_POSE = new Pose2d(
+        new Translation2d(FIELD_LENGTH_METERS, FIELD_WIDTH_METERS),
+        new Rotation2d(Math.PI));
+
     /** Minimum target ambiguity. Targets with higher ambiguity will be discarded */
     public static final double APRILTAG_AMBIGUITY_THRESHOLD = 0.2;
   }
@@ -176,11 +183,11 @@ public final class Constants {
     public static final double THETA_kI = 0.0;
     public static final double THETA_kD = 0.0;
 
-    public static final double X_kP = 5.0;
+    public static final double X_kP = 5.5;
     public static final double X_kI = 0.0;
     public static final double X_kD = 0.0;
 
-    public static final double Y_kP = 5.0;
+    public static final double Y_kP = 5.5;
     public static final double Y_kI = 0.0;
     public static final double Y_kD = 0.0;
   }
@@ -208,12 +215,12 @@ public final class Constants {
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
       shooterSettings(1.25, 27.0, 0.8, 0.95),
-      shooterSettings(1.45, 28.75, 0.8, 0.95)
+      shooterSettings(1.45, 28.7, 0.8, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
       shooterSettings(0.8, 25.5, 0.83, 0.45),
-      shooterSettings(1.3, 27.25, 0.83, 0.45)
+      shooterSettings(1.3, 26.5, 0.83, 0.45)
     ));
 
     public static final VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
@@ -223,7 +230,7 @@ public final class Constants {
   }
 
   public static class PickupConstants {
-    public static final double CONE_ELEVATOR_HEIGHT = 0.054;
+    public static final double CONE_ELEVATOR_HEIGHT = 0.056;
     public static final double CONE_WRIST_ANGLE = 0.03;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;

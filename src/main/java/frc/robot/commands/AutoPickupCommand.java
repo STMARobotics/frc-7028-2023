@@ -137,13 +137,14 @@ public class AutoPickupCommand extends CommandBase {
             && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
       var withinPickupDistance = lastTargetDistance < .75;
       var chaseSpeed = 0.8;
+      var intakeSpeed = profile == LimelightProfile.PICKUP_CONE_FLOOR ? -0.1 : intakeDutyCycle;
       if (withinPickupDistance && !readyToIntake) {
         chaseSpeed = 0.0;
       } else if (withinPickupDistance && readyToIntake) {
         chaseSpeed = forwardSpeed;
+        intakeSpeed = intakeDutyCycle;
       }
-
-      shooterSubsystem.shootDutyCycle(intakeDutyCycle);
+      shooterSubsystem.shootDutyCycle(intakeSpeed);
 
       var xySpeed = new Translation2d(chaseSpeed, 0).rotateBy(lastTargetHeading.minus(drivetrainHeading));
       drivetrainSubsystem.drive(new ChassisSpeeds(

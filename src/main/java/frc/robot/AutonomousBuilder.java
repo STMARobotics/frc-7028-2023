@@ -11,6 +11,8 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -22,6 +24,7 @@ import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.PickupConstants;
 import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultLEDCommand;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
@@ -196,6 +199,17 @@ public class AutonomousBuilder {
       elevatorSubsystem.moveToPosition(PickupConstants.CONE_ELEVATOR_HEIGHT);
       wristSubsystem.moveToPosition(PickupConstants.CONE_WRIST_ANGLE);
     }, elevatorSubsystem, wristSubsystem);
+  }
+
+  public Command driveToPose(Pose2d pose) {
+    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose);
+  }
+
+  public Command driveToPose(Pose2d pose, TrapezoidProfile.Constraints xyConstraints,
+      TrapezoidProfile.Constraints omegaConstraints) {
+    
+    return new DriveToPoseCommand(
+        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, true, xyConstraints, omegaConstraints);
   }
 
 }

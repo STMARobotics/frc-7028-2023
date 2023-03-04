@@ -207,8 +207,8 @@ public final class Constants {
     public static final double SHOOT_TIME = 0.5;
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 28.0, 0.8, 0.95),
-      shooterSettings(1.45, 29.5, 0.8, 0.95)
+      shooterSettings(1.25, 27.0, 0.8, 0.95),
+      shooterSettings(1.45, 28.75, 0.8, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
@@ -223,7 +223,7 @@ public final class Constants {
   }
 
   public static class PickupConstants {
-    public static final double CONE_ELEVATOR_HEIGHT = 0.049;
+    public static final double CONE_ELEVATOR_HEIGHT = 0.054;
     public static final double CONE_WRIST_ANGLE = 0.03;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;

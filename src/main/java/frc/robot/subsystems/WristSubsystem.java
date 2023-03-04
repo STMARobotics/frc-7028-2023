@@ -77,7 +77,10 @@ public class WristSubsystem extends SubsystemBase {
     pidController.setD(kD);
     pidController.setIZone(kIz);
     pidController.setFF(kFF);
-    pidController.setOutputRange(kMinOutput, kMaxOutput); 
+    pidController.setOutputRange(kMinOutput, kMaxOutput);
+    pidController.setPositionPIDWrappingMaxInput(1);
+    pidController.setPositionPIDWrappingMinInput(0);
+    pidController.setPositionPIDWrappingEnabled(true);
 
     // Voltage compensation and current limits
     wristLeader.enableVoltageCompensation(12);

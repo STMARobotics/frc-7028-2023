@@ -39,7 +39,7 @@ public class ScoreLocationSubsystem extends SubsystemBase {
     for(int gridId = 0; gridId < 3; gridId++) {
       for(int columnId = 0; columnId < 3; columnId++) {
         for (int rowId = 0; rowId < 3; rowId++) {
-          makeWidget(gridsLayout, gridId, columnId, rowId, 1 == columnId ? Color.kPurple : Color.kYellow);
+          makeWidget(gridsLayout, gridId, columnId, rowId, getNodeColor(columnId, rowId));
         }
       }
     }
@@ -59,7 +59,17 @@ public class ScoreLocationSubsystem extends SubsystemBase {
     }
     gridWidgets[selectedGrid][selectedColumn][selectedRow]
         .withProperties(Map.of("Color When True", match ? Color.kGreen.toHexString() : Color.kRed.toHexString(),
-            "Color When False", selectedColumn == 1 ? Color.kPurple.toHexString() : Color.kYellow.toHexString()));
+            "Color When False", getNodeColor(selectedColumn, selectedRow).toHexString()));
+  }
+
+  private Color getNodeColor(int column, int row) {
+    if (row == 0) {
+      return Color.kWhite;
+    }
+    if(column == 1) {
+      return Color.kPurple;
+    }
+    return Color.kYellow;
   }
 
   private void makeWidget(ShuffleboardLayout gridsLayout, int gridIndex, int columnIndex, int rowId, Color color) {

@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.autonomous;
 
 import static frc.robot.Constants.AutoConstants.THETA_kD;
 import static frc.robot.Constants.AutoConstants.THETA_kI;

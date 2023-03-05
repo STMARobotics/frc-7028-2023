@@ -65,7 +65,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     double kIz = 0;
     double kF = 0.00;
     double kMaxOutput = 0.7;
-    double kMinOutput = -.2;
+    double kMinOutput = -.4;
     double allowedErr = 1;
 
     // Magic Motion Coefficients

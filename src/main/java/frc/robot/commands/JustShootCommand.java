@@ -29,7 +29,7 @@ public class JustShootCommand extends CommandBase {
 
   private final MedianFilter elevatorFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer readyToShootDebouncer = new Debouncer(.25, DebounceType.kRising);
+  private final Debouncer wristDebouncer = new Debouncer(0.1, DebounceType.kRising);
 
   protected double elevatorMeters;
   protected double wristRadians;
@@ -71,11 +71,12 @@ public class JustShootCommand extends CommandBase {
   public void initialize() {
     shootTimer.reset();
     isShooting = false;
-    readyToShootDebouncer.calculate(false);
+    wristDebouncer.calculate(false);
     wristSubsystem.moveToPosition(wristRadians);
     elevatorReady = false;
     wristReady = false;
     ledSubsystem.setCustomMode(this::updateReadyStateLEDs);
+    shooterSubsystem.activeStop();
   }
 
   @Override
@@ -86,7 +87,7 @@ public class JustShootCommand extends CommandBase {
     var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
     elevatorReady = Math.abs(elevatorPosition - elevatorMeters) < ELEVATOR_TOLERANCE;
     wristReady = Math.abs(wristPosition - wristRadians) < WRIST_TOLERANCE;
-    var readyToShoot = readyToShootDebouncer.calculate(elevatorReady && wristReady);
+    var readyToShoot = elevatorReady && wristDebouncer.calculate(wristReady);
 
     if (isShooting || readyToShoot) {
       shooterSubsystem.shootVelocity(shooterRPS);

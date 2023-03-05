@@ -16,6 +16,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 
 /**
  * Runnable that gets AprilTag data from PhotonVision.
@@ -47,7 +48,7 @@ public class PhotonRunnable implements Runnable {
   @Override
   public void run() {      
     // Get AprilTag data
-    if (photonPoseEstimator != null && photonCamera != null) {
+    if (photonPoseEstimator != null && photonCamera != null && !RobotState.isAutonomous()) {
       var photonResults = photonCamera.getLatestResult();
       if (photonResults.hasTargets() 
           && (photonResults.targets.size() > 1 || photonResults.targets.get(0).getPoseAmbiguity() < APRILTAG_AMBIGUITY_THRESHOLD)) {

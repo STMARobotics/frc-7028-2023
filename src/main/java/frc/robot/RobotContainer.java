@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -96,6 +97,8 @@ public class RobotContainer {
   private final AutoScoreCommand autoScoreCommand =
       new AutoScoreCommand(scoreLocation, shooterSubsystem::hasCone, autoBuilder, drivetrainSubsystem, elevatorSubsystem,
           ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem);
+
+  private boolean pickingUp = false;
   
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -143,6 +146,7 @@ public class RobotContainer {
     /**** Driver tab ****/
     var driverTab = Shuffleboard.getTab("Driver");
     autoBuilder.addDashboardWidgets(driverTab);
+    driverTab.addBoolean("Pickup", () -> pickingUp).withPosition(9, 0).withSize(2, 2);
 
     /**** Vision tab ****/
     final var visionTab = Shuffleboard.getTab("Vision");
@@ -172,6 +176,10 @@ public class RobotContainer {
     pickupLayout.addDouble(
         "Camera Height", () -> -HIGH_LIMELIGHT_TO_ROBOT.getTranslation().getZ() + elevatorSubsystem.getElevatorTopPosition())
         .withPosition(0, 4);
+    
+    driverTab.addNumber("X", () -> drivetrainSubsystem.getGyroVelocityXYZ()[0]);
+    driverTab.addNumber("Y", () -> drivetrainSubsystem.getGyroVelocityXYZ()[1]);
+    driverTab.addNumber("Z", () -> drivetrainSubsystem.getGyroVelocityXYZ()[2]);
 
     /**** Subsystems tab ****/
     final var subsystemsTab = Shuffleboard.getTab("Subsystems");
@@ -186,7 +194,8 @@ public class RobotContainer {
     controlBindings.resetPose().ifPresent(trigger -> trigger.onTrue(runOnce(poseEstimator::resetFieldPosition)));
     // Start button reseeds the steer motors to fix dead wheel
     controlBindings.reseedSteerMotors()
-        .ifPresent(trigger -> trigger.onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets)));
+        .ifPresent(trigger -> trigger.onTrue(drivetrainSubsystem.runOnce(drivetrainSubsystem::reseedSteerMotorOffsets)
+            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)));
 
     // POV up for field oriented drive
     controlBindings.fieldOrientedDrive().ifPresent(
@@ -215,12 +224,6 @@ public class RobotContainer {
     controlBindings.wristDown().ifPresent(trigger -> trigger.whileTrue(
         startEnd(() -> wristSubsystem.moveWrist(-.1), wristSubsystem::stop, wristSubsystem)));
 
-    // Select game Piece mode
-    // controlBindings.coneMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = CONE)
-    //     .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07))));
-    // controlBindings.cubeMode().ifPresent(trigger -> trigger.onTrue(runOnce(() -> currentGamePiece = CUBE)
-    //     .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07))));
-
     // Shooter
     controlBindings.shooterOut().ifPresent(trigger -> trigger.whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem)));
@@ -235,8 +238,12 @@ public class RobotContainer {
         () -> controlBindings.omega().getAsDouble() / 6.0)
         .andThen(new DefaultWristCommand(wristSubsystem))));
 
-    controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(
-        either(autoBuilder.pickupCone(), autoBuilder.pickupCube(), () -> scoreLocation.getSelectedGamePiece() == CONE)));
+    controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(runOnce(() -> pickingUp = true)
+        .alongWith(either(
+            autoBuilder.pickupCone(),
+            autoBuilder.pickupCube(),
+            () -> scoreLocation.getSelectedGamePiece() == CONE)))
+      .onFalse(runOnce(() -> pickingUp = false)));
 
     // Double sub-station intake
     final var doublePickupHeight = 1.0;

@@ -116,16 +116,6 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> coneMode() {
-    return Optional.of(leftJoystick.povRight());
-  }
-
-  @Override
-  public Optional<Trigger> cubeMode() {
-    return Optional.of(leftJoystick.povLeft());
-  }
-
-  @Override
   public Optional<Trigger> flipConeRight() {
     return Optional.empty();
   }

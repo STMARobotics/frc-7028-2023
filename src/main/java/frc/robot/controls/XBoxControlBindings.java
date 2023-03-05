@@ -100,16 +100,6 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> coneMode() {
-    return Optional.of(driverController.leftStick());
-  }
-
-  @Override
-  public Optional<Trigger> cubeMode() {
-    return Optional.of(driverController.rightStick());
-  }
-
-  @Override
   public Optional<Trigger> wheelsToX() {
     return Optional.of(driverController.povRight());
   }

@@ -178,16 +178,20 @@ public final class Constants {
   }
 
   public static class AutoConstants {
+    public static final double PATH_THETA_kP = 2.6;
+    public static final double PATH_THETA_kI = 0.001;
+    public static final double PATH_THETA_kD = 0.0;
+
     public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(PI, 2 / PI);
-    public static final double THETA_kP = 3.1;
+    public static final double THETA_kP = 6.0;
     public static final double THETA_kI = 0.0;
     public static final double THETA_kD = 0.0;
 
-    public static final double X_kP = 5.5;
+    public static final double X_kP = 5.0;
     public static final double X_kI = 0.0;
     public static final double X_kD = 0.0;
 
-    public static final double Y_kP = 5.5;
+    public static final double Y_kP = 5.0;
     public static final double Y_kI = 0.0;
     public static final double Y_kD = 0.0;
   }
@@ -219,8 +223,8 @@ public final class Constants {
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.8, 25.5, 0.83, 0.45),
-      shooterSettings(1.3, 26.5, 0.83, 0.45)
+      shooterSettings(0.8, 23.0, 0.855, 0.50),
+      shooterSettings(1.3, 24.0, 0.855, 0.50)
     ));
 
     public static final VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(

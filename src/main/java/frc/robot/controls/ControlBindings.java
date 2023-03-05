@@ -28,8 +28,6 @@ public interface ControlBindings {
   Optional<Trigger> shootHigh();
   Optional<Trigger> shootMid();
   Optional<Trigger> shootLow();
-  Optional<Trigger> coneMode();
-  Optional<Trigger> cubeMode();
   Optional<Trigger> flipConeRight();
   DoubleSupplier translationX();
   DoubleSupplier translationY();

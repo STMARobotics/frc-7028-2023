@@ -28,6 +28,7 @@ import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
+import frc.robot.commands.autonomous.BalanceCommand;
 import frc.robot.commands.autonomous.TransitCommand;
 import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -71,7 +72,7 @@ public class AutonomousBuilder {
         poseEstimator::setCurrentPose,
         DrivetrainConstants.KINEMATICS,
         new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
-        new PIDConstants(AutoConstants.THETA_kP, AutoConstants.THETA_kI, AutoConstants.THETA_kD),
+        new PIDConstants(AutoConstants.PATH_THETA_kP, AutoConstants.PATH_THETA_kI, AutoConstants.PATH_THETA_kD),
         drivetrainSubsystem::setModuleStates,
         eventMap,
         true,
@@ -103,7 +104,7 @@ public class AutonomousBuilder {
    * @param dashboard dashboard
    */
   public void addDashboardWidgets(ShuffleboardTab dashboard) {
-    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(9, 1);
+    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(0, 3);
   }
 
   /**
@@ -124,17 +125,18 @@ public class AutonomousBuilder {
 
   private HashMap<String, Command> buildEventMap() {
     var eventMap = new HashMap<String, Command>();
-    eventMap.put("ShootCubeTop", shootCubeTop());
-    eventMap.put("ShootCubeMid", shootCubeMid());
-    eventMap.put("ShootCubeBottom", shootCubeBottom());
-    eventMap.put("ShootConeTop", shootConeTop());
-    eventMap.put("ShootConeMid", shootConeMid());
-    eventMap.put("ShootConeBottom", shootConeBottom());
+    eventMap.put("ShootCubeTop", shootCubeTop().withTimeout(2.0));
+    eventMap.put("ShootCubeMid", shootCubeMid().withTimeout(2.0));
+    eventMap.put("ShootCubeBottom", shootCubeBottom().withTimeout(2.0));
+    eventMap.put("ShootConeTop", shootConeTop().withTimeout(2.0));
+    eventMap.put("ShootConeMid", shootConeMid().withTimeout(2.0));
+    eventMap.put("ShootConeBottom", shootConeBottom().withTimeout(2.0));
     eventMap.put("Transit", transit());
     eventMap.put("PickupCone", pickupCone());
     eventMap.put("PickupCube", pickupCube());
-    eventMap.put("ShootCubeFloor", shootCubeFloor());
-    eventMap.put("PrepareForConePickup", prepareForConePickup());    
+    eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.0));
+    eventMap.put("PrepareForConePickup", prepareForConePickup());
+    eventMap.put("Balance", balance().withTimeout(4.0)); 
     return eventMap;
   }
 
@@ -210,6 +212,10 @@ public class AutonomousBuilder {
     
     return new DriveToPoseCommand(
         drivetrainSubsystem, poseEstimator::getCurrentPose, pose, true, xyConstraints, omegaConstraints);
+  }
+
+  public Command balance() {
+    return new BalanceCommand(drivetrainSubsystem);
   }
 
 }

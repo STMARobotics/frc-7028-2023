@@ -95,11 +95,6 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> tuneShoot() {
-    return Optional.of(driverController.rightTrigger().and(driverController.x()));
-  }
-
-  @Override
   public Optional<Trigger> wheelsToX() {
     return Optional.of(driverController.povRight());
   }
@@ -115,8 +110,8 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> flipConeRight() {
-    return Optional.of(driverController.rightTrigger());
+  public Optional<Trigger> launchCube() {
+    return Optional.empty();
   }
   
   @Override

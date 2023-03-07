@@ -234,8 +234,11 @@ public final class Constants {
   }
 
   public static class PickupConstants {
+    public static final String CLASSNAME_CONE = "Cone";
+    public static final String CLASSNAME_CUBE = "Cube";
+
     public static final double CONE_ELEVATOR_HEIGHT = 0.056;
-    public static final double CONE_WRIST_ANGLE = 0.03;
+    public static final double CONE_WRIST_ANGLE = 0.04;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;
 
@@ -243,6 +246,10 @@ public final class Constants {
     public static final double CUBE_WRIST_ANGLE = 0.0;
     public static final double CUBE_INTAKE_DUTY_CYCLE = -0.3;
     public static final double CUBE_FORWARD_SPEED = 0.2;
+
+    public static final double DOUBLE_ELEVATOR_HEIGHT = 1.0;
+    public static final double DOUBLE_WRIST_ANGLE = 0.1;
+    public static final double DOUBLE_INTAKE_DUTY_CYCLE = -0.2;
   }
 
 }

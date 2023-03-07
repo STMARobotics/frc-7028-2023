@@ -15,7 +15,6 @@ import static frc.robot.controls.OperatorButtons.ENTER_SELECTION;
 import static frc.robot.controls.OperatorButtons.GRID_CENTER;
 import static frc.robot.controls.OperatorButtons.GRID_LEFT;
 import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
-import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_DOUBLE_STATION;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
 import java.util.Arrays;
@@ -29,8 +28,8 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import frc.robot.Constants.PickupConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.AfterDoubleStationCommand;
 import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
@@ -43,7 +42,6 @@ import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.LEDMarqueeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
-import frc.robot.commands.TuneShootCommand;
 import frc.robot.controls.ControlBindings;
 import frc.robot.controls.JoystickControlBindings;
 import frc.robot.controls.OperatorNodeButtons;
@@ -177,10 +175,6 @@ public class RobotContainer {
         "Camera Height", () -> -HIGH_LIMELIGHT_TO_ROBOT.getTranslation().getZ() + elevatorSubsystem.getElevatorTopPosition())
         .withPosition(0, 4);
     
-    driverTab.addNumber("X", () -> drivetrainSubsystem.getGyroVelocityXYZ()[0]);
-    driverTab.addNumber("Y", () -> drivetrainSubsystem.getGyroVelocityXYZ()[1]);
-    driverTab.addNumber("Z", () -> drivetrainSubsystem.getGyroVelocityXYZ()[2]);
-
     /**** Subsystems tab ****/
     final var subsystemsTab = Shuffleboard.getTab("Subsystems");
     elevatorSubsystem.addDashboardWidgets(subsystemsTab.getLayout("Elevator", kGrid).withPosition(0, 0).withSize(2, 3));
@@ -245,23 +239,16 @@ public class RobotContainer {
             () -> scoreLocation.getSelectedGamePiece() == CONE)))
       .onFalse(runOnce(() -> pickingUp = false)));
 
-    // Double sub-station intake
-    final var doublePickupHeight = 1.0;
-    controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
-      doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-        shooterSubsystem::hasCone))
-            .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
-    
-    // controlBindings.doubleStationCube().ifPresent(trigger -> trigger.whileTrue(new DoubleStationCommand(
-    //   doublePickupHeight, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-    //     poseEstimator::getCurrentPose, highLimelightSubsystem, PICKUP_CONE_DOUBLE_STATION,
-    //     shooterSubsystem::hasCube))
-    //         .onFalse(new AfterDoubleStationCommand(elevatorSubsystem, wristSubsystem, drivetrainSubsystem, doublePickupHeight)));
+    // Double sub-station pickup
+    Command doubleStationCone = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
+        elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
+        highLimelightSubsystem, LimelightProfile.PICKUP_CONE_DOUBLE_STATION, PickupConstants.CLASSNAME_CONE);
+    Command doubleStationCube = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
+        elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
+        highLimelightSubsystem, LimelightProfile.PICKUP_CUBE_DOUBLE_STATION, PickupConstants.CLASSNAME_CUBE);
 
-    // Tune Shoot
-    controlBindings.tuneShoot().ifPresent(trigger -> trigger.whileTrue(
-        new TuneShootCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
+    controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
+        .alongWith(either(doubleStationCone, doubleStationCube, () -> scoreLocation.getSelectedGamePiece() == CONE))));
 
     // Shoot Top
     controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(
@@ -277,6 +264,9 @@ public class RobotContainer {
     
     // Auto score
     controlBindings.shootAutomatically().ifPresent(trigger -> trigger.whileTrue(autoScoreCommand));
+
+    // Launch cube
+    controlBindings.launchCube().ifPresent(trigger -> trigger.onTrue(autoBuilder.launchCube()));
     
     //////////// Operator \\\\\\\\\\\\
     // Enter location selection

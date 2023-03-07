@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,8 @@ import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
-import frc.robot.commands.autonomous.BalanceCommand;
+import frc.robot.commands.autonomous.BalanceBackwardsCommand;
+import frc.robot.commands.autonomous.BalanceForwardsCommand;
 import frc.robot.commands.autonomous.DriveToPoseCommand;
 import frc.robot.commands.autonomous.TransitCommand;
 import frc.robot.limelight.LimelightProfile;
@@ -135,8 +138,11 @@ public class AutonomousBuilder {
     eventMap.put("PickupCone", pickupCone());
     eventMap.put("PickupCube", pickupCube());
     eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.0));
+    eventMap.put("LaunchCube", shootCubeFloor().withTimeout(2.0));
+    eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
-    eventMap.put("Balance", balance().withTimeout(4.0)); 
+    eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(4.0)); 
+    eventMap.put("BalanceForwards", balanceForwards().withTimeout(4.0)); 
     return eventMap;
   }
 
@@ -152,8 +158,25 @@ public class AutonomousBuilder {
     return new JustShootCommand(0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
   }
 
+  /**
+   * Shoots a cube quickly from the floor to the top node.
+   */
   public Command shootCubeFloor() {
     return new JustShootCommand(0.01, 1.23, 100.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+  }
+
+  /**
+   * Launches a cube at max velocity
+   */
+  public Command launchCube() {
+    return new JustShootCommand(0.0, 0.78, 130.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+  }
+
+  /**
+   * Moves wrist to position to launch a cube
+   */
+  public Command prepareToLaunchCube() {
+    return runOnce(() -> wristSubsystem.moveToPosition(0.78), wristSubsystem);
   }
 
   public Command shootConeTop() {
@@ -181,7 +204,7 @@ public class AutonomousBuilder {
           PickupConstants.CONE_ELEVATOR_HEIGHT, PickupConstants.CONE_WRIST_ANGLE, PickupConstants.CONE_INTAKE_DUTY_CYCLE,
           PickupConstants.CONE_FORWARD_SPEED, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
           poseEstimator::getCurrentPose, highLimelightSubsystem, LimelightProfile.PICKUP_CONE_FLOOR,
-          shooterSubsystem::hasCone, "Cone")
+          shooterSubsystem::hasCone, PickupConstants.CLASSNAME_CONE)
       .deadlineWith(
           new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
   }
@@ -191,13 +214,13 @@ public class AutonomousBuilder {
           PickupConstants.CUBE_ELEVATOR_HEIGHT, PickupConstants.CUBE_WRIST_ANGLE, PickupConstants.CUBE_INTAKE_DUTY_CYCLE,
           PickupConstants.CUBE_FORWARD_SPEED, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
           poseEstimator::getCurrentPose, highLimelightSubsystem, LimelightProfile.PICKUP_CUBE_FLOOR,
-          shooterSubsystem::hasCube, "Cube")
+          shooterSubsystem::hasCube, PickupConstants.CLASSNAME_CUBE)
       .deadlineWith(
           new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem));
   }
 
   public Command prepareForConePickup() {
-    return Commands.runOnce(() -> {
+    return runOnce(() -> {
       elevatorSubsystem.moveToPosition(PickupConstants.CONE_ELEVATOR_HEIGHT);
       wristSubsystem.moveToPosition(PickupConstants.CONE_WRIST_ANGLE);
     }, elevatorSubsystem, wristSubsystem);
@@ -214,8 +237,12 @@ public class AutonomousBuilder {
         drivetrainSubsystem, poseEstimator::getCurrentPose, pose, true, xyConstraints, omegaConstraints);
   }
 
-  public Command balance() {
-    return new BalanceCommand(drivetrainSubsystem);
+  public Command balanceBackwards() {
+    return new BalanceBackwardsCommand(drivetrainSubsystem);
+  }
+
+  public Command balanceForwards() {
+    return new BalanceForwardsCommand(drivetrainSubsystem);
   }
 
 }

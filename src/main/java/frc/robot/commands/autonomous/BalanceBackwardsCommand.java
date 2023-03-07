@@ -7,12 +7,12 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 /**
  * Command to balance the charge station
  */
-public class BalanceCommand extends CommandBase {
+public class BalanceBackwardsCommand extends CommandBase {
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private boolean done;
 
-  public BalanceCommand(DrivetrainSubsystem drivetrainSubsystem) {
+  public BalanceBackwardsCommand(DrivetrainSubsystem drivetrainSubsystem) {
     this.drivetrainSubsystem = drivetrainSubsystem;
 
     addRequirements(drivetrainSubsystem);

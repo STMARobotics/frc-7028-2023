@@ -1,18 +1,19 @@
 package frc.robot.commands;
 
 import static frc.robot.Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.AutonomousBuilder;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -115,10 +116,20 @@ public class AutoScoreCommand extends CommandBase {
       }
     }
 
-    var pose = shootPoses[grid][column];
     if (alliance == Alliance.Red) {
-      // Flip the pose for the red side (they are mirrored, NOT rotated like previous years)
-      pose = pose.relativeTo(VisionConstants.FLIPPING_POSE);
+      // On red side, grid numbers are flipped 0 is 2 and vice versa
+      grid = Math.abs(grid - 2);
+      column = Math.abs(column - 2);
+    }
+
+    // Find the pose for the grid location
+    var pose = shootPoses[grid][column];
+
+    if (alliance == Alliance.Red) {
+      // Transform shooting pose for red alliance
+      Translation2d transformedTranslation = new Translation2d(pose.getX(), FIELD_WIDTH_METERS - pose.getY());
+      Rotation2d transformedHeading = pose.getRotation().times(-1);
+      pose = new Pose2d(transformedTranslation, transformedHeading);
     }
 
     scoreSequence = new SequentialCommandGroup(

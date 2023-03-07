@@ -24,7 +24,7 @@ public class ScoreLocationSubsystem extends SubsystemBase {
   private final BooleanSupplier hasCube;
 
   private int selectedRow = 2;
-  private int selectedColumn = 1;
+  private int selectedColumn = 2;
   private int selectedGrid = 1;
   
   public ScoreLocationSubsystem(BooleanSupplier hasCone, BooleanSupplier hasCube) {

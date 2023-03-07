@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "ShootCubeHigh",
+          "ShootCubeFloor",
           "Transit"
         ],
         "executionBehavior": "sequential",
@@ -70,7 +70,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "PickupCube",
+          "PickupCone",
           "Transit"
         ],
         "executionBehavior": "sequential",
@@ -80,18 +80,18 @@
     },
     {
       "anchorPoint": {
-        "x": 5.3636530677316685,
-        "y": 3.2121877009711475
+        "x": 5.4119631584210905,
+        "y": 3.416917495855899
       },
       "prevControl": {
-        "x": 5.991843446074212,
-        "y": 3.4141060368669645
+        "x": 6.110243300625974,
+        "y": 3.8638167868670243
       },
       "nextControl": {
-        "x": 5.1646679889104465,
-        "y": 3.1482282113500406
+        "x": 5.051215128276558,
+        "y": 3.1860387565633985
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": -154.20397350549996,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -109,18 +109,18 @@
         "y": 3.169548041223743
       },
       "prevControl": {
-        "x": 4.08446327530953,
-        "y": 3.176654651181644
+        "x": 4.084594834096919,
+        "y": 3.169548041223743
       },
       "nextControl": null,
-      "holonomicAngle": 0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Balance"
+          "BalanceForwards"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -129,7 +129,14 @@
     }
   ],
   "maxVelocity": 3.0,
-  "maxAcceleration": 1.0,
+  "maxAcceleration": 1.5,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 1.3737373737372183,
+      "names": [
+        "PrepareForConePickup"
+      ]
+    }
+  ]
 }

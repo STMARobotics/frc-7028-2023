@@ -92,12 +92,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shooterOut() {
-    return Optional.empty();
-  }
-
-  @Override
-  public Optional<Trigger> tuneShoot() {
-    return Optional.empty();
+    return Optional.of(rightJoystick.button(2));
   }
 
   @Override
@@ -116,10 +111,10 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> flipConeRight() {
-    return Optional.empty();
+  public Optional<Trigger> launchCube() {
+    return Optional.of(rightJoystick.button(8));
   }
-  
+
   @Override
   public DoubleSupplier translationX() {
     return () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;

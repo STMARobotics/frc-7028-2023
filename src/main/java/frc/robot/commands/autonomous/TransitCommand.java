@@ -45,7 +45,6 @@ public class TransitCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     elevatorSubsystem.stop();
-    System.out.println("Transit finished");
   }
   
 }

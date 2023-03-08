@@ -226,14 +226,14 @@ public class AutonomousBuilder {
   }
 
   public Command driveToPose(Pose2d pose) {
-    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose);
+    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose, ledSubsystem);
   }
 
   public Command driveToPose(Pose2d pose, TrapezoidProfile.Constraints xyConstraints,
       TrapezoidProfile.Constraints omegaConstraints) {
     
     return new DriveToPoseCommand(
-        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, xyConstraints, omegaConstraints);
+        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, xyConstraints, omegaConstraints, ledSubsystem);
   }
 
   public Command balanceBackwards() {

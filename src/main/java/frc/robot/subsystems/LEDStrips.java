@@ -70,4 +70,11 @@ public interface LEDStrips {
    * @param b blue
    */
   public void setAll(int r, int g, int b);
+
+  /**
+   * Update LED strips in segments. Useful for indicating ready state, for example. Automatically refreshes.
+   * @param segmentValues array of booleans. The strip will be split into segments one segment for each element of 
+   * the array.
+   */
+  public void setLEDSegments(Color color, boolean... segmentValues);
 }

@@ -4,10 +4,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
@@ -75,7 +73,7 @@ public class JustShootCommand extends CommandBase {
     wristSubsystem.moveToPosition(wristRadians);
     elevatorReady = false;
     wristReady = false;
-    ledSubsystem.setCustomMode(this::updateReadyStateLEDs);
+    ledSubsystem.setCustomMode(leds -> leds.setLEDSegments(LEDSubsystem.CUBE_COLOR, elevatorReady, wristReady));
     shooterSubsystem.activeStop();
   }
 
@@ -94,23 +92,6 @@ public class JustShootCommand extends CommandBase {
       shootTimer.start();
       isShooting = true;
     }
-  }
-
-  /**
-   * Updates the LED strips. 1/2 of each strip indicates a status: elevator, wrist
-   */
-  private void updateReadyStateLEDs(LEDStrips ledStrips) {
-    boolean[] statuses = new boolean[] {elevatorReady, wristReady};
-    int ledsPerStatus = LEDSubsystem.STRIP_SIZE / statuses.length;
-    for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
-      int ledIndex = 0;
-      for (int statusId = 0; statusId < statuses.length; statusId++) {
-        for(;ledIndex < (ledsPerStatus * (statusId + 1)); ledIndex++) {
-          ledStrips.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CUBE_COLOR : Color.kBlack);
-        }
-      }
-    }
-    ledStrips.refresh();
   }
 
   @Override

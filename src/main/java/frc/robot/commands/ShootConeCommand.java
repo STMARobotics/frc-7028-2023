@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
@@ -17,7 +16,6 @@ import frc.robot.limelight.VisionTargetInfo;
 import frc.robot.math.MovingAverageFilter;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -65,11 +63,6 @@ public class ShootConeCommand extends CommandBase {
 
   private VisionTargetInfo lastTargetInfo = null;
   private boolean isShooting = false;
-
-  private boolean elevatorReady = false;
-  private boolean wristReady = false;
-  private boolean distanceReady = false;
-  private boolean aimReady = false;
 
   /**
    * Constructor
@@ -121,11 +114,6 @@ public class ShootConeCommand extends CommandBase {
     var chassisSpeeds = drivetrainSubsystem.getChassisSpeeds();
     xSlewRateLimiter.reset(chassisSpeeds.vxMetersPerSecond);
     ySlewRateLimiter.reset(chassisSpeeds.vyMetersPerSecond);
-
-    elevatorReady = false;
-    wristReady = false;
-    distanceReady = false;
-    aimReady = false;
   }
 
   @Override
@@ -169,11 +157,11 @@ public class ShootConeCommand extends CommandBase {
       var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
 
       // Check if the elevator and wrist are in the right position, and if the distance and angle are right
-      elevatorReady = Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE;
-      wristReady = wristReadyDebouncer.calculate(Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE);
-      aimReady = Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance;
-      distanceReady = Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE;
-      var readyToShoot = elevatorReady && wristReady && aimReady && distanceReady;
+      final var elevatorReady = Math.abs(elevatorPosition - shooterSettings.height) < ELEVATOR_TOLERANCE;
+      final var wristReady = wristReadyDebouncer.calculate(Math.abs(wristPosition - shooterSettings.angle) < WRIST_TOLERANCE);
+      final var aimReady = Math.abs(lastTargetInfo.angle.getRadians()) < shooterProfile.aimTolerance;
+      final var distanceReady = Math.abs(lastTargetInfo.distance - shooterProfile.shootingDistance) < DISTANCE_TOLERANCE;
+      final var readyToShoot = elevatorReady && wristReady && aimReady && distanceReady;
 
       if (isShooting || readyToShoot) {
         if (false == isShooting) {
@@ -189,7 +177,8 @@ public class ShootConeCommand extends CommandBase {
         isShooting = true;
         drivetrainSubsystem.stop();
       } else {
-        ledSubsystem.setCustomMode(this::updateReadyStateLEDs);
+        ledSubsystem.setCustomMode(
+            leds -> leds.setLEDSegments(LEDSubsystem.CONE_COLOR, elevatorReady, wristReady, distanceReady, aimReady));
         // Not ready to shoot, move the elevator, wrist, and drivetrain
         elevatorSubsystem.moveToPosition(shooterSettings.height);
         wristSubsystem.moveToPosition(shooterSettings.angle);
@@ -202,23 +191,6 @@ public class ShootConeCommand extends CommandBase {
             rotationFilter.calculate(rotationCorrection)));
       }
     }
-  }
-
-  /**
-   * Updates the LED strips. 1/4 of each strip indicates a status: elevator, wrist, distance, aim
-   */
-  private void updateReadyStateLEDs(LEDStrips ledStrips) {
-    boolean[] statuses = new boolean[] {elevatorReady, wristReady, distanceReady, aimReady};
-    int ledsPerStatus = LEDSubsystem.STRIP_SIZE / statuses.length;
-    for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
-      int ledIndex = 0;
-      for (int statusId = 0; statusId < statuses.length; statusId++) {
-        for(;ledIndex < (ledsPerStatus * (statusId + 1)); ledIndex++) {
-          ledStrips.setLED(stripId, ledIndex, statuses[statusId] ? LEDSubsystem.CONE_COLOR : Color.kBlack);
-        }
-      }
-    }
-    ledStrips.refresh();
   }
 
   @Override

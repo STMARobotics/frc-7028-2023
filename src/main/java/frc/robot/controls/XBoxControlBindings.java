@@ -66,7 +66,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shootAutomatically() {
-    return Optional.empty();
+    return Optional.of(driverController.b());
   }
   
   @Override

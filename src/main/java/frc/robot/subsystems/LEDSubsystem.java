@@ -206,6 +206,19 @@ public class LEDSubsystem extends SubsystemBase {
       }
       refresh();
     }
+
+    public void setLEDSegments(Color color, boolean... segmentValues) {
+      int ledsPerStatus = LEDSubsystem.STRIP_SIZE / segmentValues.length;
+      for(int stripId = 0; stripId < LEDSubsystem.STRIP_COUNT; stripId++) {
+        int ledIndex = 0;
+        for (int segmentId = 0; segmentId < segmentValues.length; segmentId++) {
+          for(;ledIndex < (ledsPerStatus * (segmentId + 1)); ledIndex++) {
+            setLED(stripId, ledIndex, segmentValues[segmentId] ? color : Color.kBlack);
+          }
+        }
+      }
+      refresh();
+    }
   }
 
 }

@@ -19,8 +19,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 
 /**
  * Command to drive to a pose.
@@ -45,12 +47,14 @@ public class DriveToPoseCommand extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final Supplier<Pose2d> poseProvider;
   private final Pose2d goalPose;
+  private final LEDSubsystem ledSubsystem;
 
   public DriveToPoseCommand(
         DrivetrainSubsystem drivetrainSubsystem,
         Supplier<Pose2d> poseProvider,
-        Pose2d goalPose) {
-    this(drivetrainSubsystem, poseProvider, goalPose, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS);
+        Pose2d goalPose,
+        LEDSubsystem ledSubsystem) {
+    this(drivetrainSubsystem, poseProvider, goalPose, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS, ledSubsystem);
   }
 
   public DriveToPoseCommand(
@@ -58,10 +62,12 @@ public class DriveToPoseCommand extends CommandBase {
         Supplier<Pose2d> poseProvider,
         Pose2d goalPose,
         TrapezoidProfile.Constraints xyConstraints,
-        TrapezoidProfile.Constraints omegaConstraints) {
+        TrapezoidProfile.Constraints omegaConstraints,
+        LEDSubsystem ledSubsystem) {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
     this.goalPose = goalPose;
+    this.ledSubsystem = ledSubsystem;
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
     yController = new ProfiledPIDController(Y_kP, Y_kI, Y_kD, xyConstraints);
@@ -81,6 +87,8 @@ public class DriveToPoseCommand extends CommandBase {
     thetaController.setGoal(goalPose.getRotation().getRadians());
     xController.setGoal(goalPose.getX());
     yController.setGoal(goalPose.getY());
+    ledSubsystem.setCustomMode(
+        leds -> leds.setLEDSegments(Color.kBlue, xController.atGoal(), yController.atGoal(), thetaController.atGoal()));
   }
 
   public boolean atGoal() {

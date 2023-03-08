@@ -29,8 +29,7 @@ import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
-import frc.robot.commands.autonomous.BalanceBackwardsCommand;
-import frc.robot.commands.autonomous.BalanceForwardsCommand;
+import frc.robot.commands.autonomous.BalanceCommand;
 import frc.robot.commands.autonomous.DriveToPoseCommand;
 import frc.robot.commands.autonomous.TransitCommand;
 import frc.robot.limelight.LimelightProfile;
@@ -135,14 +134,14 @@ public class AutonomousBuilder {
     eventMap.put("ShootConeMid", shootConeMid().withTimeout(2.0));
     eventMap.put("ShootConeBottom", shootConeBottom().withTimeout(2.0));
     eventMap.put("Transit", transit());
-    eventMap.put("PickupCone", pickupCone());
-    eventMap.put("PickupCube", pickupCube());
+    eventMap.put("PickupCone", keepingXBelow(pickupCone(), 7.6));
+    eventMap.put("PickupCube", keepingXBelow(pickupCube(), 7.6));
     eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.0));
     eventMap.put("LaunchCube", shootCubeFloor().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
-    eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(4.0)); 
-    eventMap.put("BalanceForwards", balanceForwards().withTimeout(4.0)); 
+    eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
+    eventMap.put("BalanceForwards", balanceForwards().withTimeout(3.0)); 
     return eventMap;
   }
 
@@ -234,15 +233,35 @@ public class AutonomousBuilder {
       TrapezoidProfile.Constraints omegaConstraints) {
     
     return new DriveToPoseCommand(
-        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, true, xyConstraints, omegaConstraints);
+        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, xyConstraints, omegaConstraints);
   }
 
   public Command balanceBackwards() {
-    return new BalanceBackwardsCommand(drivetrainSubsystem);
+    return new BalanceCommand(drivetrainSubsystem, true);
   }
 
   public Command balanceForwards() {
-    return new BalanceForwardsCommand(drivetrainSubsystem);
+    return new BalanceCommand(drivetrainSubsystem, false);
+  }
+
+  /**
+   * Wraps the given command so that it will end if the robot's X coordinate becomes greater than the given value.
+   * @param command command to wrap
+   * @param x x value
+   * @return wrapped command
+   */
+  public Command keepingXBelow(Command command, double x) {
+    return command.until(() -> poseEstimator.getCurrentPose().getX() > x);
+  }
+
+  /**
+   * Wraps the given command so that it will end if the robot's X coordinate becomes less than the given value.
+   * @param command command to wrap
+   * @param x x value
+   * @return wrapped command
+   */
+  public Command keepingXAbove(Command command, double x) {
+    return command.until(() -> poseEstimator.getCurrentPose().getX() < x);
   }
 
 }

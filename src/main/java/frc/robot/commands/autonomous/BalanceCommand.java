@@ -7,13 +7,15 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 /**
  * Command to balance the charge station
  */
-public class BalanceBackwardsCommand extends CommandBase {
+public class BalanceCommand extends CommandBase {
 
   private final DrivetrainSubsystem drivetrainSubsystem;
+  private final boolean isReverse;
   private boolean done;
 
-  public BalanceBackwardsCommand(DrivetrainSubsystem drivetrainSubsystem) {
+  public BalanceCommand(DrivetrainSubsystem drivetrainSubsystem, boolean isReverse) {
     this.drivetrainSubsystem = drivetrainSubsystem;
+    this.isReverse = isReverse;
 
     addRequirements(drivetrainSubsystem);
   }
@@ -25,11 +27,19 @@ public class BalanceBackwardsCommand extends CommandBase {
 
   @Override
   public void execute() {
-    if (drivetrainSubsystem.getGyroVelocityXYZ()[1] < -10 || done) {
+    var yAccel = drivetrainSubsystem.getGyroVelocityXYZ()[1];
+    if (isReverse) {
+      yAccel *= -1;
+    }
+    if (yAccel > 10 || done) {
       done = true;
       drivetrainSubsystem.setWheelsToX();
     } else {
-      drivetrainSubsystem.drive(new ChassisSpeeds(-0.5, 0.0, 0.0));
+      var speed = 0.5;
+      if (isReverse) {
+        speed *= -1;
+      }
+      drivetrainSubsystem.drive(new ChassisSpeeds(speed, 0.0, 0.0));
     }
   }
 

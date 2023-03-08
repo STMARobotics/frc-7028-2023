@@ -32,7 +32,7 @@ public class AutoScoreCommand extends CommandBase {
       2.0);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(
       MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.4,
-      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND);
+      MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2.0);
   
   private final ScoreLocationSubsystem scoreLocationSubsystem;
   private final BooleanSupplier hasCone;

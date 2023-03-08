@@ -28,7 +28,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class DriveToPoseCommand extends CommandBase {
   
   private static final double TRANSLATION_TOLERANCE = 0.02;
-  private static final double THETA_TOLERANCE = Units.degreesToRadians(0.5);
+  private static final double THETA_TOLERANCE = Units.degreesToRadians(2.0);
 
   /** Default constraints are 90% of max speed, accelerate to full speed in 1/3 second */
   private static final TrapezoidProfile.Constraints DEFAULT_XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
@@ -44,26 +44,23 @@ public class DriveToPoseCommand extends CommandBase {
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final Supplier<Pose2d> poseProvider;
-  private final boolean endAtGoal;
-  private Pose2d goalPose;
+  private final Pose2d goalPose;
 
   public DriveToPoseCommand(
         DrivetrainSubsystem drivetrainSubsystem,
         Supplier<Pose2d> poseProvider,
         Pose2d goalPose) {
-    this(drivetrainSubsystem, poseProvider, goalPose, true, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS);
+    this(drivetrainSubsystem, poseProvider, goalPose, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS);
   }
 
   public DriveToPoseCommand(
         DrivetrainSubsystem drivetrainSubsystem,
         Supplier<Pose2d> poseProvider,
         Pose2d goalPose,
-        boolean endAtGoal,
         TrapezoidProfile.Constraints xyConstraints,
         TrapezoidProfile.Constraints omegaConstraints) {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
-    this.endAtGoal = endAtGoal;
     this.goalPose = goalPose;
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
@@ -81,16 +78,9 @@ public class DriveToPoseCommand extends CommandBase {
   @Override
   public void initialize() {
     resetPIDControllers();
-    setGoalPose(goalPose);
-  }
-
-  public void setGoalPose(Pose2d goalPose) {
-    if (goalPose != null) {
-      thetaController.setGoal(goalPose.getRotation().getRadians());
-      xController.setGoal(goalPose.getX());
-      yController.setGoal(goalPose.getY());
-    }
-    this.goalPose = goalPose;
+    thetaController.setGoal(goalPose.getRotation().getRadians());
+    xController.setGoal(goalPose.getX());
+    yController.setGoal(goalPose.getY());
   }
 
   public boolean atGoal() {
@@ -107,14 +97,6 @@ public class DriveToPoseCommand extends CommandBase {
   @Override
   public void execute() {
     var robotPose = poseProvider.get();
-    if (goalPose == null) {
-      // TODO use slew rate limiter to just stop the robot
-      // This might be crazy, just set the goal to the current pose. It _should_ plan to decelerate and then come back
-      // but updating the goal on each iteration should just decelerate until we reach the goal
-      xController.setGoal(robotPose.getX());
-      yController.setGoal(robotPose.getY());
-      thetaController.setGoal(robotPose.getRotation().getRadians());
-    }
     // Drive to the goal
     var xSpeed = xController.calculate(robotPose.getX());
     if (xController.atGoal()) {
@@ -137,7 +119,7 @@ public class DriveToPoseCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return endAtGoal && atGoal();
+    return atGoal();
   }
 
   @Override

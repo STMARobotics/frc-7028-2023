@@ -184,7 +184,7 @@ public final class Constants {
 
     public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(PI, 2 / PI);
     public static final double THETA_kP = 6.0;
-    public static final double THETA_kI = 0.0;
+    public static final double THETA_kI = 0.02;
     public static final double THETA_kD = 0.0;
 
     public static final double X_kP = 5.0;
@@ -238,7 +238,7 @@ public final class Constants {
     public static final String CLASSNAME_CUBE = "Cube";
 
     public static final double CONE_ELEVATOR_HEIGHT = 0.056;
-    public static final double CONE_WRIST_ANGLE = 0.04;
+    public static final double CONE_WRIST_ANGLE = 0.038;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;
 

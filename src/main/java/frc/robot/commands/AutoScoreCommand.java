@@ -59,7 +59,7 @@ public class AutoScoreCommand extends CommandBase {
   private final Pose2d[][] shootPoses = new Pose2d[][]{
     // Grid 0
     new Pose2d[]{
-      new Pose2d(2.0, 5, Rotation2d.fromDegrees(180)),
+      new Pose2d(2.0, 4.74, Rotation2d.fromDegrees(180)),
       new Pose2d(1.8, 4.43, Rotation2d.fromDegrees(180)),
       new Pose2d(2.0, 3.88, Rotation2d.fromDegrees(180))
     },

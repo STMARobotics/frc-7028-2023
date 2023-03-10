@@ -218,8 +218,8 @@ public final class Constants {
     public static final double SHOOT_TIME = 0.5;
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 27.75, 0.8, 0.95),
-      shooterSettings(1.45, 29.80, 0.8, 0.95)
+      shooterSettings(1.25, 28.25, 0.8, 0.95),
+      shooterSettings(1.45, 30.30, 0.8, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(

@@ -218,8 +218,8 @@ public final class Constants {
     public static final double SHOOT_TIME = 0.5;
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 27.0, 0.8, 0.95),
-      shooterSettings(1.45, 28.7, 0.8, 0.95)
+      shooterSettings(1.25, 27.75, 0.8, 0.95),
+      shooterSettings(1.45, 29.80, 0.8, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
@@ -237,8 +237,8 @@ public final class Constants {
     public static final String CLASSNAME_CONE = "Cone";
     public static final String CLASSNAME_CUBE = "Cube";
 
-    public static final double CONE_ELEVATOR_HEIGHT = 0.056;
-    public static final double CONE_WRIST_ANGLE = 0.038;
+    public static final double CONE_ELEVATOR_HEIGHT = 0.058;
+    public static final double CONE_WRIST_ANGLE = 0.04;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;
 

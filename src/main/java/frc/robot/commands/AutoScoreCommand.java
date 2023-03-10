@@ -71,7 +71,7 @@ public class AutoScoreCommand extends CommandBase {
     new Pose2d[]{
       new Pose2d(2.0, 1.62, Rotation2d.fromDegrees(180)),
       new Pose2d(1.8, 1.07, Rotation2d.fromDegrees(180)),
-      new Pose2d(2.0, 0.50, Rotation2d.fromDegrees(180))
+      new Pose2d(2.0, 0.80, Rotation2d.fromDegrees(-174))
     },
   };
 

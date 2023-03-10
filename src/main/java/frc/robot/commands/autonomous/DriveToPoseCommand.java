@@ -100,10 +100,7 @@ public class DriveToPoseCommand extends CommandBase {
     }
     thetaController.setGoal(pose.getRotation().getRadians());
     xController.setGoal(pose.getX());
-    yController.setGoal(pose.getY());
-    ledSubsystem.setCustomMode(
-        leds -> leds.setLEDSegments(Color.kBlue, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal()));
-  }
+    yController.setGoal(pose.getY());  }
 
   public boolean atGoal() {
     return xController.atGoal() && yController.atGoal() && thetaController.atGoal();
@@ -133,6 +130,11 @@ public class DriveToPoseCommand extends CommandBase {
     var omegaSpeed = thetaController.calculate(robotPose.getRotation().getRadians());
     if (thetaController.atGoal()) {
       omegaSpeed = 0;
+    }
+
+    if (xSpeed == 0 || ySpeed == 0 || omegaSpeed == 0) {
+      ledSubsystem.setCustomMode(
+        leds -> leds.setLEDSegments(Color.kBlue, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal())); 
     }
 
     drivetrainSubsystem.drive(

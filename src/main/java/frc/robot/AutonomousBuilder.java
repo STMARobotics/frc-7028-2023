@@ -127,16 +127,16 @@ public class AutonomousBuilder {
 
   private HashMap<String, Command> buildEventMap() {
     var eventMap = new HashMap<String, Command>();
-    eventMap.put("ShootCubeTop", shootCubeTop().withTimeout(2.0));
-    eventMap.put("ShootCubeMid", shootCubeMid().withTimeout(2.0));
-    eventMap.put("ShootCubeBottom", shootCubeBottom().withTimeout(2.0));
-    eventMap.put("ShootConeTop", shootConeTop().withTimeout(2.0));
-    eventMap.put("ShootConeMid", shootConeMid().withTimeout(2.0));
-    eventMap.put("ShootConeBottom", shootConeBottom().withTimeout(2.0));
+    eventMap.put("ShootCubeTop", shootCubeTop().withTimeout(3.0));
+    eventMap.put("ShootCubeMid", shootCubeMid().withTimeout(3.0));
+    eventMap.put("ShootCubeBottom", shootCubeBottom().withTimeout(3.0));
+    eventMap.put("ShootConeTop", shootConeTop().withTimeout(3.0));
+    eventMap.put("ShootConeMid", shootConeMid().withTimeout(3.0));
+    eventMap.put("ShootConeBottom", shootConeBottom().withTimeout(3.0));
     eventMap.put("Transit", transit());
     eventMap.put("PickupCone", keepingXBelow(pickupCone(), 7.6));
     eventMap.put("PickupCube", keepingXBelow(pickupCube(), 7.6));
-    eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.0));
+    eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.5));
     eventMap.put("LaunchCube", shootCubeFloor().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());

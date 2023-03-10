@@ -112,7 +112,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> launchCube() {
-    return Optional.of(rightJoystick.button(8));
+    return Optional.of(rightJoystick.povRight());
   }
 
   @Override

@@ -116,6 +116,11 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
+  public Optional<Trigger> driveAndPickup() {
+    return Optional.of(leftJoystick.button(3));
+  }
+
+  @Override
   public DoubleSupplier translationX() {
     return () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
   }

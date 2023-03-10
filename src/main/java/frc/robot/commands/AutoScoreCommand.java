@@ -1,13 +1,11 @@
 package frc.robot.commands;
 
 import static frc.robot.Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
-import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -123,17 +121,8 @@ public class AutoScoreCommand extends CommandBase {
     }
 
     // Find the pose for the grid location
-    var pose = shootPoses[grid][column];
-
-    if (alliance == Alliance.Red) {
-      // Transform shooting pose for red alliance
-      Translation2d transformedTranslation = new Translation2d(pose.getX(), FIELD_WIDTH_METERS - pose.getY());
-      Rotation2d transformedHeading = pose.getRotation().times(-1);
-      pose = new Pose2d(transformedTranslation, transformedHeading);
-    }
-
     scoreSequence = new SequentialCommandGroup(
-      autoBuilder.driveToPose(pose, XY_CONSTRAINTS, OMEGA_CONSTRAINTS),
+      autoBuilder.driveToPose(shootPoses[grid][column], XY_CONSTRAINTS, OMEGA_CONSTRAINTS, true),
       shootCommand
     );
 

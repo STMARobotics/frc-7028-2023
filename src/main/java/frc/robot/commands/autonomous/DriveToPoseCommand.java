@@ -11,14 +11,18 @@ import static frc.robot.Constants.AutoConstants.Y_kI;
 import static frc.robot.Constants.AutoConstants.Y_kP;
 import static frc.robot.Constants.DrivetrainConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 import static frc.robot.Constants.DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
+import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -48,13 +52,15 @@ public class DriveToPoseCommand extends CommandBase {
   private final Supplier<Pose2d> poseProvider;
   private final Pose2d goalPose;
   private final LEDSubsystem ledSubsystem;
+  private final boolean useAllianceColor;
 
   public DriveToPoseCommand(
         DrivetrainSubsystem drivetrainSubsystem,
         Supplier<Pose2d> poseProvider,
         Pose2d goalPose,
-        LEDSubsystem ledSubsystem) {
-    this(drivetrainSubsystem, poseProvider, goalPose, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS, ledSubsystem);
+        LEDSubsystem ledSubsystem,
+        boolean useAllianceColor) {
+    this(drivetrainSubsystem, poseProvider, goalPose, DEFAULT_XY_CONSTRAINTS, DEFAULT_OMEGA_CONSTRAINTS, ledSubsystem, useAllianceColor);
   }
 
   public DriveToPoseCommand(
@@ -63,11 +69,13 @@ public class DriveToPoseCommand extends CommandBase {
         Pose2d goalPose,
         TrapezoidProfile.Constraints xyConstraints,
         TrapezoidProfile.Constraints omegaConstraints,
-        LEDSubsystem ledSubsystem) {
+        LEDSubsystem ledSubsystem,
+        boolean useAllianceColor) {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
     this.goalPose = goalPose;
     this.ledSubsystem = ledSubsystem;
+    this.useAllianceColor = useAllianceColor;
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
     yController = new ProfiledPIDController(Y_kP, Y_kI, Y_kD, xyConstraints);
@@ -84,11 +92,17 @@ public class DriveToPoseCommand extends CommandBase {
   @Override
   public void initialize() {
     resetPIDControllers();
-    thetaController.setGoal(goalPose.getRotation().getRadians());
-    xController.setGoal(goalPose.getX());
-    yController.setGoal(goalPose.getY());
+    var pose = goalPose;
+    if (useAllianceColor && DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+      Translation2d transformedTranslation = new Translation2d(pose.getX(), FIELD_WIDTH_METERS - pose.getY());
+      Rotation2d transformedHeading = pose.getRotation().times(-1);
+      pose = new Pose2d(transformedTranslation, transformedHeading);
+    }
+    thetaController.setGoal(pose.getRotation().getRadians());
+    xController.setGoal(pose.getX());
+    yController.setGoal(pose.getY());
     ledSubsystem.setCustomMode(
-        leds -> leds.setLEDSegments(Color.kBlue, xController.atGoal(), yController.atGoal(), thetaController.atGoal()));
+        leds -> leds.setLEDSegments(Color.kBlue, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal()));
   }
 
   public boolean atGoal() {

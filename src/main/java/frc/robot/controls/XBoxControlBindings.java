@@ -113,6 +113,11 @@ public class XBoxControlBindings implements ControlBindings {
   public Optional<Trigger> launchCube() {
     return Optional.empty();
   }
+
+  @Override
+  public Optional<Trigger> driveAndPickup() {
+    return Optional.empty();
+  }
   
   @Override
   public DoubleSupplier translationX() {

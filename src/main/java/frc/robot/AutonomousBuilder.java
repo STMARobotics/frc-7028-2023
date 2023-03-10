@@ -225,15 +225,15 @@ public class AutonomousBuilder {
     }, elevatorSubsystem, wristSubsystem);
   }
 
-  public Command driveToPose(Pose2d pose) {
-    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose, ledSubsystem);
+  public Command driveToPose(Pose2d pose, boolean useAllianceColor) {
+    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose, ledSubsystem, useAllianceColor);
   }
 
   public Command driveToPose(Pose2d pose, TrapezoidProfile.Constraints xyConstraints,
-      TrapezoidProfile.Constraints omegaConstraints) {
+      TrapezoidProfile.Constraints omegaConstraints, boolean useAllianceColor) {
     
-    return new DriveToPoseCommand(
-        drivetrainSubsystem, poseEstimator::getCurrentPose, pose, xyConstraints, omegaConstraints, ledSubsystem);
+    return new DriveToPoseCommand(drivetrainSubsystem, poseEstimator::getCurrentPose, pose, xyConstraints,
+        omegaConstraints, ledSubsystem, useAllianceColor);
   }
 
   public Command balanceBackwards() {

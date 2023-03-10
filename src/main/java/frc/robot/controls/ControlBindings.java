@@ -28,6 +28,7 @@ public interface ControlBindings {
   Optional<Trigger> shootMid();
   Optional<Trigger> shootLow();
   Optional<Trigger> launchCube();
+  Optional<Trigger> driveAndPickup();
   DoubleSupplier translationX();
   DoubleSupplier translationY();
   DoubleSupplier omega();

@@ -19,6 +19,8 @@ import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
 import java.util.Arrays;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -249,6 +251,16 @@ public class RobotContainer {
 
     controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
         .alongWith(either(doubleStationCone, doubleStationCube, () -> scoreLocation.getSelectedGamePiece() == CONE))));
+
+    // Drive to human player station and pickup
+    controlBindings.driveAndPickup().ifPresent(trigger -> trigger.whileTrue(
+      autoBuilder.driveToPose(new Pose2d(14.3, 6.45, Rotation2d.fromDegrees(90)), true)
+          .andThen(runOnce(() -> pickingUp = true)
+          .alongWith(either(
+              autoBuilder.pickupCone(),
+              autoBuilder.pickupCube(),
+              () -> scoreLocation.getSelectedGamePiece() == CONE))))
+      .onFalse(runOnce(() -> pickingUp = false)));
 
     // Shoot Top
     controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(

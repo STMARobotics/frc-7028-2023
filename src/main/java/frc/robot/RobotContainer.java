@@ -36,7 +36,6 @@ import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
-import frc.robot.commands.DefaultShooterCommand;
 import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
@@ -87,7 +86,6 @@ public class RobotContainer {
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand;
 
   private final DefaultWristCommand defaultWristCommand = new DefaultWristCommand(wristSubsystem);
-  private final DefaultShooterCommand defaultShooterCommand = new DefaultShooterCommand(shooterSubsystem);
 
   private final Timer reseedTimer = new Timer();
 
@@ -128,7 +126,6 @@ public class RobotContainer {
     // Set up the default command for the drivetrain.
     drivetrainSubsystem.setDefaultCommand(fieldOrientedDriveCommand);
     wristSubsystem.setDefaultCommand(defaultWristCommand);
-    shooterSubsystem.setDefaultCommand(defaultShooterCommand);
     ledSubsystem.setDefaultCommand(
         new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube));
     elevatorSubsystem.setDefaultCommand(new DefaultElevatorCommand(
@@ -224,7 +221,7 @@ public class RobotContainer {
     controlBindings.shooterOut().ifPresent(trigger -> trigger.whileTrue(startEnd(
       ()-> shooterSubsystem.shootDutyCycle(0.4825), shooterSubsystem::stop, shooterSubsystem)));
     controlBindings.shooterIn().ifPresent(trigger -> trigger.whileTrue(startEnd(
-      ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::stop, shooterSubsystem)));
+      ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::activeStop, shooterSubsystem)));
 
     // Intake
     controlBindings.manualIntake().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(

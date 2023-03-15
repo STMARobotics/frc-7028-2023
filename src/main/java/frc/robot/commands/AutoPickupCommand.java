@@ -161,7 +161,7 @@ public class AutoPickupCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    shooterSubsystem.stop();
+    shooterSubsystem.activeStop();
   }
 
 }

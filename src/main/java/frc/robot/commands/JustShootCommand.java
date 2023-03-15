@@ -103,7 +103,11 @@ public class JustShootCommand extends CommandBase {
   public void end(boolean interrupted) {
     elevatorSubsystem.stop();
     wristSubsystem.stop();
-    shooterSubsystem.stop();
+    if (isShooting) {
+      shooterSubsystem.stop();
+    } else {
+      shooterSubsystem.activeStop();
+    }
     shootTimer.stop();
   }
 

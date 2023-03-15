@@ -130,7 +130,7 @@ public class ShootConeCommand extends CommandBase {
       // We've never seen a target
       elevatorSubsystem.stop();
       wristSubsystem.stop();
-      shooterSubsystem.stop();
+      shooterSubsystem.activeStop();
       drivetrainSubsystem.drive(
           new ChassisSpeeds(xSlewRateLimiter.calculate(0.0), ySlewRateLimiter.calculate(0.0), 1.0));
       ledSubsystem.setMode(Mode.SHOOTING_NO_TARGET);
@@ -202,7 +202,11 @@ public class ShootConeCommand extends CommandBase {
   public void end(boolean interrupted) {
     elevatorSubsystem.stop();
     wristSubsystem.stop();
-    shooterSubsystem.stop();
+    if (isShooting) {
+      shooterSubsystem.stop();
+    } else {
+      shooterSubsystem.activeStop();
+    }
     shootTimer.stop();
   }
 

@@ -109,7 +109,7 @@ public class DoubleStationCommand extends CommandBase {
     elevatorSubsystem.moveToPosition(PickupConstants.DOUBLE_ELEVATOR_HEIGHT);
 
     if (shooterSubsystem.hasCone() || shooterSubsystem.hasCube()) {
-      shooterSubsystem.stop();
+      shooterSubsystem.activeStop();
       wristSubsystem.parkWrist();
     } else {
       shooterSubsystem.shootDutyCycle(PickupConstants.DOUBLE_INTAKE_DUTY_CYCLE);

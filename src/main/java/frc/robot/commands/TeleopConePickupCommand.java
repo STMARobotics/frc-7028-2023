@@ -83,7 +83,7 @@ public class TeleopConePickupCommand extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    shooterSubsystem.stop();
+    shooterSubsystem.activeStop();
   }
 
 }

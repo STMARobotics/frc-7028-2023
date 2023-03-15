@@ -7,8 +7,6 @@ import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
-import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -29,6 +27,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.21411, 1.1101 / 10.0, 0.022082);
   private final double VELOCITY_COEFFIENT = 1 / (5.0 * Math.PI * Units.inchesToMeters(4.0)); // gearing * wheel circumfrence
 
+  private boolean isActiveStopped = false;
+
   public ShooterSubsystem() {
     var config = new TalonFXConfiguration();
     config.slot0.kP = 0.03;
@@ -46,8 +46,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     shooterRight.configAllSettings(config);
     shooterLeft.configAllSettings(config);
-    shooterRight.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    shooterLeft.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    shooterLeft.overrideLimitSwitchesEnable(false);
+    shooterRight.overrideLimitSwitchesEnable(false);
 
     shooterRight.enableVoltageCompensation(true);
     shooterLeft.enableVoltageCompensation(true);
@@ -85,18 +85,23 @@ public class ShooterSubsystem extends SubsystemBase {
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
+    isActiveStopped = false;
   }
 
   public void activeStop() {
-    shooterRight.selectProfileSlot(1, 0);
-    shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition() - 1000);
-    shooterLeft.selectProfileSlot(1, 0);
-    shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition() - 1000);
+    if (!isActiveStopped) {
+      shooterRight.selectProfileSlot(1, 0);
+      shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition() - 600);
+      shooterLeft.selectProfileSlot(1, 0);
+      shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition() - 600);
+    }
+    isActiveStopped = true;
   }
 
   public void shootDutyCycle(double speed) {
     shooterRight.set(speed);
     shooterLeft.set(speed);
+    isActiveStopped = false;
   }
 
   /**
@@ -126,6 +131,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void stop() {
     shooterRight.stopMotor();
     shooterLeft.stopMotor();
+    isActiveStopped = false;
   }
 
   public static double edgesPerDecisecToRPS(double edgesPerDecisec) {

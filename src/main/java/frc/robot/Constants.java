@@ -161,7 +161,7 @@ public final class Constants {
     /** Physical location of the high camera on the robot, relative to the center of the robot. */
     public static final Transform3d HIGH_LIMELIGHT_TO_ROBOT = new Transform3d(
         new Translation3d(-0.11, -0.015, -0.895),
-        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(34.6), 0.0));
+        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(34.6 + 29.8), 0.0)); // Add 29.8 for LL crosshair offset
 
     public static final String HIGH_LIMELIGHT_NAME = "limelight-high";
     
@@ -206,7 +206,7 @@ public final class Constants {
 
   public static class WristConstants {
     public static final int WRIST_LEADER_ID = 3;
-    public static final double WRIST_PARK_HEIGHT = 1.4;
+    public static final double WRIST_PARK_HEIGHT = 1.1;
   }
 
   public static class ShooterConstants {
@@ -218,8 +218,8 @@ public final class Constants {
     public static final double SHOOT_TIME = 0.5;
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 28.25, 0.8, 0.95),
-      shooterSettings(1.45, 30.30, 0.8, 0.95)
+      shooterSettings(1.25, 27.25, 0.95, 0.95),
+      shooterSettings(1.45, 29.30, 0.95, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
@@ -237,9 +237,9 @@ public final class Constants {
     public static final String CLASSNAME_CONE = "Cone";
     public static final String CLASSNAME_CUBE = "Cube";
 
-    public static final double CONE_ELEVATOR_HEIGHT = 0.058;
-    public static final double CONE_WRIST_ANGLE = 0.04;
-    public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
+    public static final double CONE_ELEVATOR_HEIGHT = 0.01;
+    public static final double CONE_WRIST_ANGLE = -0.115;
+    public static final double CONE_INTAKE_DUTY_CYCLE = -0.4;
     public static final double CONE_FORWARD_SPEED = 0.6;
 
     public static final double CUBE_ELEVATOR_HEIGHT = 0.058;

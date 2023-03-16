@@ -135,7 +135,7 @@ public class AutoPickupCommand extends CommandBase {
       var readyToIntake =
         Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
             && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
-      var withinPickupDistance = lastTargetDistance < .75;
+      var withinPickupDistance = lastTargetDistance < 1.0;
       var chaseSpeed = 0.8;
       var intakeSpeed = profile == LimelightProfile.PICKUP_CONE_FLOOR ? -0.07 : intakeDutyCycle;
       if (withinPickupDistance && !readyToIntake) {

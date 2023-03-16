@@ -17,7 +17,7 @@ public class DefaultWristCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    wristSubsystem.moveToPosition(Math.PI/2);
+    wristSubsystem.parkWrist();
   }
 
 }

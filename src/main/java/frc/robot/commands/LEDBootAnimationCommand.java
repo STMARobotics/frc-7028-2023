@@ -28,7 +28,7 @@ public class LEDBootAnimationCommand extends CommandBase {
   }
 
   private void animate(LEDStrips ledStrips) {
-    if (timer.advanceIfElapsed(.2) && refreshCount < LEDSubsystem.STRIP_SIZE) {
+    if (timer.advanceIfElapsed(.06) && refreshCount < LEDSubsystem.STRIP_SIZE) {
       for (int strip = 0; strip < LEDSubsystem.STRIP_COUNT; strip++) {
         if (strip % 2 == 0) {
           evenStrip(strip, ledStrips);

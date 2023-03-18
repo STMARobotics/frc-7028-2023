@@ -66,7 +66,7 @@ public class LEDBootAnimationCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return checker2 >= 31;
+    return refreshCount >= LEDSubsystem.STRIP_SIZE;
   }
 
   @Override

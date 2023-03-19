@@ -50,6 +50,11 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
+  public Optional<Trigger> babyBirdPickup() {
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<Trigger> doubleStationPickup() {
     return Optional.of(driverController.rightStick().and(driverController.leftTrigger()));
   }
@@ -115,7 +120,7 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> driveAndPickup() {
+  public Optional<Trigger> driveSingleSubstation() {
     return Optional.empty();
   }
   

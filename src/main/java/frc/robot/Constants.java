@@ -161,7 +161,7 @@ public final class Constants {
     /** Physical location of the high camera on the robot, relative to the center of the robot. */
     public static final Transform3d HIGH_LIMELIGHT_TO_ROBOT = new Transform3d(
         new Translation3d(-0.11, -0.015, -0.895),
-        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(34.6 + 29.8), 0.0)); // Add 29.8 for LL crosshair offset
+        new Rotation3d(degreesToRadians(-90.0), degreesToRadians(34.6), 0.0));
 
     public static final String HIGH_LIMELIGHT_NAME = "limelight-high";
     
@@ -201,7 +201,6 @@ public final class Constants {
     public static final int ELEVATOR_FOLLOWER_ID = 41;
     public static final int ANALOG_SENSOR_CHANNEL = 0;
     public static final double ELEVATOR_PARK_HEIGHT = .06;
-
   }
 
   public static class WristConstants {
@@ -218,28 +217,23 @@ public final class Constants {
     public static final double SHOOT_TIME = 0.5;
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.25, 27.25, 0.95, 0.95),
-      shooterSettings(1.45, 29.30, 0.95, 0.95)
+      shooterSettings(1.25, 28.5, 0.9, 0.95),
+      shooterSettings(1.45, 29.0, 0.9, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(0.8, 23.0, 0.855, 0.50),
-      shooterSettings(1.3, 24.0, 0.855, 0.50)
+      shooterSettings(1.0, 25.75, 0.855, 0.45),
+      shooterSettings(1.2, 26.0, 0.855, 0.45)
     ));
-
-    public static final VelocityAngleInterpolator LOW_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.0, 15.0, 0.0, 0.1)
-    ));
-
   }
 
   public static class PickupConstants {
     public static final String CLASSNAME_CONE = "Cone";
     public static final String CLASSNAME_CUBE = "Cube";
 
-    public static final double CONE_ELEVATOR_HEIGHT = 0.01;
-    public static final double CONE_WRIST_ANGLE = -0.115;
-    public static final double CONE_INTAKE_DUTY_CYCLE = -0.4;
+    public static final double CONE_ELEVATOR_HEIGHT = 0.0;
+    public static final double CONE_WRIST_ANGLE = -0.015;
+    public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;
 
     public static final double CUBE_ELEVATOR_HEIGHT = 0.058;
@@ -250,6 +244,10 @@ public final class Constants {
     public static final double DOUBLE_ELEVATOR_HEIGHT = 1.0;
     public static final double DOUBLE_WRIST_ANGLE = 0.1;
     public static final double DOUBLE_INTAKE_DUTY_CYCLE = -0.2;
+
+    public static final double BABY_BIRD_ELEVATOR_HEIGHT = 0.53;
+    public static final double BABY_BIRD_WRIST_ANGLE = 0.61;
+    public static final double BABY_BIRD_INTAKE_DUTY_CYCLE = -0.2;
   }
 
 }

@@ -23,12 +23,13 @@ public interface ControlBindings {
   Optional<Trigger> manualIntake();
   Optional<Trigger> autoIntake();
   Optional<Trigger> doubleStationPickup();
+  Optional<Trigger> babyBirdPickup();
   Optional<Trigger> shootAutomatically();
   Optional<Trigger> shootHigh();
   Optional<Trigger> shootMid();
   Optional<Trigger> shootLow();
   Optional<Trigger> launchCube();
-  Optional<Trigger> driveAndPickup();
+  Optional<Trigger> driveSingleSubstation();
   DoubleSupplier translationX();
   DoubleSupplier translationY();
   DoubleSupplier omega();

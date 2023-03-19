@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.ConeShootingConstants.LOW_TABLE;
 import static frc.robot.Constants.ConeShootingConstants.MIDDLE_TABLE;
 import static frc.robot.Constants.ConeShootingConstants.TOP_TABLE;
 
@@ -16,10 +15,7 @@ public enum ShooterProfile {
   SCORE_CONE_TOP(TOP_TABLE, 1.35, Units.degreesToRadians(1.0)),
 
   /** Score a cone on a middle node */
-  SCORE_CONE_MIDDLE(MIDDLE_TABLE, 1.0, Units.degreesToRadians(1.5)),
-
-  /** Score a cone in a low node */
-  SCORE_CONE_LOW(LOW_TABLE, 1.1, Units.degreesToRadians(1.0));
+  SCORE_CONE_MIDDLE(MIDDLE_TABLE, 1.1, Units.degreesToRadians(1.25));
 
   /** Lookup table for shooter velocity, angle, and height */
   public final VelocityAngleInterpolator lookupTable;

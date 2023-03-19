@@ -109,8 +109,10 @@ public class AutoPickupCommand extends CommandBase {
     var detectorTarget = limelightSubsystem.getLatestDetectorTarget();
     if (detectorTarget.isPresent()) {
       var target = detectorTarget.get();
+      // Account for LL crosshairs being on the far left
+      target.targetXDegrees -= 31.0;
       if (className.equalsIgnoreCase(target.className)) {
-        var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(detectorTarget.get());
+        var targetInfo = limelightCalcs.getRobotRelativeTargetInfo(target);
         lastTargetHeading = drivetrainHeading.plus(targetInfo.angle);
         lastTargetDistance = targetInfo.distance;
         thetaController.setGoal(lastTargetHeading.getRadians());
@@ -135,7 +137,7 @@ public class AutoPickupCommand extends CommandBase {
       var readyToIntake =
         Math.abs(elevatorSubsystem.getElevatorPosition() - elevatorMeters) < ELEVATOR_TOLERANCE
             && Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
-      var withinPickupDistance = lastTargetDistance < 1.0;
+      var withinPickupDistance = lastTargetDistance < 1.5;
       var chaseSpeed = 0.8;
       var intakeSpeed = profile == LimelightProfile.PICKUP_CONE_FLOOR ? -0.07 : intakeDutyCycle;
       if (withinPickupDistance && !readyToIntake) {

@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.PickupConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AutoScoreCommand;
+import frc.robot.commands.BabyBirdCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
@@ -239,25 +240,25 @@ public class RobotContainer {
       .onFalse(runOnce(() -> pickingUp = false)));
 
     // Double sub-station pickup
-    Command doubleStationCone = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
+    var doubleStationCone = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
         elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
         highLimelightSubsystem, LimelightProfile.PICKUP_CONE_DOUBLE_STATION, PickupConstants.CLASSNAME_CONE);
-    Command doubleStationCube = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
+    var doubleStationCube = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
         elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
         highLimelightSubsystem, LimelightProfile.PICKUP_CUBE_DOUBLE_STATION, PickupConstants.CLASSNAME_CUBE);
 
     controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
         .alongWith(either(doubleStationCone, doubleStationCube, () -> scoreLocation.getSelectedGamePiece() == CONE))));
 
-    // Drive to human player station and pickup
-    controlBindings.driveAndPickup().ifPresent(trigger -> trigger.whileTrue(
-      autoBuilder.driveToPose(new Pose2d(14.3, 6.45, Rotation2d.fromDegrees(90)), true)
-          .andThen(runOnce(() -> pickingUp = true)
-          .alongWith(either(
-              autoBuilder.pickupCone(),
-              autoBuilder.pickupCube(),
-              () -> scoreLocation.getSelectedGamePiece() == CONE))))
-      .onFalse(runOnce(() -> pickingUp = false)));
+    // Baby bird
+    controlBindings.babyBirdPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
+        .andThen(new BabyBirdCommand(controlBindings.translationX(), controlBindings.translationY(),
+            controlBindings.omega(), elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+            poseEstimator::getCurrentPose))).onFalse(runOnce(() -> pickingUp = false)));
+
+    // Drive to human player station
+    controlBindings.driveSingleSubstation().ifPresent(trigger -> trigger.whileTrue(
+      autoBuilder.driveToPose(new Pose2d(14.3, 6.45, Rotation2d.fromDegrees(90)), true)));
 
     // Shoot Top
     controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(

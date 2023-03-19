@@ -1,6 +1,9 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
+import static frc.robot.subsystems.LEDSubsystem.CONE_COLOR;
+import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -146,29 +149,34 @@ public class AutonomousBuilder {
   }
 
   public Command shootCubeTop() {
-    return new JustShootCommand(0.8, 0.5, 25.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.8, 0.5, 25.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
   }
 
   public Command shootCubeMid() {
-    return new JustShootCommand(0.55, 0.4, 23.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.01, 1.23, 25.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
   }
 
   public Command shootCubeBottom() {
-    return new JustShootCommand(0.06, 0.1, 15.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.01, WRIST_PARK_HEIGHT, 10.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem,
+        shooterSubsystem, ledSubsystem);
   }
 
   /**
    * Shoots a cube quickly from the floor to the top node.
    */
   public Command shootCubeFloor() {
-    return new JustShootCommand(0.01, 1.23, 100.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.01, 1.23, 100.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
   }
 
   /**
    * Launches a cube at max velocity
    */
   public Command launchCube() {
-    return new JustShootCommand(0.0, 0.78, 130.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.0, 0.78, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
   }
 
   /**
@@ -191,7 +199,8 @@ public class AutonomousBuilder {
   }
   
   public Command shootConeBottom() {
-    return new JustShootCommand(0.06, 0.1, 16.0, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
+    return new JustShootCommand(0.0, WRIST_PARK_HEIGHT, 10.0, CONE_COLOR, elevatorSubsystem, wristSubsystem,
+        shooterSubsystem, ledSubsystem);
   }
 
   public Command transit() {
@@ -205,7 +214,7 @@ public class AutonomousBuilder {
           poseEstimator::getCurrentPose, highLimelightSubsystem, LimelightProfile.PICKUP_CONE_FLOOR,
           shooterSubsystem::hasCone, PickupConstants.CLASSNAME_CONE)
       .deadlineWith(
-          new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
+          new LEDCustomCommand(leds -> leds.alternate(CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
   }
 
   public Command pickupCube() {
@@ -215,7 +224,7 @@ public class AutonomousBuilder {
           poseEstimator::getCurrentPose, highLimelightSubsystem, LimelightProfile.PICKUP_CUBE_FLOOR,
           shooterSubsystem::hasCube, PickupConstants.CLASSNAME_CUBE)
       .deadlineWith(
-          new LEDCustomCommand(leds -> leds.alternate(LEDSubsystem.CUBE_COLOR, Color.kRed, 1.0), ledSubsystem));
+          new LEDCustomCommand(leds -> leds.alternate(CUBE_COLOR, Color.kRed, 1.0), ledSubsystem));
   }
 
   public Command prepareForConePickup() {

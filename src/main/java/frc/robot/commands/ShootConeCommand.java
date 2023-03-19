@@ -30,10 +30,10 @@ public class ShootConeCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double DISTANCE_TOLERANCE = 0.1;
+  private static final double DISTANCE_TOLERANCE = 0.05;
   private static final double SHOOT_TIME = 0.5;
 
-  private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(2.0, 4.0);
+  private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(1.5, 2.0);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =
       new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI);
 
@@ -46,7 +46,7 @@ public class ShootConeCommand extends CommandBase {
   private final Timer shootTimer = new Timer();
 
   private final ProfiledPIDController aimController = new ProfiledPIDController(3.75, 0.0, 0, OMEGA_CONSTRAINTS);
-  private final ProfiledPIDController distanceController = new ProfiledPIDController(1.5, 0, 0, DISTANCE_CONSTRAINTS);
+  private final ProfiledPIDController distanceController = new ProfiledPIDController(2.5, 0, 0, DISTANCE_CONSTRAINTS);
 
   private final LimelightProfile limelightProfile;
   private final ShooterProfile shooterProfile;
@@ -92,7 +92,7 @@ public class ShootConeCommand extends CommandBase {
     aimController.enableContinuousInput(-Math.PI, Math.PI);
     aimController.setTolerance(shooterProfile.aimTolerance / 3.0);
     distanceController.setGoal(shooterProfile.shootingDistance);
-    distanceController.setTolerance(DISTANCE_TOLERANCE / 2.0);
+    distanceController.setTolerance(DISTANCE_TOLERANCE / 4.0);
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, limelightSubsystem);
   }
@@ -184,6 +184,9 @@ public class ShootConeCommand extends CommandBase {
         wristSubsystem.moveToPosition(shooterSettings.angle);
 
         // Rotate the distance measurement so we drive toward the target in X and Y direction, not just robot forward
+        if (!elevatorReady && limelightProfile.cameraOnElevator) {
+          distanceCorrection = 0.0;
+        }
         var xySpeeds = new Translation2d(distanceFilter.calculate(distanceCorrection), 0).rotateBy(lastTargetInfo.angle);
         drivetrainSubsystem.drive(new ChassisSpeeds(
             xSlewRateLimiter.calculate(xySpeeds.getX()),

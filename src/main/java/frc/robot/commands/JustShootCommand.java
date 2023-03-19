@@ -4,6 +4,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -28,6 +29,7 @@ public class JustShootCommand extends CommandBase {
   private final MedianFilter elevatorFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
   private final Debouncer wristDebouncer = new Debouncer(0.1, DebounceType.kRising);
+  private final Color ledColor;
 
   protected double elevatorMeters;
   protected double wristRadians;
@@ -46,17 +48,14 @@ public class JustShootCommand extends CommandBase {
    * @param wristSubsystem wrist
    * @param shooterSubsystem shooter
    */
-  public JustShootCommand(double elevatorMeters, double wristRadians, double shooterRPS,
+  public JustShootCommand(double elevatorMeters, double wristRadians, double shooterRPS, Color ledColor,
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, ShooterSubsystem shooterSubsystem,
       LEDSubsystem ledSubsystem) {
-    this(elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem);
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
     this.shooterRPS = shooterRPS;
-  }
+    this.ledColor = ledColor;
 
-  protected JustShootCommand(ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, 
-      ShooterSubsystem shooterSubsystem, LEDSubsystem ledSubsystem) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
     this.shooterSubsystem = shooterSubsystem;
@@ -73,7 +72,7 @@ public class JustShootCommand extends CommandBase {
     wristSubsystem.moveToPosition(wristRadians);
     elevatorReady = false;
     wristReady = false;
-    ledSubsystem.setCustomMode(leds -> leds.setLEDSegments(LEDSubsystem.CUBE_COLOR, elevatorReady, wristReady));
+    ledSubsystem.setCustomMode(leds -> leds.setLEDSegments(ledColor, elevatorReady, wristReady));
     shooterSubsystem.activeStop();
   }
 

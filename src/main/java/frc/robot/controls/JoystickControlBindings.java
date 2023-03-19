@@ -49,6 +49,11 @@ public class JoystickControlBindings implements ControlBindings {
   public Optional<Trigger> autoIntake() {
     return Optional.of(leftJoystick.trigger());
   }
+
+  @Override
+  public Optional<Trigger> babyBirdPickup() {
+    return Optional.of(leftJoystick.povUp());
+  }
   
   @Override
   public Optional<Trigger> doubleStationPickup() {
@@ -62,7 +67,7 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> resetPose() {
-    return Optional.of(leftJoystick.povUp());
+    return Optional.of(leftJoystick.povDown());
   }
   
   @Override
@@ -116,7 +121,7 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> driveAndPickup() {
+  public Optional<Trigger> driveSingleSubstation() {
     return Optional.of(leftJoystick.button(3));
   }
 

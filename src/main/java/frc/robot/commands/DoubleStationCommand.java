@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.wpilibj2.command.Commands.run;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -142,8 +144,8 @@ public class DoubleStationCommand extends CommandBase {
     shooterSubsystem.activeStop();
     wristSubsystem.parkWrist();
     drivetrainSubsystem.stop();
-    var transitCommand = new TransitCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem);
-    transitCommand.addRequirements(drivetrainSubsystem);
+    var transitCommand = new TransitCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)
+        .deadlineWith(run(drivetrainSubsystem::stop, drivetrainSubsystem));
     transitCommand.schedule();
   }
 

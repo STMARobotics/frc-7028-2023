@@ -31,10 +31,10 @@ import frc.robot.Constants.WristConstants;
 public class WristSubsystem extends SubsystemBase {
 
   // Offset in rotations to add to encoder value - offset from arm horizontal to sensor zero
-  private static final double ENCODER_OFFSET = -0.553;
+  private static final double ENCODER_OFFSET = -0.23f; //-0.553
   
-  private static final float LIMIT_BOTTOM = 0.53f;
-  private static final float LIMIT_TOP = 0.7519f;
+  private static final float LIMIT_BOTTOM = 0.229f; //-0.53f
+  private static final float LIMIT_TOP = 0.4137f; //-0.7519f
   private static final double LIMIT_TOP_RADIANS = Units.rotationsToRadians(LIMIT_TOP + ENCODER_OFFSET);
   private static final double LIMIT_BOTTOM_RADIANS = Units.rotationsToRadians(LIMIT_BOTTOM + ENCODER_OFFSET);
 

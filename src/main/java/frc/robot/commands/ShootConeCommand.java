@@ -31,7 +31,7 @@ public class ShootConeCommand extends CommandBase {
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
   private static final double DISTANCE_TOLERANCE = 0.05;
-  private static final double SHOOT_TIME = 0.5;
+  private static final double SHOOT_TIME = 0.1;
 
   private static final TrapezoidProfile.Constraints DISTANCE_CONSTRAINTS = new TrapezoidProfile.Constraints(1.5, 2.0);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =
@@ -54,7 +54,7 @@ public class ShootConeCommand extends CommandBase {
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer readyToShootDebouncer = new Debouncer(0.2, DebounceType.kRising);
+  private final Debouncer readyToShootDebouncer = new Debouncer(0.5, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(3);
   private final MovingAverageFilter rotationFilter = new MovingAverageFilter(3);
 

@@ -72,14 +72,12 @@ public class ShooterSubsystem extends SubsystemBase {
   public void shootVelocity(double rps) {
     var feedForwardVolts = feedForward.calculate(rps);
 
-    shooterRight.selectProfileSlot(0, 0);
     shooterRight.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
         DemandType.ArbitraryFeedForward,
         feedForwardVolts / 12);
 
-    shooterLeft.selectProfileSlot(0, 0);
     shooterLeft.set(
         ControlMode.Velocity,
         rpsToedgesPerDecisec(rps),
@@ -90,10 +88,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void activeStop() {
     if (!isActiveStopped) {
-      shooterRight.selectProfileSlot(1, 0);
-      shooterRight.set(ControlMode.Position, shooterRight.getSelectedSensorPosition() - 1000);
-      shooterLeft.selectProfileSlot(1, 0);
-      shooterLeft.set(ControlMode.Position, shooterLeft.getSelectedSensorPosition() - 1000);
+      shooterRight.setSelectedSensorPosition(0.0);
+      shooterRight.set(ControlMode.Position, -1000);
+      shooterLeft.setSelectedSensorPosition(0.0);
+      shooterLeft.set(ControlMode.Position, -1000);
     }
     isActiveStopped = true;
   }

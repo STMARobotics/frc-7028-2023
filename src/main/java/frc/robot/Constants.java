@@ -232,7 +232,7 @@ public final class Constants {
     public static final String CLASSNAME_CUBE = "Cube";
 
     public static final double CONE_ELEVATOR_HEIGHT = 0.0;
-    public static final double CONE_WRIST_ANGLE = -0.015;
+    public static final double CONE_WRIST_ANGLE = -0.045;
     public static final double CONE_INTAKE_DUTY_CYCLE = -0.2;
     public static final double CONE_FORWARD_SPEED = 0.6;
 
@@ -245,8 +245,8 @@ public final class Constants {
     public static final double DOUBLE_WRIST_ANGLE = 0.1;
     public static final double DOUBLE_INTAKE_DUTY_CYCLE = -0.2;
 
-    public static final double BABY_BIRD_ELEVATOR_HEIGHT = 0.53;
-    public static final double BABY_BIRD_WRIST_ANGLE = 0.61;
+    public static final double BABY_BIRD_ELEVATOR_HEIGHT = 0.54;
+    public static final double BABY_BIRD_WRIST_ANGLE = 0.56;
     public static final double BABY_BIRD_INTAKE_DUTY_CYCLE = -0.2;
   }
 

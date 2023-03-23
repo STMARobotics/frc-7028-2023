@@ -237,17 +237,43 @@
         "x": 2.5562098069340036,
         "y": 0.7999999999999999
       },
-      "nextControl": null,
+      "nextControl": {
+        "x": 2.5562098069340036,
+        "y": 0.7999999999999999
+      },
       "holonomicAngle": -174.1736579704443,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "ShootConeTop",
+          "Transit"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 3.3976253972332637,
+        "y": 0.7975112582803294
+      },
+      "prevControl": {
+        "x": 3.2833151634166047,
+        "y": 0.7975112582803294
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [
-          "ShootConeTop"
-        ],
-        "executionBehavior": "sequential",
+        "names": [],
+        "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }

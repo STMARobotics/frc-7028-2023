@@ -134,7 +134,7 @@ public class DriveToPoseCommand extends CommandBase {
 
     if (xSpeed == 0 || ySpeed == 0 || omegaSpeed == 0) {
       ledSubsystem.setCustomMode(
-        leds -> leds.setLEDSegments(Color.kBlue, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal())); 
+        leds -> leds.setLEDSegments(Color.kSaddleBrown, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal())); 
     }
 
     drivetrainSubsystem.drive(

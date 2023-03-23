@@ -34,7 +34,7 @@ public class WristSubsystem extends SubsystemBase {
   private static final double ENCODER_OFFSET = -0.2285f;
   
   private static final float LIMIT_BOTTOM = 0.15f;
-  private static final float LIMIT_TOP = 0.4137f;
+  private static final float LIMIT_TOP = 0.4272f;
   private static final double LIMIT_TOP_RADIANS = Units.rotationsToRadians(LIMIT_TOP + ENCODER_OFFSET);
   private static final double LIMIT_BOTTOM_RADIANS = Units.rotationsToRadians(LIMIT_BOTTOM + ENCODER_OFFSET);
 

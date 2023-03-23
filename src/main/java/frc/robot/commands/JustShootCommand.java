@@ -18,7 +18,7 @@ public class JustShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double SHOOT_TIME = 0.1;
+  private static final double SHOOT_TIME = 0.25;
 
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;

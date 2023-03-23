@@ -24,13 +24,7 @@ public enum LimelightProfile {
   PICKUP_CONE_FLOOR(0, 0.165, HIGH_LIMELIGHT_TO_ROBOT, true),
 
   /** Cube pickup on the floor */
-  PICKUP_CUBE_FLOOR(2, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true),
-
-  /** Cone pickup from double substation */
-  PICKUP_CONE_DOUBLE_STATION(0, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true),
-
-  /** Cube pickup from double substation */
-  PICKUP_CUBE_DOUBLE_STATION(2, 0.95, HIGH_LIMELIGHT_TO_ROBOT, true);
+  PICKUP_CUBE_FLOOR(2, 0.0, HIGH_LIMELIGHT_TO_ROBOT, true);
 
   /** ID for the Limelight profile */
   public final int pipelineId;

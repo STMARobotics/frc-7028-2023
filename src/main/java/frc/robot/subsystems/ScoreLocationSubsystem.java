@@ -35,7 +35,7 @@ public class ScoreLocationSubsystem extends SubsystemBase {
     var gridsLayout = gridsTab.getLayout("Grids", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 9, "Number of rows", 3, "Label Position", "HIDDEN"))
         .withSize(9, 3)
-        .withPosition(0, 0);
+        .withPosition(4, 0);
 
     for(int gridId = 0; gridId < 3; gridId++) {
       for(int columnId = 0; columnId < 3; columnId++) {

@@ -9,6 +9,12 @@ import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
+import static frc.robot.Constants.PickupConstants.BABY_BIRD_ELEVATOR_HEIGHT;
+import static frc.robot.Constants.PickupConstants.BABY_BIRD_INTAKE_DUTY_CYCLE;
+import static frc.robot.Constants.PickupConstants.BABY_BIRD_WRIST_ANGLE;
+import static frc.robot.Constants.PickupConstants.DOUBLE_ELEVATOR_HEIGHT;
+import static frc.robot.Constants.PickupConstants.DOUBLE_INTAKE_DUTY_CYCLE;
+import static frc.robot.Constants.PickupConstants.DOUBLE_WRIST_ANGLE;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
 import static frc.robot.GamePiece.CONE;
 import static frc.robot.controls.OperatorButtons.ENTER_SELECTION;
@@ -18,29 +24,30 @@ import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 
 import java.util.Arrays;
+import java.util.Map;
 
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import frc.robot.Constants.PickupConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.AutoScoreCommand;
-import frc.robot.commands.BabyBirdCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.DefaultWristCommand;
-import frc.robot.commands.DoubleStationCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
+import frc.robot.commands.HighPickupCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.LEDMarqueeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
@@ -144,7 +151,12 @@ public class RobotContainer {
     /**** Driver tab ****/
     var driverTab = Shuffleboard.getTab("Driver");
     autoBuilder.addDashboardWidgets(driverTab);
-    driverTab.addBoolean("Pickup", () -> pickingUp).withPosition(9, 0).withSize(2, 2);
+    driverTab.addBoolean("Pickup", () -> pickingUp).withPosition(11, 3).withSize(2, 2);
+
+    driverTab.add(new HttpCamera("limelight-high", "http://10.70.28.13:1181"))
+        .withWidget(BuiltInWidgets.kCameraStream)
+        .withProperties(Map.of("showCrosshair", true, "showControls", false, "rotation", "QUARTER_CCW"))
+        .withSize(4, 6).withPosition(0, 0);
 
     /**** Vision tab ****/
     final var visionTab = Shuffleboard.getTab("Vision");
@@ -240,21 +252,17 @@ public class RobotContainer {
       .onFalse(runOnce(() -> pickingUp = false)));
 
     // Double sub-station pickup
-    var doubleStationCone = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
-        elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
-        highLimelightSubsystem, LimelightProfile.PICKUP_CONE_DOUBLE_STATION, PickupConstants.CLASSNAME_CONE);
-    var doubleStationCube = new DoubleStationCommand(controlBindings.translationX(), controlBindings.translationY(),
-        elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem, poseEstimator::getCurrentPose,
-        highLimelightSubsystem, LimelightProfile.PICKUP_CUBE_DOUBLE_STATION, PickupConstants.CLASSNAME_CUBE);
-
     controlBindings.doubleStationPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
-        .alongWith(either(doubleStationCone, doubleStationCube, () -> scoreLocation.getSelectedGamePiece() == CONE))));
+        .alongWith(new HighPickupCommand(controlBindings.translationX(), controlBindings.translationY(),            
+        controlBindings.omega(), DOUBLE_WRIST_ANGLE, DOUBLE_ELEVATOR_HEIGHT, DOUBLE_INTAKE_DUTY_CYCLE,
+        elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem))));
 
     // Baby bird
     controlBindings.babyBirdPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
-        .andThen(new BabyBirdCommand(controlBindings.translationX(), controlBindings.translationY(),
-            controlBindings.omega(), elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-            poseEstimator::getCurrentPose))).onFalse(runOnce(() -> pickingUp = false)));
+        .andThen(new HighPickupCommand(controlBindings.translationX(), controlBindings.translationY(),            
+            controlBindings.omega(), BABY_BIRD_WRIST_ANGLE, BABY_BIRD_ELEVATOR_HEIGHT, BABY_BIRD_INTAKE_DUTY_CYCLE,
+            elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem)))
+        .onFalse(runOnce(() -> pickingUp = false)));
 
     // Drive to human player station
     controlBindings.driveSingleSubstation().ifPresent(trigger -> trigger.whileTrue(

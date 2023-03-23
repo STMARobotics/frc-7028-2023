@@ -157,5 +157,12 @@
   "maxVelocity": 4.0,
   "maxAcceleration": 3.0,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 1.9272727272727215,
+      "names": [
+        "PrepareForConePickup"
+      ]
+    }
+  ]
 }

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 import static frc.robot.subsystems.LEDSubsystem.CONE_COLOR;
 import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
@@ -109,7 +110,7 @@ public class AutonomousBuilder {
    * @param dashboard dashboard
    */
   public void addDashboardWidgets(ShuffleboardTab dashboard) {
-    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(0, 3);
+    dashboard.add("Autonomous", autoChooser).withSize(2, 1).withPosition(4, 3);
   }
 
   /**
@@ -125,7 +126,8 @@ public class AutonomousBuilder {
     if (twoConePath == null) {
       return Commands.print("********* Path failed to load. Not running auto: " + pathGroupName + " *********");
     }
-    return swerveAutoBuilder.fullAuto(twoConePath);
+    return runOnce(shooterSubsystem::activeStop, shooterSubsystem)
+        .andThen(swerveAutoBuilder.fullAuto(twoConePath));
   }
 
   private HashMap<String, Command> buildEventMap() {
@@ -144,7 +146,8 @@ public class AutonomousBuilder {
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
     eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
-    eventMap.put("BalanceForwards", balanceForwards().withTimeout(3.0)); 
+    eventMap.put("BalanceForwards", balanceForwards().withTimeout(3.0));
+    eventMap.put("DumpShooter", dumpShooter());
     return eventMap;
   }
 
@@ -167,8 +170,16 @@ public class AutonomousBuilder {
    * Shoots a cube quickly from the floor to the top node.
    */
   public Command shootCubeFloor() {
-    return new JustShootCommand(0.01, 1.23, 100.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+    return new JustShootCommand(0.01, 1.15, 100.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
         ledSubsystem);
+  }
+
+  /**
+   * Just runs the shooter out at 100 RPS for 1/4 second.
+   */
+  public Command dumpShooter() {
+    return startEnd(() -> shooterSubsystem.shootVelocity(100.0), shooterSubsystem::stop, shooterSubsystem)
+        .withTimeout(0.25);
   }
 
   /**

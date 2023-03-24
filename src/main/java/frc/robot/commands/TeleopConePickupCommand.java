@@ -12,7 +12,7 @@ import frc.robot.subsystems.WristSubsystem;
 public class TeleopConePickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
-  private static final double WRIST_TOLERANCE = 0.045;
+  private static final double WRIST_TOLERANCE = 0.075;
 
   private final double elevatorMeters;
   private final double wristRadians;

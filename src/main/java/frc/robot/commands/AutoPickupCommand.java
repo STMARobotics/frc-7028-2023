@@ -28,7 +28,7 @@ import frc.robot.subsystems.WristSubsystem;
 public class AutoPickupCommand extends CommandBase {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
-  private static final double WRIST_TOLERANCE = 0.045;
+  private static final double WRIST_TOLERANCE = 0.075;
   private static final double THETA_TOLERANCE = .01;
 
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(

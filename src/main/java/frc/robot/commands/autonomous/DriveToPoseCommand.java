@@ -23,7 +23,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -51,7 +50,6 @@ public class DriveToPoseCommand extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final Supplier<Pose2d> poseProvider;
   private final Pose2d goalPose;
-  private final LEDSubsystem ledSubsystem;
   private final boolean useAllianceColor;
 
   public DriveToPoseCommand(
@@ -74,7 +72,6 @@ public class DriveToPoseCommand extends CommandBase {
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
     this.goalPose = goalPose;
-    this.ledSubsystem = ledSubsystem;
     this.useAllianceColor = useAllianceColor;
 
     xController = new ProfiledPIDController(X_kP, X_kI, X_kD, xyConstraints);
@@ -130,11 +127,6 @@ public class DriveToPoseCommand extends CommandBase {
     var omegaSpeed = thetaController.calculate(robotPose.getRotation().getRadians());
     if (thetaController.atGoal()) {
       omegaSpeed = 0;
-    }
-
-    if (xSpeed == 0 || ySpeed == 0 || omegaSpeed == 0) {
-      ledSubsystem.setCustomMode(
-        leds -> leds.setLEDSegments(Color.kSaddleBrown, true, xController.atGoal(), yController.atGoal(), thetaController.atGoal())); 
     }
 
     drivetrainSubsystem.drive(

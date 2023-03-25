@@ -266,7 +266,7 @@ public class RobotContainer {
 
     // Drive to human player station
     controlBindings.driveSingleSubstation().ifPresent(trigger -> trigger.whileTrue(
-      autoBuilder.driveToPose(new Pose2d(14.3, 7.0, Rotation2d.fromDegrees(90)), true)));
+        autoBuilder.driveToPose(new Pose2d(14.22, 7.0, Rotation2d.fromDegrees(90)), true)));
 
     // Shoot Top
     controlBindings.shootHigh().ifPresent(trigger -> trigger.whileTrue(

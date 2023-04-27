@@ -21,22 +21,22 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> elevatorDown() {
-    return Optional.of(driverController.rightTrigger().and(driverController.y()));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> elevatorUp() {
-    return Optional.of(driverController.rightTrigger().and(driverController.b()));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> fieldHeadingDrive() {
-    return Optional.of(driverController.povDown());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> fieldOrientedDrive() {
-    return Optional.of(driverController.povUp());
+    return Optional.empty();
   }
 
   @Override
@@ -56,7 +56,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> doubleStationPickup() {
-    return Optional.of(driverController.rightStick().and(driverController.leftTrigger()));
+    return Optional.empty();
   }
 
   @Override
@@ -106,17 +106,17 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> wristDown() {
-    return Optional.of(driverController.rightTrigger().and(driverController.b()));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> wristUp() {
-    return Optional.of(driverController.rightTrigger().and(driverController.y()));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> launchCube() {
-    return Optional.empty();
+    return Optional.of(driverController.rightTrigger());
   }
 
   @Override

@@ -22,6 +22,7 @@ import static frc.robot.controls.OperatorButtons.GRID_CENTER;
 import static frc.robot.controls.OperatorButtons.GRID_LEFT;
 import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
+import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -48,6 +49,7 @@ import frc.robot.commands.DefaultWristCommand;
 import frc.robot.commands.FieldHeadingDriveCommand;
 import frc.robot.commands.FieldOrientedDriveCommand;
 import frc.robot.commands.HighPickupCommand;
+import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.LEDMarqueeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
@@ -284,7 +286,8 @@ public class RobotContainer {
     controlBindings.shootAutomatically().ifPresent(trigger -> trigger.whileTrue(autoScoreCommand));
 
     // Launch cube
-    controlBindings.launchCube().ifPresent(trigger -> trigger.onTrue(autoBuilder.launchCube()));
+    controlBindings.launchCube().ifPresent(trigger -> trigger.onTrue(new JustShootCommand(
+        0.0, 0.78, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
     
     //////////// Operator \\\\\\\\\\\\
     // Enter location selection

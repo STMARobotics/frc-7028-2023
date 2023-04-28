@@ -50,7 +50,7 @@ public class AutoPickupCommand extends CommandBase {
   private final LimelightSubsystem limelightSubsystem;
   private final LimelightProfile profile;
   private final Supplier<Pose2d> robotPoseSupplier;
-  private final BooleanSupplier finishedSuppiler;
+  private final BooleanSupplier finishedSupplier;
 
   private final LimelightCalcs limelightCalcs;
   private final SlewRateLimiter xSlewRateLimiter = new SlewRateLimiter(3.0);
@@ -63,7 +63,7 @@ public class AutoPickupCommand extends CommandBase {
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
       ShooterSubsystem shooterSubsystem, Supplier<Pose2d> poseSupplier, LimelightSubsystem limelightSubsystem,
-      LimelightProfile profile, BooleanSupplier finishedSuppiler, String className) {
+      LimelightProfile profile, BooleanSupplier finishedSupplier, String className) {
 
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
@@ -76,7 +76,7 @@ public class AutoPickupCommand extends CommandBase {
     this.robotPoseSupplier = poseSupplier;
     this.limelightSubsystem = limelightSubsystem;
     this.profile = profile;
-    this.finishedSuppiler = finishedSuppiler;
+    this.finishedSupplier = finishedSupplier;
     this.className = className;
 
     DoubleSupplier cameraHeightOffset = 
@@ -158,7 +158,7 @@ public class AutoPickupCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return finishedSuppiler.getAsBoolean();
+    return finishedSupplier.getAsBoolean();
   }
 
   @Override

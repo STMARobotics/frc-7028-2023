@@ -244,12 +244,12 @@
       "holonomicAngle": -174.1736579704443,
       "isReversal": true,
       "velOverride": null,
-      "isLocked": false,
+      "isLocked": true,
       "isStopPoint": true,
       "stopEvent": {
         "names": [
           "ShootConeTop",
-          "Transit"
+          "TransitAfterShoot"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -269,7 +269,7 @@
       "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
-      "isLocked": false,
+      "isLocked": true,
       "isStopPoint": false,
       "stopEvent": {
         "names": [],

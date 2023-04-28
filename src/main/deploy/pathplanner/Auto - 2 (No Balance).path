@@ -146,7 +146,7 @@
       "stopEvent": {
         "names": [
           "ShootConeTop",
-          "Transit"
+          "TransitAfterShoot"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",

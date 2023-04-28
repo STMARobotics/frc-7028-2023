@@ -149,12 +149,12 @@ public class SwerveSteerController {
     // Reset the Falcon's encoder periodically when the module is not rotating.
     // Sometimes (~5% of the time) when we initialize, the absolute encoder isn't fully set up, and we don't
     // end up getting a good reading. If we reset periodically this won't matter anymore.
-    if (reseedTimer.advanceIfElapsed(ENCODER_RESEED_SECONDS) && 
-        motor.getSelectedSensorVelocity() * motorEncoderVelocityCoefficient < ENCODER_RESEED_MAX_ANGULAR_VELOCITY) {
-      currentAngleRadians = configMotorOffset(false);
-    } else {
+    // if (reseedTimer.advanceIfElapsed(ENCODER_RESEED_SECONDS) && 
+    //     motor.getSelectedSensorVelocity() * motorEncoderVelocityCoefficient < ENCODER_RESEED_MAX_ANGULAR_VELOCITY) {
+    //   currentAngleRadians = configMotorOffset(false);
+    // } else {
       currentAngleRadians = motor.getSelectedSensorPosition() * motorEncoderPositionCoefficient;
-    }
+    // }
 
     double currentAngleRadiansMod = currentAngleRadians % (2.0 * Math.PI);
     if (currentAngleRadiansMod < 0.0) {

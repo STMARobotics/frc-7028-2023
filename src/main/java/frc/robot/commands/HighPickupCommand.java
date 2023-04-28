@@ -115,7 +115,7 @@ public class HighPickupCommand extends CommandBase {
     shooterSubsystem.activeStop();
     wristSubsystem.parkWrist();
     drivetrainSubsystem.stop();
-    var transitCommand = new TransitCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem)
+    var transitCommand = new TransitCommand(elevatorSubsystem, wristSubsystem)
         .deadlineWith(run(drivetrainSubsystem::stop, drivetrainSubsystem));
     transitCommand.schedule();
   }

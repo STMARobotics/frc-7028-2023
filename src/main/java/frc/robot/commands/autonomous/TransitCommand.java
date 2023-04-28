@@ -2,7 +2,6 @@ package frc.robot.commands.autonomous;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
 /**
@@ -15,20 +14,12 @@ public class TransitCommand extends CommandBase {
    
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
-  private final ShooterSubsystem shooterSubsystem;
 
-  public TransitCommand(ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem,
-      ShooterSubsystem shooterSubsystem) {
+  public TransitCommand(ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.wristSubsystem = wristSubsystem;
-    this.shooterSubsystem = shooterSubsystem;
 
-    addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem);
-  }
-  
-  @Override
-  public void initialize() {
-    shooterSubsystem.activeStop();
+    addRequirements(elevatorSubsystem, wristSubsystem);
   }
 
   @Override

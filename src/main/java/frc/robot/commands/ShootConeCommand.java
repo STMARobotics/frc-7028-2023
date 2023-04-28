@@ -54,7 +54,7 @@ public class ShootConeCommand extends CommandBase {
 
   private final MedianFilter elevatoFilter = new MedianFilter(5);
   private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer readyToShootDebouncer = new Debouncer(0.5, DebounceType.kRising);
+  private final Debouncer readyToShootDebouncer = new Debouncer(0.25, DebounceType.kRising);
   private final MovingAverageFilter distanceFilter = new MovingAverageFilter(3);
   private final MovingAverageFilter rotationFilter = new MovingAverageFilter(3);
 

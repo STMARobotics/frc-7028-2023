@@ -29,7 +29,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.PickupConstants;
 import frc.robot.commands.AutoPickupCommand;
-import frc.robot.commands.DefaultLEDCommand;
+import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
@@ -83,7 +83,7 @@ public class AutonomousBuilder {
         eventMap,
         true,
         new Command[] {
-          new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube)
+          new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem)
         },
         drivetrainSubsystem
     );
@@ -139,10 +139,11 @@ public class AutonomousBuilder {
     eventMap.put("ShootConeMid", shootConeMid().withTimeout(3.0));
     eventMap.put("ShootConeBottom", shootConeBottom().withTimeout(3.0));
     eventMap.put("Transit", transit());
-    eventMap.put("PickupCone", keepingXBelow(pickupCone(), 7.6));
+    eventMap.put("TransitAfterShoot", transitAfterShoot());
+    eventMap.put("PickupCone", keepingXBelow(pickupConeAuto(), 7.6));
     eventMap.put("PickupCube", keepingXBelow(pickupCube(), 7.6));
     eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.5));
-    eventMap.put("LaunchCube", shootCubeFloor().withTimeout(2.0));
+    eventMap.put("LaunchCube", launchCube().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
     eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
@@ -175,18 +176,18 @@ public class AutonomousBuilder {
   }
 
   /**
-   * Just runs the shooter out at 100 RPS for 1/4 second.
+   * Just runs the shooter out at 50 RPS for 0.1 seconds.
    */
   public Command dumpShooter() {
-    return startEnd(() -> shooterSubsystem.shootVelocity(100.0), shooterSubsystem::stop, shooterSubsystem)
-        .withTimeout(0.25);
+    return startEnd(() -> shooterSubsystem.shootVelocity(50.0), shooterSubsystem::stop, shooterSubsystem)
+        .withTimeout(0.1);
   }
 
   /**
    * Launches a cube at max velocity
    */
   public Command launchCube() {
-    return new JustShootCommand(0.0, 0.78, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+    return new JustShootCommand(0.35, 0.65, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
         ledSubsystem);
   }
 
@@ -214,8 +215,15 @@ public class AutonomousBuilder {
         shooterSubsystem, ledSubsystem);
   }
 
+  /** Puts the elevator and wrist in transit position and the shooter in "active hold" */
   public Command transit() {
-    return new TransitCommand(elevatorSubsystem, wristSubsystem, shooterSubsystem);
+    return new TransitCommand(elevatorSubsystem, wristSubsystem)
+        .alongWith(runOnce(shooterSubsystem::activeStop, shooterSubsystem));
+  }
+
+  /** Puts the elevator and wrist in transit position and dumps the shooter */
+  public Command transitAfterShoot() {
+    return new TransitCommand(elevatorSubsystem, wristSubsystem).alongWith(dumpShooter());
   }
 
   public Command pickupCone() {
@@ -226,6 +234,17 @@ public class AutonomousBuilder {
           shooterSubsystem::hasCone, PickupConstants.CLASSNAME_CONE)
       .deadlineWith(
           new LEDCustomCommand(leds -> leds.alternate(CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
+  }
+
+  /** Like regular pickupcone, but faster */
+  public Command pickupConeAuto() {
+    return new AutoPickupCommand(
+      PickupConstants.CONE_ELEVATOR_HEIGHT, PickupConstants.CONE_WRIST_ANGLE, PickupConstants.CONE_INTAKE_DUTY_CYCLE,
+      PickupConstants.CONE_FORWARD_SPEED * 1.4, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
+      poseEstimator::getCurrentPose, highLimelightSubsystem, LimelightProfile.PICKUP_CONE_FLOOR,
+      shooterSubsystem::hasCone, PickupConstants.CLASSNAME_CONE)
+  .deadlineWith(
+      new LEDCustomCommand(leds -> leds.alternate(CONE_COLOR, Color.kRed, 1.0), ledSubsystem));
   }
 
   public Command pickupCube() {

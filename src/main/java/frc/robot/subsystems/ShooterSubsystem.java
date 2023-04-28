@@ -34,10 +34,6 @@ public class ShooterSubsystem extends SubsystemBase {
     config.slot0.kP = 0.03;
     config.slot0.kI = 0;
     config.slot0.kD = 0;
-    config.slot1.kP = 0.3;
-    config.slot1.kI = 0;
-    config.slot1.kD = 0;
-    config.slot1.allowableClosedloopError = 0;
     config.neutralDeadband = 0;
     config.voltageCompSaturation = 12;
 
@@ -60,9 +56,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void addDashboardWidgets(ShuffleboardLayout layout) {
     layout.withProperties(Map.of("Number of columns", 1, "Number of rows", 4));
-    layout.addNumber("Velocity RPS", this::getVelocity).withPosition(0, 0);
-    layout.addNumber("Right Velocity Raw", shooterRight::getSelectedSensorVelocity).withPosition(0, 1);
-    layout.addNumber("Left Velocity Raw", shooterLeft::getSelectedSensorVelocity).withPosition(0, 2);
+    layout.addNumber("Velocity Right", this::getVelocityRight).withPosition(0, 0);
+    layout.addNumber("Velocity Left", this::getVelocityLeft).withPosition(0, 1);
     var gamePieceLayout = layout.getLayout("Game Piece", BuiltInLayouts.kGrid)
         .withProperties(Map.of("Number of columns", 2, "Number of rows", 1)).withPosition(0, 3);
     gamePieceLayout.addBoolean("Has Cone", this::hasCone).withPosition(0, 0);
@@ -103,19 +98,19 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   /**
-   * Gets the velocity in RPS
+   * Gets the velocity of the right wheel in RPS
    * @return velocity in RPS
    */
-  public double getVelocity() {
+  public double getVelocityRight() {
     return edgesPerDecisecToRPS(shooterRight.getSelectedSensorVelocity());
   }
 
   /**
-   * Get the surface velocity of the shooter wheels in meters per second.
-   * @return shooter surface velocity in meters per second
+   * Gets the velocity of the left wheel in RPS
+   * @return velocity in RPS
    */
-  public double getVelocityInMetersPerSecond() {
-    return (getVelocity() * VELOCITY_COEFFIENT);
+  public double getVelocityLeft() {
+    return edgesPerDecisecToRPS(shooterLeft.getSelectedSensorVelocity());
   }
 
   public boolean hasCone() {

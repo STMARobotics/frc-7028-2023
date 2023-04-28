@@ -23,6 +23,7 @@ public class LEDBootAnimationCommand extends CommandBase {
 
   @Override
   public void initialize() {
+    blipIndex = -1;
     timer.start();
     ledSubsystem.setCustomMode(this::animate);
   }

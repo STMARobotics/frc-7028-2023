@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
@@ -18,7 +16,7 @@ public class JustShootCommand extends CommandBase {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;
-  private static final double SHOOT_TIME = 0.25;
+  private static final double SHOOT_TIME = 0.2;
 
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;
@@ -27,8 +25,6 @@ public class JustShootCommand extends CommandBase {
   private final Timer shootTimer = new Timer();
 
   private final MedianFilter elevatorFilter = new MedianFilter(5);
-  private final MedianFilter wristFilter = new MedianFilter(5);
-  private final Debouncer wristDebouncer = new Debouncer(0.1, DebounceType.kRising);
   private final Color ledColor;
 
   protected double elevatorMeters;
@@ -68,7 +64,6 @@ public class JustShootCommand extends CommandBase {
   public void initialize() {
     shootTimer.reset();
     isShooting = false;
-    wristDebouncer.calculate(false);
     wristSubsystem.moveToPosition(wristRadians);
     elevatorReady = false;
     wristReady = false;
@@ -81,10 +76,9 @@ public class JustShootCommand extends CommandBase {
     elevatorSubsystem.moveToPosition(elevatorMeters);
 
     var elevatorPosition = elevatorFilter.calculate(elevatorSubsystem.getElevatorPosition());
-    var wristPosition = wristFilter.calculate(wristSubsystem.getWristPosition());
     elevatorReady = Math.abs(elevatorPosition - elevatorMeters) < ELEVATOR_TOLERANCE;
-    wristReady = Math.abs(wristPosition - wristRadians) < WRIST_TOLERANCE;
-    var readyToShoot = elevatorReady && wristDebouncer.calculate(wristReady);
+    wristReady = Math.abs(wristSubsystem.getWristPosition() - wristRadians) < WRIST_TOLERANCE;
+    var readyToShoot = elevatorReady && wristReady;
 
     if (isShooting || readyToShoot) {
       shooterSubsystem.shootVelocity(shooterRPS);

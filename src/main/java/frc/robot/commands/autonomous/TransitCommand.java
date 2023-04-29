@@ -10,7 +10,7 @@ import frc.robot.subsystems.WristSubsystem;
  */
 public class TransitCommand extends CommandBase {
 
-  private static final double WRIST_SAFE_POSITION = 0.09;
+  private static final double WRIST_SAFE_POSITION = 0.01;
    
   private final ElevatorSubsystem elevatorSubsystem;
   private final WristSubsystem wristSubsystem;

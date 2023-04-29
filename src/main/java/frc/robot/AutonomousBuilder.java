@@ -30,6 +30,7 @@ import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.PickupConstants;
 import frc.robot.commands.AutoPickupCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
+import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
@@ -83,6 +84,7 @@ public class AutonomousBuilder {
         eventMap,
         true,
         new Command[] {
+          new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube),
           new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem)
         },
         drivetrainSubsystem
@@ -143,7 +145,8 @@ public class AutonomousBuilder {
     eventMap.put("PickupCone", keepingXBelow(pickupConeAuto(), 7.6));
     eventMap.put("PickupCube", keepingXBelow(pickupCube(), 7.6));
     eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.5));
-    eventMap.put("LaunchCube", launchCube().withTimeout(2.0));
+    eventMap.put("LaunchCube", launchCube().withTimeout(2.5));
+    eventMap.put("LaunchCone", launchCone().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
     eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
@@ -176,6 +179,14 @@ public class AutonomousBuilder {
   }
 
   /**
+   * Launches a cube to score mid from far away
+   */
+  public Command launchCube() {
+    return new JustShootCommand(0.01, 0.78, 100.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+  }
+
+  /**
    * Just runs the shooter out at 50 RPS for 0.1 seconds.
    */
   public Command dumpShooter() {
@@ -184,10 +195,10 @@ public class AutonomousBuilder {
   }
 
   /**
-   * Launches a cube at max velocity
+   * Launches a cone to score low from far away
    */
-  public Command launchCube() {
-    return new JustShootCommand(0.35, 0.65, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+  public Command launchCone() {
+    return new JustShootCommand(0.01, Math.PI / 4.0, 60.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
         ledSubsystem);
   }
 

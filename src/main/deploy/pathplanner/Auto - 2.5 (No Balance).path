@@ -183,15 +183,68 @@
     },
     {
       "anchorPoint": {
-        "x": 5.610925780324113,
-        "y": 4.495990853556887
+        "x": 4.821732506682591,
+        "y": 4.533644446452606
       },
       "prevControl": {
-        "x": 5.007163761267091,
-        "y": 4.533508199452293
+        "x": 4.2179704876255695,
+        "y": 4.571161792348012
+      },
+      "nextControl": {
+        "x": 5.425494525739612,
+        "y": 4.4961271005572
+      },
+      "holonomicAngle": null,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.0716094217447125,
+        "y": 3.97688109337948
+      },
+      "prevControl": {
+        "x": 5.560296138310209,
+        "y": 4.437063048470534
+      },
+      "nextControl": {
+        "x": 5.560296138310209,
+        "y": 4.437063048470534
+      },
+      "holonomicAngle": -37.50414236027003,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "PickupCone",
+          "Transit"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.0716094217447125,
+        "y": 4.175725148048454
+      },
+      "prevControl": {
+        "x": 6.446572496263348,
+        "y": 3.7950808148249893
       },
       "nextControl": null,
-      "holonomicAngle": 0.0,
+      "holonomicAngle": 161.5650511770782,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -210,6 +263,12 @@
   "markers": [
     {
       "position": 1.9272727272727215,
+      "names": [
+        "PrepareForConePickup"
+      ]
+    },
+    {
+      "position": 7.010909090909388,
       "names": [
         "PrepareForConePickup"
       ]

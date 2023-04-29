@@ -187,10 +187,10 @@ public class AutonomousBuilder {
   }
 
   /**
-   * Just runs the shooter out at 50 RPS for 0.1 seconds.
+   * Just runs the shooter out at 28 RPS for 0.1 seconds.
    */
   public Command dumpShooter() {
-    return startEnd(() -> shooterSubsystem.shootVelocity(50.0), shooterSubsystem::stop, shooterSubsystem)
+    return startEnd(() -> shooterSubsystem.shootVelocity(28.0), shooterSubsystem::stop, shooterSubsystem)
         .withTimeout(0.1);
   }
 

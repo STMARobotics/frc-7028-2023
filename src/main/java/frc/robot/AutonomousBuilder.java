@@ -5,6 +5,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
 import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 import static frc.robot.subsystems.LEDSubsystem.CONE_COLOR;
 import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
+import static java.lang.Math.PI;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -147,6 +148,7 @@ public class AutonomousBuilder {
     eventMap.put("ShootCubeFloor", shootCubeFloor().withTimeout(2.5));
     eventMap.put("LaunchCube", launchCube().withTimeout(2.5));
     eventMap.put("LaunchCone", launchCone().withTimeout(2.0));
+    eventMap.put("SuperLaunchCone", superLaunchCone().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
     eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
@@ -199,6 +201,14 @@ public class AutonomousBuilder {
    */
   public Command launchCone() {
     return new JustShootCommand(0.01, Math.PI / 4.0, 60.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+        ledSubsystem);
+  }
+
+  /**
+   * Launches a cone to score low from far away
+   */
+  public Command superLaunchCone() {
+    return new JustShootCommand(0.2, PI / 4.0, 120.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
         ledSubsystem);
   }
 

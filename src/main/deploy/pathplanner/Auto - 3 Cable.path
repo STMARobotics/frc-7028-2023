@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 3.401194105490836,
-        "y": 0.990074581581145
+        "x": 1.7879403583045304,
+        "y": 1.0567141190979754
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.783831624942486,
-        "y": 0.990074581581145
+        "x": 2.602438283635517,
+        "y": 0.899198170711377
       },
       "holonomicAngle": -180.0,
       "isReversal": false,
@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "LaunchCone",
+          "ShootCubeFloor",
           "Transit"
         ],
         "executionBehavior": "sequential",
@@ -27,18 +27,43 @@
     },
     {
       "anchorPoint": {
-        "x": 4.764340268537339,
-        "y": 1.1813933413069688
+        "x": 3.7,
+        "y": 0.8
       },
       "prevControl": {
-        "x": 4.481100079748432,
-        "y": 1.0397732469125156
+        "x": 3.222023256440735,
+        "y": 0.8212825065654701
       },
       "nextControl": {
-        "x": 5.347862485701104,
-        "y": 1.4731544498888518
+        "x": 4.269146192004352,
+        "y": 0.7746580608130719
       },
-      "holonomicAngle": null,
+      "holonomicAngle": -90.0,
+      "isReversal": false,
+      "velOverride": 1.0,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.6,
+        "y": 0.8
+      },
+      "prevControl": {
+        "x": 4.192071344668641,
+        "y": 0.8
+      },
+      "nextControl": {
+        "x": 5.70151500339781,
+        "y": 0.8
+      },
+      "holonomicAngle": -90.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -52,53 +77,26 @@
     },
     {
       "anchorPoint": {
-        "x": 6.184882059501588,
-        "y": 1.8031793104159
+        "x": 6.486209106069763,
+        "y": 1.5448989847860366
       },
       "prevControl": {
-        "x": 6.264419681369176,
-        "y": 1.8202230865303837
+        "x": 6.060524865679802,
+        "y": 1.2005252172795524
       },
       "nextControl": {
-        "x": 6.264419681369176,
-        "y": 1.8202230865303837
+        "x": 6.060524865679802,
+        "y": 1.2005252172795524
       },
-      "holonomicAngle": 14.500166766552386,
-      "isReversal": true,
-      "velOverride": 3.0,
-      "isLocked": false,
-      "isStopPoint": true,
-      "stopEvent": {
-        "names": [
-          "PickupCone",
-          "Transit"
-        ],
-        "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 4.869565586386543,
-        "y": 1.0044234885605825
-      },
-      "prevControl": {
-        "x": 5.1900245089273,
-        "y": 0.9565937986291266
-      },
-      "nextControl": {
-        "x": 5.1900245089273,
-        "y": 0.9565937986291266
-      },
-      "holonomicAngle": 180.0,
+      "holonomicAngle": 29.638383688151517,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "LaunchCone"
+          "PickupCone",
+          "Transit"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -107,20 +105,47 @@
     },
     {
       "anchorPoint": {
-        "x": 6.218362842453609,
-        "y": 1.2100911552658424
+        "x": 4.4,
+        "y": 0.8181012534952082
       },
       "prevControl": {
-        "x": 5.993563299775765,
-        "y": 1.2244400622452798
+        "x": 4.720458922540757,
+        "y": 0.7702715635637524
       },
       "nextControl": {
-        "x": 5.993563299775765,
-        "y": 1.2244400622452798
+        "x": 4.720458922540757,
+        "y": 0.7702715635637524
       },
-      "holonomicAngle": -16.365132101070465,
+      "holonomicAngle": 173.0,
       "isReversal": true,
-      "velOverride": 3.0,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "SuperLaunchCone"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.0,
+        "y": 0.75
+      },
+      "prevControl": {
+        "x": 5.784112169216543,
+        "y": 0.75
+      },
+      "nextControl": {
+        "x": 5.784112169216543,
+        "y": 0.75
+      },
+      "holonomicAngle": 4.0,
+      "isReversal": true,
+      "velOverride": null,
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
@@ -135,20 +160,20 @@
     },
     {
       "anchorPoint": {
-        "x": 4.372136811099398,
-        "y": 0.6887475350129707
+        "x": 4.109073516476388,
+        "y": 0.6696156590403882
       },
       "prevControl": {
-        "x": 4.78108066001335,
-        "y": 0.7485346474272909
+        "x": 4.5223646612828095,
+        "y": 0.6696156590403882
       },
       "nextControl": {
-        "x": 3.9631929621854454,
-        "y": 0.6289604225986506
+        "x": 3.8171556313605786,
+        "y": 0.6696156590403882
       },
       "holonomicAngle": 90.0,
       "isReversal": false,
-      "velOverride": 0.5,
+      "velOverride": 1.5,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
@@ -160,11 +185,11 @@
     },
     {
       "anchorPoint": {
-        "x": 1.837163244732217,
+        "x": 1.75,
         "y": 0.6791815970266795
       },
       "prevControl": {
-        "x": 2.172107702631703,
+        "x": 2.084944457899486,
         "y": 0.6791815970266795
       },
       "nextControl": null,
@@ -189,13 +214,13 @@
   "isReversed": null,
   "markers": [
     {
-      "position": 1.1345454545454765,
+      "position": 2.240000000000003,
       "names": [
         "PrepareForConePickup"
       ]
     },
     {
-      "position": 3.316363636363646,
+      "position": 4.250909090909074,
       "names": [
         "PrepareForConePickup"
       ]

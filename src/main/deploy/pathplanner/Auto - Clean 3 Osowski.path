@@ -81,15 +81,15 @@
     {
       "anchorPoint": {
         "x": 3.3,
-        "y": 4.55
+        "y": 4.7
       },
       "prevControl": {
         "x": 3.7075286562514824,
-        "y": 4.55
+        "y": 4.7
       },
       "nextControl": {
         "x": 2.8924713437485106,
-        "y": 4.55
+        "y": 4.7
       },
       "holonomicAngle": 165.0,
       "isReversal": false,
@@ -106,17 +106,17 @@
     {
       "anchorPoint": {
         "x": 2.6,
-        "y": 4.55
+        "y": 4.6
       },
       "prevControl": {
         "x": 2.7634555708252213,
-        "y": 4.540434062013709
+        "y": 4.590434062013709
       },
       "nextControl": {
         "x": 2.7634555708252213,
-        "y": 4.540434062013709
+        "y": 4.590434062013709
       },
-      "holonomicAngle": 175.0,
+      "holonomicAngle": 180.0,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
@@ -132,18 +132,18 @@
     },
     {
       "anchorPoint": {
-        "x": 4.872457108550581,
-        "y": 4.445378345302146
+        "x": 4.912612307324853,
+        "y": 4.491207884563741
       },
       "prevControl": {
-        "x": 4.125487796430138,
-        "y": 4.6457847461149475
+        "x": 3.93210366373,
+        "y": 4.921675093946847
       },
       "nextControl": {
-        "x": 5.568574585765612,
-        "y": 4.258615119707869
+        "x": 5.572549708888762,
+        "y": 4.201479269242999
       },
-      "holonomicAngle": 40.0,
+      "holonomicAngle": 67.88812534430338,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -239,21 +239,15 @@
   "isReversed": null,
   "markers": [
     {
-      "position": 0.7090909090909152,
+      "position": 1.1636363636363474,
       "names": [
-        "PrepareForConePickup"
+        "PrepareForCubePickup"
       ]
     },
     {
-      "position": 3.7454545454545594,
+      "position": 4.538181818181824,
       "names": [
         "PrepareForConePickup"
-      ]
-    },
-    {
-      "position": 1.1636363636363636,
-      "names": [
-        "SetCubePipeline"
       ]
     }
   ]

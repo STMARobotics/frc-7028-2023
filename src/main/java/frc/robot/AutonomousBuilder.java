@@ -60,6 +60,7 @@ public class AutonomousBuilder {
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final SwerveAutoBuilder swerveAutoBuilder;
+  private GamePiece selectedGamePiece = GamePiece.CONE;
 
   public AutonomousBuilder(DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem,
       LEDSubsystem ledSubsystem, ShooterSubsystem shooterSubsystem, WristSubsystem wristSubsystem,
@@ -86,7 +87,8 @@ public class AutonomousBuilder {
         true,
         new Command[] {
           new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube),
-          new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem)
+          new DefaultHighLimelightCommand(
+              shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, () -> selectedGamePiece)
         },
         drivetrainSubsystem
     );
@@ -151,6 +153,7 @@ public class AutonomousBuilder {
     eventMap.put("SuperLaunchCone", superLaunchCone().withTimeout(2.0));
     eventMap.put("PrepareToLaunchCube", prepareToLaunchCube());
     eventMap.put("PrepareForConePickup", prepareForConePickup());
+    eventMap.put("PrepareForCubePickup", prepareForCubePickup());
     eventMap.put("BalanceBackwards", balanceBackwards().withTimeout(3.0)); 
     eventMap.put("BalanceForwards", balanceForwards().withTimeout(3.0));
     eventMap.put("DumpShooter", dumpShooter());
@@ -280,8 +283,17 @@ public class AutonomousBuilder {
 
   public Command prepareForConePickup() {
     return runOnce(() -> {
+      selectedGamePiece = GamePiece.CONE;
       elevatorSubsystem.moveToPosition(PickupConstants.CONE_ELEVATOR_HEIGHT);
       wristSubsystem.moveToPosition(PickupConstants.CONE_WRIST_ANGLE);
+    }, elevatorSubsystem, wristSubsystem);
+  }
+
+  public Command prepareForCubePickup() {
+    return runOnce(() -> {
+      selectedGamePiece = GamePiece.CUBE;
+      elevatorSubsystem.moveToPosition(PickupConstants.CUBE_ELEVATOR_HEIGHT);
+      wristSubsystem.moveToPosition(PickupConstants.CUBE_WRIST_ANGLE);
     }, elevatorSubsystem, wristSubsystem);
   }
 

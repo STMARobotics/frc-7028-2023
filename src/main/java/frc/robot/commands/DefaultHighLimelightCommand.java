@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.GamePiece;
 import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.LimelightSubsystem;
 
@@ -14,10 +16,13 @@ public class DefaultHighLimelightCommand extends CommandBase {
   public final BooleanSupplier hasCone;
   public final BooleanSupplier hasCube;
   public final LimelightSubsystem limelightSubsystem;
+  public final Supplier<GamePiece> gamePieceSupplier;
+
   public DefaultHighLimelightCommand(BooleanSupplier hasCone, BooleanSupplier hasCube,
-      LimelightSubsystem limelightSubsystem) {
+      LimelightSubsystem limelightSubsystem, Supplier<GamePiece> gamePieceSupplier) {
     this.hasCone = hasCone;
     this.hasCube = hasCube;
+    this.gamePieceSupplier = gamePieceSupplier;
     this.limelightSubsystem = limelightSubsystem;
 
     addRequirements(limelightSubsystem);
@@ -29,8 +34,10 @@ public class DefaultHighLimelightCommand extends CommandBase {
       limelightSubsystem.setPipelineId(LimelightProfile.SCORE_CONE_MIDDLE.pipelineId);
     } else if (hasCube.getAsBoolean()) {
       limelightSubsystem.setPipelineId(LimelightProfile.PICKUP_CUBE_FLOOR.pipelineId);
-    } else {
+    } else if (gamePieceSupplier.get() == GamePiece.CONE) {
       limelightSubsystem.setPipelineId(LimelightProfile.PICKUP_CONE_FLOOR.pipelineId);
+    } else {
+      limelightSubsystem.setPipelineId(LimelightProfile.PICKUP_CUBE_FLOOR.pipelineId);
     }
   }
 

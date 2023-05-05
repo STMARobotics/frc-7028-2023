@@ -77,27 +77,24 @@
     },
     {
       "anchorPoint": {
-        "x": 6.2641123414567454,
-        "y": 2.46773821635915
+        "x": 6.0,
+        "y": 2.73
       },
       "prevControl": {
-        "x": 5.908667080581566,
-        "y": 2.689112019184921
+        "x": 5.581254619062887,
+        "y": 2.73
       },
       "nextControl": {
-        "x": 5.908667080581566,
-        "y": 2.689112019184921
+        "x": 5.581254619062887,
+        "y": 2.73
       },
-      "holonomicAngle": -20.788245689030283,
+      "holonomicAngle": 180.0,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [
-          "PickupCone",
-          "Transit"
-        ],
+        "names": [],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
@@ -105,16 +102,16 @@
     },
     {
       "anchorPoint": {
-        "x": 4.5547133475556825,
-        "y": 2.6247415216304564
+        "x": 4.491711035928038,
+        "y": 2.73
       },
       "prevControl": {
-        "x": 5.331848016880618,
-        "y": 2.595573792638821
+        "x": 5.2692884020723385,
+        "y": 2.742747169936792
       },
       "nextControl": {
-        "x": 4.126710914441208,
-        "y": 2.6408054800016454
+        "x": 3.9081888187642715,
+        "y": 2.720434062013709
       },
       "holonomicAngle": -180.0,
       "isReversal": false,
@@ -130,12 +127,12 @@
     },
     {
       "anchorPoint": {
-        "x": 3.884324820385999,
-        "y": 2.6190602629256285
+        "x": 3.783831624942486,
+        "y": 2.7310752950861517
       },
       "prevControl": {
-        "x": 4.076334848036708,
-        "y": 2.6190602629256285
+        "x": 4.257345555263908,
+        "y": 2.7502071710587344
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -145,8 +142,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "BalanceForwards",
-          "LaunchCone"
+          "BalanceForwards"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -157,12 +153,5 @@
   "maxVelocity": 3.0,
   "maxAcceleration": 1.5,
   "isReversed": null,
-  "markers": [
-    {
-      "position": 2.3737373737372183,
-      "names": [
-        "PrepareForConePickup"
-      ]
-    }
-  ]
+  "markers": []
 }

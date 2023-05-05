@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.7961348688654837,
-        "y": 4.427418003772178
+        "x": 1.8049841344190136,
+        "y": 2.7326854370221856
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.6133950140240714,
-        "y": 4.903560870951529
+        "x": 2.2547016070086676,
+        "y": 2.7326854370221856
       },
       "holonomicAngle": 180.0,
       "isReversal": false,
@@ -27,20 +27,20 @@
     },
     {
       "anchorPoint": {
-        "x": 5.143348159036744,
-        "y": 4.754322061835614
+        "x": 3.060542308185964,
+        "y": 2.73
       },
       "prevControl": {
-        "x": 4.575091439130107,
-        "y": 4.787748927712476
+        "x": 2.605577793192721,
+        "y": 2.73
       },
       "nextControl": {
-        "x": 5.505785266889684,
-        "y": 4.733002231961911
+        "x": 3.515506823179207,
+        "y": 2.73
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": -180.0,
       "isReversal": false,
-      "velOverride": null,
+      "velOverride": 0.75,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
@@ -52,25 +52,50 @@
     },
     {
       "anchorPoint": {
-        "x": 6.2732991423429665,
-        "y": 4.605083252719697
+        "x": 4.531988312736372,
+        "y": 2.73
       },
       "prevControl": {
-        "x": 6.251979312469263,
-        "y": 4.605083252719697
+        "x": 3.9627492987173047,
+        "y": 2.73
       },
       "nextControl": {
-        "x": 6.251979312469263,
-        "y": 4.605083252719697
+        "x": 4.8950519329114695,
+        "y": 2.73
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": -180.0,
+      "isReversal": false,
+      "velOverride": 1.0,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.2641123414567454,
+        "y": 2.46773821635915
+      },
+      "prevControl": {
+        "x": 5.908667080581566,
+        "y": 2.689112019184921
+      },
+      "nextControl": {
+        "x": 5.908667080581566,
+        "y": 2.689112019184921
+      },
+      "holonomicAngle": -20.788245689030283,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "PickupCone",
+          "PickupCube",
           "Transit"
         ],
         "executionBehavior": "sequential",
@@ -80,20 +105,20 @@
     },
     {
       "anchorPoint": {
-        "x": 5.4119631584210905,
-        "y": 3.416917495855899
+        "x": 4.5547133475556825,
+        "y": 2.6247415216304564
       },
       "prevControl": {
-        "x": 6.110243300625974,
-        "y": 3.8638167868670243
+        "x": 5.331848016880618,
+        "y": 2.595573792638821
       },
       "nextControl": {
-        "x": 5.051215128276558,
-        "y": 3.1860387565633985
+        "x": 4.126710914441208,
+        "y": 2.6408054800016454
       },
-      "holonomicAngle": -154.20397350549996,
+      "holonomicAngle": -180.0,
       "isReversal": false,
-      "velOverride": null,
+      "velOverride": 0.75,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
@@ -105,12 +130,12 @@
     },
     {
       "anchorPoint": {
-        "x": 3.8925848064462096,
-        "y": 3.169548041223743
+        "x": 3.884324820385999,
+        "y": 2.6190602629256285
       },
       "prevControl": {
-        "x": 4.084594834096919,
-        "y": 3.169548041223743
+        "x": 4.076334848036708,
+        "y": 2.6190602629256285
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -120,7 +145,8 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "BalanceForwards"
+          "BalanceForwards",
+          "LaunchCube"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -133,9 +159,9 @@
   "isReversed": null,
   "markers": [
     {
-      "position": 1.3737373737372183,
+      "position": 2.3737373737372183,
       "names": [
-        "PrepareForConePickup"
+        "PrepareForCubePickup"
       ]
     }
   ]

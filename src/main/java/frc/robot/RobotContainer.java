@@ -140,8 +140,8 @@ public class RobotContainer {
         new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube));
     elevatorSubsystem.setDefaultCommand(new DefaultElevatorCommand(
         elevatorSubsystem, wristSubsystem::isParked));
-    highLimelightSubsystem.setDefaultCommand(
-        new DefaultHighLimelightCommand(shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem));
+    highLimelightSubsystem.setDefaultCommand(new DefaultHighLimelightCommand(
+        shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, scoreLocation::getSelectedGamePiece));
 
     configureButtonBindings();
     configureDashboard();

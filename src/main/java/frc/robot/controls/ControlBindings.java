@@ -20,10 +20,10 @@ public interface ControlBindings {
   Optional<Trigger> wristDown();
   Optional<Trigger> shooterIn();
   Optional<Trigger> shooterOut();
-  Optional<Trigger> manualIntake();
   Optional<Trigger> autoIntake();
   Optional<Trigger> doubleStationPickup();
-  Optional<Trigger> babyBirdPickup();
+  Optional<Trigger> manualCube();
+  Optional<Trigger> manualCone();
   Optional<Trigger> shootAutomatically();
   Optional<Trigger> shootHigh();
   Optional<Trigger> shootMid();

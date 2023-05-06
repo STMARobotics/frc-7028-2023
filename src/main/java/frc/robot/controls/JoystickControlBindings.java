@@ -41,20 +41,21 @@ public class JoystickControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> manualIntake() {
-    return Optional.empty();
-  }
-
-  @Override
   public Optional<Trigger> autoIntake() {
     return Optional.of(leftJoystick.trigger());
   }
 
   @Override
-  public Optional<Trigger> babyBirdPickup() {
+  public Optional<Trigger> manualCube() {
     return Optional.of(leftJoystick.povUp());
   }
-  
+
+
+  @Override
+  public Optional<Trigger> manualCone() {
+    return Optional.of(leftJoystick.povLeft());
+  }
+
   @Override
   public Optional<Trigger> doubleStationPickup() {
     return Optional.of(leftJoystick.button(2));

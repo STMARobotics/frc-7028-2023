@@ -40,17 +40,17 @@ public class XBoxControlBindings implements ControlBindings {
   }
 
   @Override
-  public Optional<Trigger> manualIntake() {
-    return Optional.empty();
-  }
-
-  @Override
   public Optional<Trigger> autoIntake() {
     return Optional.of(driverController.leftTrigger());
   }
 
   @Override
-  public Optional<Trigger> babyBirdPickup() {
+  public Optional<Trigger> manualCube() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Trigger> manualCone() {
     return Optional.empty();
   }
 

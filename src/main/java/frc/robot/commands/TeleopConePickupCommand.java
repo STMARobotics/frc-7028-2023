@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,12 +28,13 @@ public class TeleopConePickupCommand extends CommandBase {
   private final WristSubsystem wristSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final DrivetrainSubsystem drivetrainSubsystem;
+  private final BooleanSupplier doneSuppler;
 
   public TeleopConePickupCommand(
       double elevatorMeters, double wristRadians, double intakeDutyCycle, double forwardSpeed, 
       ElevatorSubsystem elevatorSubsystem, WristSubsystem wristSubsystem, DrivetrainSubsystem drivetrainSubsystem, 
       ShooterSubsystem shooterSubsystem,  DoubleSupplier xSupplier, DoubleSupplier ySupplier,
-      DoubleSupplier rotationSupplier) {
+      DoubleSupplier rotationSupplier, BooleanSupplier doneSuppler) {
 
     this.elevatorMeters = elevatorMeters;
     this.wristRadians = wristRadians;
@@ -45,6 +47,7 @@ public class TeleopConePickupCommand extends CommandBase {
     this.xSupplier = xSupplier;
     this.ySupplier = ySupplier;
     this.rotationSupplier = rotationSupplier;
+    this.doneSuppler = doneSuppler;
 
     addRequirements(elevatorSubsystem, wristSubsystem, shooterSubsystem, drivetrainSubsystem);
   }
@@ -78,7 +81,7 @@ public class TeleopConePickupCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return shooterSubsystem.hasCone();
+    return doneSuppler.getAsBoolean();
   }
 
   @Override

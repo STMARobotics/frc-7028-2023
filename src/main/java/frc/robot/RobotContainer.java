@@ -9,9 +9,10 @@ import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.startEnd;
-import static frc.robot.Constants.PickupConstants.BABY_BIRD_ELEVATOR_HEIGHT;
-import static frc.robot.Constants.PickupConstants.BABY_BIRD_INTAKE_DUTY_CYCLE;
-import static frc.robot.Constants.PickupConstants.BABY_BIRD_WRIST_ANGLE;
+import static frc.robot.Constants.PickupConstants.CUBE_ELEVATOR_HEIGHT;
+import static frc.robot.Constants.PickupConstants.CUBE_FORWARD_SPEED;
+import static frc.robot.Constants.PickupConstants.CUBE_INTAKE_DUTY_CYCLE;
+import static frc.robot.Constants.PickupConstants.CUBE_WRIST_ANGLE;
 import static frc.robot.Constants.PickupConstants.DOUBLE_ELEVATOR_HEIGHT;
 import static frc.robot.Constants.PickupConstants.DOUBLE_INTAKE_DUTY_CYCLE;
 import static frc.robot.Constants.PickupConstants.DOUBLE_WRIST_ANGLE;
@@ -143,6 +144,7 @@ public class RobotContainer {
     highLimelightSubsystem.setDefaultCommand(new DefaultHighLimelightCommand(
         shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, scoreLocation::getSelectedGamePiece));
 
+
     configureButtonBindings();
     configureDashboard();
     reseedTimer.start();
@@ -239,13 +241,6 @@ public class RobotContainer {
       ()-> shooterSubsystem.shootDutyCycle(-0.15), shooterSubsystem::activeStop, shooterSubsystem)));
 
     // Intake
-    controlBindings.manualIntake().ifPresent(trigger -> trigger.whileTrue(new TeleopConePickupCommand(
-        0.060, 0.0, -0.1, 0.2, elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem,
-        () -> controlBindings.translationX().getAsDouble() * 0.25,
-        () -> controlBindings.translationY().getAsDouble() * 0.25,
-        () -> controlBindings.omega().getAsDouble() / 6.0)
-        .andThen(new DefaultWristCommand(wristSubsystem))));
-
     controlBindings.autoIntake().ifPresent(trigger -> trigger.whileTrue(runOnce(() -> pickingUp = true)
         .alongWith(either(
             autoBuilder.pickupCone(),
@@ -259,12 +254,25 @@ public class RobotContainer {
         controlBindings.omega(), DOUBLE_WRIST_ANGLE, DOUBLE_ELEVATOR_HEIGHT, DOUBLE_INTAKE_DUTY_CYCLE,
         elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem))));
 
-    // Baby bird
-    controlBindings.babyBirdPickup().ifPresent(trigger -> trigger.toggleOnTrue(runOnce(() -> pickingUp = true)
-        .andThen(new HighPickupCommand(controlBindings.translationX(), controlBindings.translationY(),            
-            controlBindings.omega(), BABY_BIRD_WRIST_ANGLE, BABY_BIRD_ELEVATOR_HEIGHT, BABY_BIRD_INTAKE_DUTY_CYCLE,
-            elevatorSubsystem, wristSubsystem, drivetrainSubsystem, shooterSubsystem)))
-        .onFalse(runOnce(() -> pickingUp = false)));
+    // Manual Cube
+    controlBindings.manualCube().ifPresent(trigger -> trigger.whileTrue(
+      new TeleopConePickupCommand(CUBE_ELEVATOR_HEIGHT, CUBE_WRIST_ANGLE, CUBE_INTAKE_DUTY_CYCLE,
+      CUBE_FORWARD_SPEED, elevatorSubsystem, wristSubsystem, drivetrainSubsystem,
+      shooterSubsystem, () -> controlBindings.translationX().getAsDouble() * 0.25,
+      () -> controlBindings.translationY().getAsDouble() * 0.25,
+      () -> controlBindings.omega().getAsDouble() / 6.0,
+      shooterSubsystem::hasCube)));
+
+    // Manual Cone
+    controlBindings.manualCone().ifPresent(trigger -> trigger.whileTrue(
+        new TeleopConePickupCommand(Constants.PickupConstants.CONE_ELEVATOR_HEIGHT, 
+        Constants.PickupConstants.CONE_WRIST_ANGLE,
+        Constants.PickupConstants.CONE_INTAKE_DUTY_CYCLE,
+        Constants.PickupConstants.CONE_FORWARD_SPEED, elevatorSubsystem, wristSubsystem, drivetrainSubsystem,
+        shooterSubsystem, () -> controlBindings.translationX().getAsDouble() * 0.25,
+        () -> controlBindings.translationY().getAsDouble() * 0.25,
+        () -> controlBindings.omega().getAsDouble() / 6.0,
+        shooterSubsystem::hasCone)));
 
     // Drive to human player station
     controlBindings.driveSingleSubstation().ifPresent(trigger -> trigger.whileTrue(

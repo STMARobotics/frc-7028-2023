@@ -166,7 +166,7 @@ public class AutonomousBuilder {
   }
 
   public Command shootCubeMid() {
-    return new JustShootCommand(0.01, 1.23, 25.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
+    return new JustShootCommand(0.01, 1.1, 25.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem,
         ledSubsystem);
   }
 

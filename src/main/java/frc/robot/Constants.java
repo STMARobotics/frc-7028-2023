@@ -219,11 +219,11 @@ public final class Constants {
 
     public static final VelocityAngleInterpolator TOP_TABLE = new VelocityAngleInterpolator(List.of(
       shooterSettings(1.4, 27.5, 0.95, 0.95),
-      shooterSettings(1.6, 29.5, 0.95, 0.95)
+      shooterSettings(1.6, 29.0, 0.95, 0.95)
     ));
 
     public static final VelocityAngleInterpolator MIDDLE_TABLE = new VelocityAngleInterpolator(List.of(
-      shooterSettings(1.0, 25.25, 0.86, 0.45),
+      shooterSettings(1.0, 24.25, 0.86, 0.45),
       shooterSettings(1.2, 25.25, 0.86, 0.45)
     ));
   }

@@ -53,12 +53,12 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> manualCone() {
-    return Optional.of(leftJoystick.povLeft());
+    return Optional.of(leftJoystick.povDown());
   }
 
   @Override
   public Optional<Trigger> doubleStationPickup() {
-    return Optional.of(leftJoystick.button(2));
+    return Optional.empty();
   }
 
   @Override
@@ -68,17 +68,17 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> resetPose() {
-    return Optional.of(leftJoystick.povDown());
+    return Optional.of(leftJoystick.povLeft());
   }
   
   @Override
   public Optional<Trigger> shootAutomatically() {
-    return Optional.of(rightJoystick.trigger());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> shootHigh() {
-    return Optional.of(rightJoystick.povUp());
+    return Optional.of(rightJoystick.trigger());
   }
 
   @Override
@@ -93,17 +93,17 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shooterIn() {
-    return Optional.of(rightJoystick.button(3));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> shooterOut() {
-    return Optional.of(rightJoystick.button(2));
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> wheelsToX() {
-    return Optional.of(leftJoystick.button(4));
+    return Optional.empty();
   }
 
   @Override
@@ -123,21 +123,21 @@ public class JoystickControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> driveSingleSubstation() {
-    return Optional.of(leftJoystick.button(3));
+    return Optional.empty();
   }
 
   @Override
   public DoubleSupplier translationX() {
-    return () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND;
+    return () -> -modifyAxis(leftJoystick.getY()) * DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND / 2;
   }
   @Override
   public DoubleSupplier translationY() {
-    return () -> -modifyAxis(leftJoystick.getX()) * MAX_VELOCITY_METERS_PER_SECOND;
+    return () -> -modifyAxis(leftJoystick.getX()) * MAX_VELOCITY_METERS_PER_SECOND / 2;
   }
   
   @Override
   public DoubleSupplier omega() {
-    return () -> -modifyAxis(rightJoystick.getX()) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2;
+    return () -> -modifyAxis(rightJoystick.getX()) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 4;
   }
 
   @Override

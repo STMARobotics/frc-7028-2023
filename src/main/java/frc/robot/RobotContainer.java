@@ -18,31 +18,24 @@ import static frc.robot.Constants.PickupConstants.DOUBLE_INTAKE_DUTY_CYCLE;
 import static frc.robot.Constants.PickupConstants.DOUBLE_WRIST_ANGLE;
 import static frc.robot.Constants.VisionConstants.HIGH_LIMELIGHT_TO_ROBOT;
 import static frc.robot.GamePiece.CONE;
-import static frc.robot.controls.OperatorButtons.ENTER_SELECTION;
-import static frc.robot.controls.OperatorButtons.GRID_CENTER;
-import static frc.robot.controls.OperatorButtons.GRID_LEFT;
-import static frc.robot.controls.OperatorButtons.GRID_RIGHT;
+import static frc.robot.GamePiece.CUBE;
 import static frc.robot.limelight.LimelightProfile.PICKUP_CONE_FLOOR;
 import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.AutoScoreCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultHighLimelightCommand;
 import frc.robot.commands.DefaultLEDCommand;
@@ -54,9 +47,6 @@ import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDBootAnimationCommand;
 import frc.robot.commands.LEDMarqueeCommand;
 import frc.robot.commands.TeleopConePickupCommand;
-import frc.robot.controls.ControlBindings;
-import frc.robot.controls.JoystickControlBindings;
-import frc.robot.controls.OperatorNodeButtons;
 import frc.robot.controls.XBoxControlBindings;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
@@ -65,7 +55,6 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.ScoreLocationSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -77,7 +66,7 @@ import frc.robot.subsystems.WristSubsystem;
  */
 public class RobotContainer {
 
-  private final ControlBindings controlBindings;
+  private final XBoxControlBindings controlBindings;
   private final CommandJoystick operatorJoysticks[] =
       new CommandJoystick[] {new CommandJoystick(2), new CommandJoystick(3)};
 
@@ -90,8 +79,8 @@ public class RobotContainer {
   private final LimelightSubsystem lowLimelightSubsystem = new LimelightSubsystem(VisionConstants.LOW_LIMELIGHT_NAME);
   private final LimelightSubsystem highLimelightSubsystem = new LimelightSubsystem(VisionConstants.HIGH_LIMELIGHT_NAME);
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
-  private final ScoreLocationSubsystem scoreLocation =
-      new ScoreLocationSubsystem(shooterSubsystem::hasCone, shooterSubsystem::hasCube);
+  // private final ScoreLocationSubsystem scoreLocation =
+  //     new ScoreLocationSubsystem(shooterSubsystem::hasCone, shooterSubsystem::hasCube);
   
   private final FieldOrientedDriveCommand fieldOrientedDriveCommand;
   private final FieldHeadingDriveCommand fieldHeadingDriveCommand;
@@ -103,22 +92,23 @@ public class RobotContainer {
   private final AutonomousBuilder autoBuilder = new AutonomousBuilder(drivetrainSubsystem, elevatorSubsystem,
       ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem, poseEstimator);
 
-  private final AutoScoreCommand autoScoreCommand =
-      new AutoScoreCommand(scoreLocation, shooterSubsystem::hasCone, autoBuilder, drivetrainSubsystem, elevatorSubsystem,
-          ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem);
+  // private final AutoScoreCommand autoScoreCommand =
+  //     new AutoScoreCommand(scoreLocation, shooterSubsystem::hasCone, autoBuilder, drivetrainSubsystem, elevatorSubsystem,
+  //         ledSubsystem, shooterSubsystem, wristSubsystem, lowLimelightSubsystem, highLimelightSubsystem);
 
   private boolean pickingUp = false;
+  private GamePiece selectedGamePiece = GamePiece.CONE;
   
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     // Configure control binding scheme
-    if (DriverStation.getJoystickIsXbox(0)) {
+    // if (DriverStation.getJoystickIsXbox(0)) {
       controlBindings = new XBoxControlBindings();
-    } else {
-      controlBindings = new JoystickControlBindings();
-    }
+    // } else {
+    //   controlBindings = new JoystickControlBindings();
+    // }
 
     fieldOrientedDriveCommand = new FieldOrientedDriveCommand(
         drivetrainSubsystem,
@@ -142,7 +132,7 @@ public class RobotContainer {
     elevatorSubsystem.setDefaultCommand(new DefaultElevatorCommand(
         elevatorSubsystem, wristSubsystem::isParked));
     highLimelightSubsystem.setDefaultCommand(new DefaultHighLimelightCommand(
-        shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, scoreLocation::getSelectedGamePiece));
+        shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, () -> selectedGamePiece));
 
 
     configureButtonBindings();
@@ -245,7 +235,7 @@ public class RobotContainer {
         .alongWith(either(
             autoBuilder.pickupCone(),
             autoBuilder.pickupCube(),
-            () -> scoreLocation.getSelectedGamePiece() == CONE)))
+            () -> selectedGamePiece == CONE)))
       .onFalse(runOnce(() -> pickingUp = false)));
 
     // Double sub-station pickup
@@ -291,31 +281,38 @@ public class RobotContainer {
         either(autoBuilder.shootConeBottom(), autoBuilder.shootCubeBottom(), shooterSubsystem::hasCone)));
     
     // Auto score
-    controlBindings.shootAutomatically().ifPresent(trigger -> trigger.whileTrue(autoScoreCommand));
+    // controlBindings.shootAutomatically().ifPresent(trigger -> trigger.whileTrue(autoScoreCommand));
 
     // Launch cube
     controlBindings.launchCube().ifPresent(trigger -> trigger.onTrue(new JustShootCommand(
         0.0, 0.78, 130.0, CUBE_COLOR, elevatorSubsystem, wristSubsystem, shooterSubsystem, ledSubsystem)));
+
+    // DEMO MODE select cone/cube
+    controlBindings.wantCone().ifPresent(trigger -> trigger.onTrue(runOnce(() -> selectedGamePiece = CONE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07))));
+
+    controlBindings.wantCube().ifPresent(trigger -> trigger.onTrue(runOnce(() -> selectedGamePiece = CUBE)
+        .andThen(new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07))));
     
     //////////// Operator \\\\\\\\\\\\
     // Enter location selection
-    operatorJoysticks[ENTER_SELECTION.joystickId].button(ENTER_SELECTION.buttonId)
-        .onTrue(Commands.print("Enter not cable side")).onFalse(Commands.print("Enter cable side"));
+    // operatorJoysticks[ENTER_SELECTION.joystickId].button(ENTER_SELECTION.buttonId)
+    //     .onTrue(Commands.print("Enter not cable side")).onFalse(Commands.print("Enter cable side"));
     
-    // Grid selection
-    operatorJoysticks[GRID_LEFT.joystickId].button(GRID_LEFT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(0)));
-    operatorJoysticks[GRID_CENTER.joystickId].button(GRID_CENTER.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(1)));
-    operatorJoysticks[GRID_RIGHT.joystickId].button(GRID_RIGHT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(2)));
+    // // Grid selection
+    // operatorJoysticks[GRID_LEFT.joystickId].button(GRID_LEFT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(0)));
+    // operatorJoysticks[GRID_CENTER.joystickId].button(GRID_CENTER.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(1)));
+    // operatorJoysticks[GRID_RIGHT.joystickId].button(GRID_RIGHT.buttonId).onTrue(runOnce(() -> scoreLocation.selectGrid(2)));
 
-    // Node selection
-    Arrays.stream(OperatorNodeButtons.values()).forEach(button -> 
-      operatorJoysticks[button.joystickId].button(button.buttonId).onTrue(
-          runOnce(() -> scoreLocation.selectColumn(button.column).selectRow(button.row))
-              .andThen(
-                  Commands.either(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07),
-                      new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07),
-                      () -> scoreLocation.getSelectedGamePiece() == CONE)))
-    );
+    // // Node selection
+    // Arrays.stream(OperatorNodeButtons.values()).forEach(button -> 
+    //   operatorJoysticks[button.joystickId].button(button.buttonId).onTrue(
+    //       runOnce(() -> scoreLocation.selectColumn(button.column).selectRow(button.row))
+    //           .andThen(
+    //               Commands.either(new LEDMarqueeCommand(ledSubsystem, 20, 255, 0, 15, .07),
+    //                   new LEDMarqueeCommand(ledSubsystem, 130, 255, 0, 15, .07),
+    //                   () -> scoreLocation.getSelectedGamePiece() == CONE)))
+    // );
 
   }
 
@@ -341,7 +338,7 @@ public class RobotContainer {
    */
   public void onAllianceChanged(Alliance alliance) {
     poseEstimator.setAlliance(alliance);
-    autoScoreCommand.setAlliance(alliance);
+    // autoScoreCommand.setAlliance(alliance);
   }
 
 }

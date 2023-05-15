@@ -71,7 +71,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shootAutomatically() {
-    return Optional.of(driverController.b());
+    return Optional.empty();
   }
   
   @Override
@@ -91,12 +91,12 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> shooterIn() {
-    return Optional.of(driverController.leftBumper());
+    return Optional.empty();
   }
 
   @Override
   public Optional<Trigger> shooterOut() {
-    return Optional.of(driverController.rightBumper());
+    return Optional.empty();
   }
 
   @Override
@@ -116,7 +116,7 @@ public class XBoxControlBindings implements ControlBindings {
 
   @Override
   public Optional<Trigger> launchCube() {
-    return Optional.of(driverController.rightTrigger());
+    return Optional.empty();
   }
 
   @Override
@@ -126,16 +126,16 @@ public class XBoxControlBindings implements ControlBindings {
   
   @Override
   public DoubleSupplier translationX() {
-    return () ->-modifyAxis(driverController.getLeftY()) * MAX_VELOCITY_METERS_PER_SECOND;
+    return () ->-modifyAxis(driverController.getLeftY()) * MAX_VELOCITY_METERS_PER_SECOND / 2;
   }
   @Override
   public DoubleSupplier translationY() {
-    return () -> -modifyAxis(driverController.getLeftX()) * MAX_VELOCITY_METERS_PER_SECOND;
+    return () -> -modifyAxis(driverController.getLeftX()) * MAX_VELOCITY_METERS_PER_SECOND / 2;
   }
   
   @Override
   public DoubleSupplier omega() {
-    return () -> -modifyAxis(driverController.getRightX()) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2;
+    return () -> -modifyAxis(driverController.getRightX()) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 4;
   }
 
   @Override
@@ -161,6 +161,14 @@ public class XBoxControlBindings implements ControlBindings {
         || modifyAxis(driverController.getLeftX()) != 0.0
         || modifyAxis(driverController.getLeftY()) != 0.0
         || modifyAxis(driverController.getLeftX()) != 0.0;
+  }
+
+  public Optional<Trigger> wantCone() {
+    return Optional.of(driverController.leftBumper());
+  }
+
+  public Optional<Trigger> wantCube() {
+    return Optional.of(driverController.rightBumper());
   }
   
   private static double modifyAxis(double value) {

@@ -6,6 +6,7 @@ import static frc.robot.Constants.VisionConstants.FIELD_LENGTH_METERS;
 import static frc.robot.Constants.VisionConstants.FIELD_WIDTH_METERS;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.photonvision.EstimatedRobotPose;
@@ -36,9 +37,9 @@ public class PhotonRunnable implements Runnable {
       layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
       if (photonCamera != null) {
         photonPoseEstimator = new PhotonPoseEstimator(
-            layout, PoseStrategy.MULTI_TAG_PNP, photonCamera, APRILTAG_CAMERA_TO_ROBOT.inverse());
+            layout, PoseStrategy.MULTI_TAG_PNP_ON_RIO, photonCamera, APRILTAG_CAMERA_TO_ROBOT.inverse());
       }
-    } catch(IOException e) {
+    } catch(UncheckedIOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       photonPoseEstimator = null;
     }

@@ -3,7 +3,7 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.GamePiece;
 import frc.robot.limelight.LimelightProfile;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -11,7 +11,7 @@ import frc.robot.subsystems.LimelightSubsystem;
 /**
  * Command for the high limelight to proactively switch pipelines.
  */
-public class DefaultHighLimelightCommand extends CommandBase {
+public class DefaultHighLimelightCommand extends Command {
   
   public final BooleanSupplier hasCone;
   public final BooleanSupplier hasCube;

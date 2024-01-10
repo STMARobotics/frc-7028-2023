@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.server.PathPlannerServer;
+import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private Alliance alliance = Alliance.Invalid;
+  private Optional<Alliance> alliance = Optional.empty();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -29,9 +29,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    PathPlannerServer.startServer(5811);
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
     checkDriverStationUpdate();
   }
@@ -110,11 +107,11 @@ public class Robot extends TimedRobot {
    */
   private void checkDriverStationUpdate() {
     // https://www.chiefdelphi.com/t/getalliance-always-returning-red/425782/27
-    Alliance currentAlliance = DriverStation.getAlliance();
+    var currentAlliance = DriverStation.getAlliance();
 
     // If we have data, and have a new alliance from last time
-    if (DriverStation.isDSAttached() && currentAlliance != alliance) {
-      robotContainer.onAllianceChanged(currentAlliance);
+    if (DriverStation.isDSAttached() && currentAlliance.isPresent() && !currentAlliance.equals(alliance)) {
+      robotContainer.onAllianceChanged(currentAlliance.get());
       alliance = currentAlliance;
     }
   }

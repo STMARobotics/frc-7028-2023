@@ -2,12 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
 
 /** Command to run the boot animation on the LED strips */
-public class LEDBootAnimationCommand extends CommandBase {
+public class LEDBootAnimationCommand extends Command {
   
   private static final int BLIP_SIZE = 5;
   private final LEDSubsystem ledSubsystem;

@@ -1,13 +1,13 @@
 package frc.robot.commands.autonomous;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 /**
  * Command to balance the charge station
  */
-public class BalanceCommand extends CommandBase {
+public class BalanceCommand extends Command {
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final boolean isReverse;

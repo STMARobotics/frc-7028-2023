@@ -7,31 +7,17 @@ import static frc.robot.subsystems.LEDSubsystem.CONE_COLOR;
 import static frc.robot.subsystems.LEDSubsystem.CUBE_COLOR;
 import static java.lang.Math.PI;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.stream.Stream;
-
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.PickupConstants;
 import frc.robot.commands.AutoPickupCommand;
-import frc.robot.commands.DefaultHighLimelightCommand;
-import frc.robot.commands.DefaultLEDCommand;
 import frc.robot.commands.JustShootCommand;
 import frc.robot.commands.LEDCustomCommand;
 import frc.robot.commands.ShootConeCommand;
@@ -59,7 +45,6 @@ public class AutonomousBuilder {
   private final PoseEstimatorSubsystem poseEstimator;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-  private final SwerveAutoBuilder swerveAutoBuilder;
   private GamePiece selectedGamePiece = GamePiece.CONE;
 
   public AutonomousBuilder(DrivetrainSubsystem drivetrainSubsystem, ElevatorSubsystem elevatorSubsystem,
@@ -75,39 +60,7 @@ public class AutonomousBuilder {
     this.lowLimelightSubsystem = lowLimelightSubsystem;
     this.poseEstimator = poseEstimator;
 
-    var eventMap = buildEventMap();
-    swerveAutoBuilder = new AutoBuilder(
-        poseEstimator::getCurrentPose,
-        poseEstimator::setCurrentPose,
-        DrivetrainConstants.KINEMATICS,
-        new PIDConstants(AutoConstants.X_kP, AutoConstants.X_kI, AutoConstants.X_kD),
-        new PIDConstants(AutoConstants.PATH_THETA_kP, AutoConstants.PATH_THETA_kI, AutoConstants.PATH_THETA_kD),
-        drivetrainSubsystem::setModuleStates,
-        eventMap,
-        true,
-        new Command[] {
-          new DefaultLEDCommand(ledSubsystem, shooterSubsystem::hasCone, shooterSubsystem::hasCube),
-          new DefaultHighLimelightCommand(
-              shooterSubsystem::hasCone, shooterSubsystem::hasCube, highLimelightSubsystem, () -> selectedGamePiece)
-        },
-        drivetrainSubsystem
-    );
-
     autoChooser.setDefaultOption("None", Commands.none());
-    // Add all the paths in the pathplanner directory
-    try (Stream<Path> files = Files.list(Paths.get(Filesystem.getDeployDirectory().getAbsolutePath(), "pathplanner"))) {
-      files.filter(file -> !Files.isDirectory(file))
-          .map(Path::getFileName)
-          .map(Path::toString)
-          .filter(fileName -> fileName.endsWith(".path"))
-          .filter(fileName -> fileName.startsWith("Auto - "))
-          .sorted()
-          .map(pathName -> pathName.substring(0, pathName.lastIndexOf(".")))
-          .forEach(pathName -> autoChooser.addOption("PP: " + pathName.substring(6), buildAutoForPathGroup(pathName)));
-    } catch (IOException e) {
-      System.out.println("********* Failed to list PathPlanner paths. *********");
-    }
-
   }
 
   /**
@@ -124,15 +77,6 @@ public class AutonomousBuilder {
    */
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
-  }
-
-  private Command buildAutoForPathGroup(String pathGroupName) {
-    var twoConePath = PathPlanner.loadPathGroup(pathGroupName, PathPlanner.getConstraintsFromPath(pathGroupName));
-    if (twoConePath == null) {
-      return Commands.print("********* Path failed to load. Not running auto: " + pathGroupName + " *********");
-    }
-    return runOnce(shooterSubsystem::activeStop, shooterSubsystem)
-        .andThen(swerveAutoBuilder.fullAuto(twoConePath));
   }
 
   private HashMap<String, Command> buildEventMap() {

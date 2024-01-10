@@ -7,7 +7,7 @@ import edu.wpi.first.util.CircularBuffer;
  */
 public class MovingAverageFilter {
   private final int taps;
-  private CircularBuffer m_inputs = new CircularBuffer(0);
+  private CircularBuffer<Double> m_inputs = new CircularBuffer<Double>(0);
 
   public MovingAverageFilter(int taps) {
     this.taps = taps;

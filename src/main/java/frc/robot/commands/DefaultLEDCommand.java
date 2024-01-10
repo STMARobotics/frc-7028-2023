@@ -4,14 +4,14 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSubsystem.Mode;
 
 /**
  * Default LED command to make the LEDs dance or go yellow when holding a cone.
  */
-public class DefaultLEDCommand extends CommandBase {
+public class DefaultLEDCommand extends Command {
 
   private final LEDSubsystem ledSubsystem;
   private final BooleanSupplier hasCone;

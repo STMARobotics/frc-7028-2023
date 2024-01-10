@@ -2,10 +2,10 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 
-public class DefaultElevatorCommand extends CommandBase {
+public class DefaultElevatorCommand extends Command {
 
   private final ElevatorSubsystem elevatorSubsystem;
   private final BooleanSupplier idleSupplier;

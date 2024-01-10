@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.AutonomousBuilder;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -23,7 +23,7 @@ import frc.robot.subsystems.WristSubsystem;
 /**
  * Command to look at the selected scoring location, drive to pose, then shoot.
  */
-public class AutoScoreCommand extends CommandBase {
+public class AutoScoreCommand extends Command {
 
   private static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
       2.0,
@@ -75,7 +75,7 @@ public class AutoScoreCommand extends CommandBase {
     },
   };
 
-  private Alliance alliance = Alliance.Invalid;
+  private Alliance alliance = null;
   private Command scoreSequence;
 
   public void setAlliance(Alliance alliance) {

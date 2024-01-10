@@ -21,7 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 /**
@@ -33,7 +33,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  * Rotation is specified as a point to make it easy to use with a joystick. The heading is the angle from the X-axis
  * to the point.
  */
-public class FieldHeadingDriveCommand extends CommandBase {
+public class FieldHeadingDriveCommand extends Command {
 
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final Supplier<Rotation2d> robotAngleSupplier;

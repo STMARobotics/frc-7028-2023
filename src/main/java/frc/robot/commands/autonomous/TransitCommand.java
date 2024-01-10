@@ -1,6 +1,6 @@
 package frc.robot.commands.autonomous;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -8,7 +8,7 @@ import frc.robot.subsystems.WristSubsystem;
  * Command for autonomous to put the elevator and wrist into transit position. Similar to what DefaultWristCommand and
  * DefaultElevatorCommand do, but it stops once they reach a safe position to start moving.
  */
-public class TransitCommand extends CommandBase {
+public class TransitCommand extends Command {
 
   private static final double WRIST_SAFE_POSITION = 0.01;
    

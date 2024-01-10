@@ -4,13 +4,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
-public class TeleopConePickupCommand extends CommandBase {
+public class TeleopConePickupCommand extends Command {
 
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.075;

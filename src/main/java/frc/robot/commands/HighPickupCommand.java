@@ -6,7 +6,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.autonomous.TransitCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -14,7 +14,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
 /** Command to pick up a game piece manually from up high - and hold elevator and wrist until interrupted */
-public class HighPickupCommand extends CommandBase {
+public class HighPickupCommand extends Command {
 
   private static final double SPEED_COEFFICIENT = 0.2;
   private static final double XY_SLEW_RATE = 2.0;

@@ -23,14 +23,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
 /**
  * Command to drive to a pose.
  */
-public class DriveToPoseCommand extends CommandBase {
+public class DriveToPoseCommand extends Command {
   
   private static final double TRANSLATION_TOLERANCE = 0.02;
   private static final double THETA_TOLERANCE = Units.degreesToRadians(2.0);
@@ -90,7 +90,7 @@ public class DriveToPoseCommand extends CommandBase {
   public void initialize() {
     resetPIDControllers();
     var pose = goalPose;
-    if (useAllianceColor && DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+    if (useAllianceColor && DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
       Translation2d transformedTranslation = new Translation2d(pose.getX(), FIELD_WIDTH_METERS - pose.getY());
       Rotation2d transformedHeading = pose.getRotation().times(-1);
       pose = new Pose2d(transformedTranslation, transformedHeading);

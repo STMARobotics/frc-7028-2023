@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.WristSubsystem;
 
 /**
  * Command that tilts the wrist up if not doing anything else
  */
-public class DefaultWristCommand extends CommandBase {
+public class DefaultWristCommand extends Command {
 
   private final WristSubsystem wristSubsystem;
 

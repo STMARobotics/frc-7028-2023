@@ -3,7 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -12,7 +12,7 @@ import frc.robot.subsystems.WristSubsystem;
 /**
  * Basic command to position elevator and wrist, and then shoot
  */
-public class JustShootCommand extends CommandBase {
+public class JustShootCommand extends Command {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;

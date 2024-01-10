@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.limelight.LimelightCalcs;
 import frc.robot.limelight.LimelightProfile;
 import frc.robot.limelight.VisionTargetInfo;
@@ -26,7 +26,7 @@ import frc.robot.subsystems.WristSubsystem;
 /**
  * Command to drive within range, turn to target, position elevator and wrist, and then shoot
  */
-public class ShootConeCommand extends CommandBase {
+public class ShootConeCommand extends Command {
   
   private static final double ELEVATOR_TOLERANCE = 0.0254;
   private static final double WRIST_TOLERANCE = 0.035;

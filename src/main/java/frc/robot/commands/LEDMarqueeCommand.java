@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LEDStrips;
 import frc.robot.subsystems.LEDSubsystem;
 
 /** Runs an LED marquee effect */
-public class LEDMarqueeCommand extends CommandBase {
+public class LEDMarqueeCommand extends Command {
   
   private static final int MARQUEE_SIZE = 16;
   private final LEDSubsystem ledSubsystem;

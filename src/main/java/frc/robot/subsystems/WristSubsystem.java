@@ -1,22 +1,22 @@
 package frc.robot.subsystems;
 
-import static com.revrobotics.CANSparkMax.SoftLimitDirection.kForward;
-import static com.revrobotics.CANSparkMax.SoftLimitDirection.kReverse;
-import static com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle;
-import static com.revrobotics.SparkMaxLimitSwitch.Type.kNormallyOpen;
+import static com.revrobotics.CANSparkBase.SoftLimitDirection.kForward;
+import static com.revrobotics.CANSparkBase.SoftLimitDirection.kReverse;
+import static com.revrobotics.SparkAbsoluteEncoder.Type.kDutyCycle;
+import static com.revrobotics.SparkLimitSwitch.Type.kNormallyOpen;
 import static edu.wpi.first.math.util.Units.radiansToRotations;
 import static frc.robot.Constants.WristConstants.WRIST_PARK_HEIGHT;
 
 import java.util.Map;
 import java.util.Objects;
 
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -44,8 +44,8 @@ public class WristSubsystem extends SubsystemBase {
 
   private final CANSparkMax wristLeader;
 
-  private final SparkMaxPIDController pidController;
-  private final SparkMaxAbsoluteEncoder wristEncoder;
+  private final SparkPIDController pidController;
+  private final SparkAbsoluteEncoder wristEncoder;
   
   private TrapezoidProfile.State goal = null;
   private TrapezoidProfile trapezoidProfile;
